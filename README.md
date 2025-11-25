@@ -39,9 +39,9 @@
         /* --- Grid Layout for Chapters --- */
         .container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
-            max-width: 1150px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
