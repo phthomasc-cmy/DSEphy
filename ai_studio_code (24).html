@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Law of Conduction Calculator</title>
+    
+    <!-- 1. MathJax Configuration: This makes the math symbols look like the textbook -->
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #ff7675;
+            --secondary: #74b9ff;
+            --accent: #ffeaa7;
+            --dark: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #fab1a0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .main-card {
+            background: white;
+            width: 100%;
+            max-width: 950px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 2.2rem; }
+        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 1.1rem; }
+
+        /* Layout */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        @media (max-width: 800px) {
+            .content { grid-template-columns: 1fr; }
+        }
+
+        /* Calculator Side */
+        .calculator {
+            padding: 30px;
+            background: #fff;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background-color: #fff0f0;
+        }
+
+        /* Educational Notes Side */
+        .notes {
+            background: #f1f2f6;
+            padding: 30px;
+            border-left: 1px solid #dfe6e9;
+        }
+
+        .formula-box {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px dashed var(--primary);
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .explanation-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .explanation-card h4 { margin: 0 0 5px 0; color: var(--dark); }
+        .explanation-card p { margin: 0; font-size: 0.95rem; color: #636e72; }
+
+        /* Result Section */
+        .result-display {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .unit-tag {
+            font-size: 0.9rem;
+            background: #dfe6e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <div class="header">
+        <h1>🔥 Rate of Conduction Lab 🧊</h1>
+        <p>Interactive Physics Calculator</p>
+    </div>
+
+    <div class="content">
+        <!-- LEFT: INPUTS -->
+        <div class="calculator">
+            <h2 style="margin-top:0; color:var(--primary);">🎛️ Variables</h2>
+
+            <!-- Material / Kappa -->
+            <div class="input-group">
+                <label>1. Material ($ \kappa $ value)</label>
+                <select id="material" onchange="updateKappa()">
+                    <option value="0.035">📦 Styrofoam (0.035)</option>
+                    <option value="0.15">🌲 Timber/Wood (0.15)</option>
+                    <option value="0.6">🧱 Brick (0.6)</option>
+                    <option value="0.8">🪟 Glass (0.8)</option>
+                    <option value="1.7" selected>🏢 Concrete (1.7)</option>
+                    <option value="50">⛓️ Steel (50.0)</option>
+                    <option value="400">⚡ Copper (400.0)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Thermal Conductivity $\kappa$ <span class="unit-tag">$W m^{-1} K^{-1}$</span></label>
+                <input type="number" id="kappa" value="1.7" step="0.01" oninput="calculate()">
+            </div>
+
+            <!-- Area -->
+            <div class="input-group">
+                <label>Area of the layer $A$ <span class="unit-tag">$m^2$</span></label>
+                <input type="number" id="area" value="5" step="0.1" oninput="calculate()">
+            </div>
+
+            <!-- Thickness -->
+            <div class="input-group">
+                <label>Thickness $d$ <span class="unit-tag">$meters$</span></label>
+                <input type="number" id="thickness" value="0.2" step="0.01" oninput="calculate()">
+            </div>
+
+            <!-- Temperatures -->
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex:1">
+                    <label>Temp Hot $T_{hot}$ <span class="unit-tag">$^\circ C$</span></label>
+                    <input type="number" id="thot" value="30" oninput="calculate()">
+                </div>
+                <div class="input-group" style="flex:1">
+                    <label>Temp Cold $T_{cold}$ <span class="unit-tag">$^\circ C$</span></label>
+                    <input type="number" id="tcold" value="10" oninput="calculate()">
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="result-display">
+                <div style="margin-bottom: 5px;">Rate of Conduction ($P$)</div>
+                <div class="result-value" id="result">0 W</div>
+                <div id="emoji-feedback">Waiting...</div>
+            </div>
+        </div>
+
+        <!-- RIGHT: TEACHING NOTES -->
+        <div class="notes">
+            <h2 style="margin-top:0; color:var(--dark);">👨‍🏫 Study Notes</h2>
+            
+            <div class="formula-box">
+                $$ P = \kappa \frac{A \Delta T}{d} $$
+            </div>
+
+            <div class="explanation-card">
+                <h4>🌡️ The Temperature Difference ($\Delta T$)</h4>
+                <p>Calculated as $(T_{hot} - T_{cold})$. The bigger the difference, the faster heat runs! It's the "pushing force" for heat.</p>
+            </div>
+
+            <div class="explanation-card">
+                <h4>🧱 Thermal Conductivity ($\kappa$)</h4>
+                <p>This tells us how easily a material transmits heat. High $\kappa$ (like Copper) = Fast heat. Low $\kappa$ (like Styrofoam) = Slow heat.</p>
+            </div>
+
+            <div class="explanation-card">
+                <h4>📐 Area ($A$)</h4>
+                <p>A larger surface area gives the heat more room to escape. It is directly proportional to power ($P$).</p>
+            </div>
+
+            <div class="explanation-card">
+                <h4>📏 Thickness ($d$)</h4>
+                <p>This is on the bottom of the fraction (denominator). The thicker the wall, the slower the rate of conduction.</p>
+            </div>
+
+            <div style="text-align:center; font-size: 0.9rem; margin-top: 20px; color: #666;">
+                <em>"Heat always flows from Hot to Cold!"</em> 🥵 ➡️ 🥶
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to handle dropdown changes
+    function updateKappa() {
+        const select = document.getElementById('material');
+        const input = document.getElementById('kappa');
+        input.value = select.value;
+        calculate();
+    }
+
+    // Main Calculation Logic
+    function calculate() {
+        // Get values
+        let k = parseFloat(document.getElementById('kappa').value) || 0;
+        let A = parseFloat(document.getElementById('area').value) || 0;
+        let d = parseFloat(document.getElementById('thickness').value);
+        let Thot = parseFloat(document.getElementById('thot').value) || 0;
+        let Tcold = parseFloat(document.getElementById('tcold').value) || 0;
+
+        // Prevent division by zero
+        if (d <= 0 || isNaN(d)) {
+            document.getElementById('result').innerText = "💥";
+            document.getElementById('emoji-feedback').innerText = "Thickness (d) cannot be zero!";
+            return;
+        }
+
+        // Calculate Delta T
+        let deltaT = Thot - Tcold;
+
+        // Calculate Power P = k * A * (Delta T) / d
+        let P = (k * A * deltaT) / d;
+
+        // Display Result
+        document.getElementById('result').innerText = P.toFixed(2) + " W";
+
+        // Dynamic Feedback
+        let feedback = "";
+        if (P < 0) {
+            feedback = "🔄 Heat is flowing backwards (Inwards)!";
+        } else if (P === 0) {
+            feedback = "🛑 No heat transfer (Temps are equal).";
+        } else if (P < 50) {
+            feedback = "🧣 Cozy! Very low heat loss.";
+        } else if (P < 500) {
+            feedback = "🏠 Normal heat loss for a building part.";
+        } else if (P < 2000) {
+            feedback = "🔥 Getting hot! Check your insulation.";
+        } else {
+            feedback = "🚀 Massive energy loss! Is the window open?";
+        }
+        document.getElementById('emoji-feedback').innerText = feedback;
+    }
+
+    // Run once on load
+    calculate();
+</script>
+
+</body>
+</html>
