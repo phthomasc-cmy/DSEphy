@@ -81,7 +81,7 @@
 
         /* --- Link Slots Styles --- */
         .links-container {
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 10px;
