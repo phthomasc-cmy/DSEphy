@@ -210,7 +210,7 @@
         <div class="chapter-card ch8">
             <div class="card-header">Chapter 8</div>
             <div class="links-container">
-                <a href="#" class="sim-link">8.1 Simulation Name</a>
+                <a href="#" class="ai_studio_code (24).html">Rate of Conduction</a>
                 <a href="#" class="sim-link">8.2 Simulation Name</a>
                 <a href="#" class="sim-link">8.3 Simulation Name</a>
                 <a href="#" class="sim-link">8.4 Simulation Name</a>
