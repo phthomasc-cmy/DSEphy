@@ -41,7 +41,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
-            max-width: 1200px;
+            max-width: 1150px;
             margin: 0 auto;
         }
 
