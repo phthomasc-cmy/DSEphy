@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn OTTV! 🌞</title>
+    <style>
+        :root {
+            --primary: #4FACFE;
+            --secondary: #00F2FE;
+            --accent: #FF9A9E;
+            --text: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        h2 {
+            color: #0077b6;
+            margin-top: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .formula-box {
+            background-color: #f0f8ff;
+            border: 2px dashed #4FACFE;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        /* Simulator Styles */
+        .simulator {
+            background: linear-gradient(to bottom right, #fff, #f9f9f9);
+            border-left: 5px solid #FF9A9E;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        input[type=range] {
+            width: 60%;
+            cursor: pointer;
+        }
+
+        .result-display {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        #ottv-score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4FACFE;
+        }
+
+        .meter-container {
+            width: 100%;
+            height: 20px;
+            background-color: #555;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        #meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            transition: width 0.3s, background 0.3s;
+        }
+
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            background: #eee;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: #ddd;
+        }
+
+        .correct {
+            background-color: #d4edda !important;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .wrong {
+            background-color: #f8d7da !important;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header>
+        <h1>🌞 Let's Master OTTV! 🏙️</h1>
+        <p>Overall Thermal Transfer Value made simple.</p>
+    </header>
+
+    <!-- Concept Section -->
+    <div class="card">
+        <h2>🤔 What is OTTV?</h2>
+        <p>Imagine your building is wearing a jacket. 🧥</p>
+        <p>If the jacket is thin, the heat from the sun gets in easily. If the jacket is good quality, the heat stays out! <strong>OTTV</strong> is basically the "Heat Score" of your building's jacket.</p>
+        
+        <ul>
+            <li><strong>High OTTV:</strong> Lots of heat getting in! 🥵 (AC works hard)</li>
+            <li><strong>Low OTTV:</strong> The building stays cool! 😎 (Save money!)</li>
+        </ul>
+    </div>
+
+    <!-- Formula Section -->
+    <div class="card">
+        <h2>🧮 The Magic Formula</h2>
+        <p>Don't panic! It looks scary, but it's actually super simple.</p>
+        
+        <div class="formula-box">
+            OTTV = Total Heat Gain (P) ➗ Total Surface Area (A)
+        </div>
+
+        <p>We add up all the heat coming through the <strong>Walls</strong> 🧱 and the <strong>Windows</strong> 🪟, and divide it by the size of the building.</p>
+        <p><em>Note: Windows usually let in way more heat (Radiation) than walls (Conduction)!</em> ☀️</p>
+    </div>
+
+    <!-- Simulator Section -->
+    <div class="card simulator">
+        <h2>🛠️ OTTV Simulator</h2>
+        <p>Adjust the sliders below to build a room. Watch how the <strong>Glass Area</strong> affects the score drastically!</p>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>🧱 Concrete Wall Area: <span id="wall-val">50</span> m²</label>
+                <input type="range" id="wall-slider" min="10" max="100" value="50">
+            </div>
+            
+            <div class="control-group">
+                <label>🪟 Glass Window Area: <span id="window-val">10</span> m²</label>
+                <input type="range" id="window-slider" min="0" max="100" value="10">
+            </div>
+        </div>
+
+        <div class="result-display">
+            <p>Your Building's OTTV Score:</p>
+            <div id="ottv-score">--</div>
+            <div class="meter-container">
+                <div id="meter-fill"></div>
+            </div>
+            <p id="feedback-text">Adjust sliders to start!</p>
+        </div>
+    </div>
+
+    <!-- Important Rules Section -->
+    <div class="card">
+        <h2>🤓 Important Rules to Remember</h2>
+        <ol>
+            <li><strong>The Goal:</strong> We want a <span class="highlight">LOWER</span> number. Lower OTTV = Slower heat flow.</li>
+            <li><strong>The Setup:</strong> This calculation assumes the building is <strong>fully enclosed</strong> (windows are closed). 🛑 No open windows allowed in this math!</li>
+            <li><strong>The Heat:</strong> 
+                <br>👉 Glass lets heat in via <em>Radiation</em> (Super strong! ☀️).
+                <br>👉 Walls let heat in via <em>Conduction</em> (Slower).
+            </li>
+        </ol>
+    </div>
+
+    <!-- Mini Quiz -->
+    <div class="card">
+        <h2>🧠 Quick Quiz</h2>
+        <p><strong>1. If you want to save money on Air Conditioning, you want your OTTV to be:</strong></p>
+        <div class="quiz-option" onclick="checkAnswer(this, 'correct')">A. Low 📉</div>
+        <div class="quiz-option" onclick="checkAnswer(this, 'wrong')">B. High 📈</div>
+
+        <p><strong>2. Does OTTV account for heat coming through open windows (convection)?</strong></p>
+        <div class="quiz-option" onclick="checkAnswer(this, 'wrong')">A. Yes, absolutely!</div>
+        <div class="quiz-option" onclick="checkAnswer(this, 'correct')">B. No, it assumes a closed envelope. 🚫</div>
+    </div>
+
+</div>
+
+<script>
+    // Simulator Logic
+    const wallSlider = document.getElementById('wall-slider');
+    const windowSlider = document.getElementById('window-slider');
+    const wallVal = document.getElementById('wall-val');
+    const windowVal = document.getElementById('window-val');
+    const scoreDisplay = document.getElementById('ottv-score');
+    const meterFill = document.getElementById('meter-fill');
+    const feedbackText = document.getElementById('feedback-text');
+
+    // Arbitrary Heat Transfer Coefficients for simulation purposes
+    // Windows transfer heat much faster (radiation) than walls (conduction)
+    const WALL_HEAT_FACTOR = 15; 
+    const WINDOW_HEAT_FACTOR = 180; 
+
+    function calculateOTTV() {
+        // Get values
+        const A_wall = parseInt(wallSlider.value);
+        const A_window = parseInt(windowSlider.value);
+
+        // Update Text Labels
+        wallVal.textContent = A_wall;
+        windowVal.textContent = A_window;
+
+        // Calculate Total Heat (P_tot)
+        // P = (Area * Factor)
+        const P_wall = A_wall * WALL_HEAT_FACTOR;
+        const P_window = A_window * WINDOW_HEAT_FACTOR;
+        const P_tot = P_wall + P_window;
+
+        // Calculate Total Area (A_tot)
+        const A_tot = A_wall + A_window;
+
+        // Calculate OTTV
+        // Avoid division by zero
+        let ottv = 0;
+        if (A_tot > 0) {
+            ottv = P_tot / A_tot;
+        }
+
+        // Display Result
+        scoreDisplay.textContent = ottv.toFixed(1);
+
+        // Update Visual Meter (Assuming max possible realistic OTTV is around 180 for pure glass)
+        let percentage = (ottv / 180) * 100;
+        if(percentage > 100) percentage = 100;
+        meterFill.style.width = percentage + "%";
+
+        // Change Color and Feedback based on score
+        if(ottv < 40) {
+            meterFill.style.background = "#43e97b"; // Green
+            feedbackText.textContent = "Great job! Very energy efficient. ❄️🐧";
+        } else if (ottv < 90) {
+            meterFill.style.background = "#fa709a"; // Orange/Red
+            feedbackText.textContent = "Getting warm... AC is turning on. 😐💨";
+        } else {
+            meterFill.style.background = "#ff0844"; // Deep Red
+            feedbackText.textContent = "Warning! Super hot inside! High energy bills ahead! 💸🥵";
+        }
+    }
+
+    // Event Listeners
+    wallSlider.addEventListener('input', calculateOTTV);
+    windowSlider.addEventListener('input', calculateOTTV);
+
+    // Initial Calculation
+    calculateOTTV();
+
+    // Quiz Logic
+    function checkAnswer(element, status) {
+        if(status === 'correct') {
+            element.classList.add('correct');
+            element.innerHTML += " ✅ Correct!";
+        } else {
+            element.classList.add('wrong');
+            element.innerHTML += " ❌ Try again!";
+        }
+        // Disable further clicks on siblings
+        // (Simplified logic for demo purposes)
+    }
+
+</script>
+
+</body>
+</html>
