@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regenerative Braking Experiment</title>
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --panel: #ffffff;
+            --accent: #2980b9;
+            --active-wire: #f1c40f; /* Yellow for electricity */
+            --inactive-wire: #bdc3c7; /* Grey for no current */
+            --current-dot: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+        }
+
+        /* --- Left Side: Simulation --- */
+        .sim-area {
+            flex: 2;
+            background: var(--panel);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        h2 { margin: 0 0 15px 0; color: #2c3e50; }
+
+        .canvas-wrapper {
+            flex-grow: 1;
+            background: #2c3e50; /* Dark background to make wires pop */
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #34495e;
+        }
+
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            background: #e0e0e0;
+            color: #555;
+            transition: all 0.2s;
+            border-bottom: 4px solid #bbb;
+        }
+
+        button:hover { filter: brightness(0.95); }
+        button:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+        .btn-a.active { background: #27ae60; color: white; border-bottom-color: #1e8449; }
+        .btn-b.active { background: #e67e22; color: white; border-bottom-color: #d35400; }
+        .btn-c.active { background: #3498db; color: white; border-bottom-color: #2980b9; }
+
+        /* --- Right Side: Worksheet --- */
+        .worksheet-area {
+            flex: 1;
+            background: var(--panel);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            padding: 25px;
+            overflow-y: auto;
+            border-left: 5px solid var(--accent);
+        }
+
+        .stats-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #bdc3c7;
+        }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-family: monospace; font-size: 1.1em;}
+
+        .question { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .q-text { font-weight: 600; margin-bottom: 10px; display: block; color: #333; }
+        
+        .answer-box {
+            display: none;
+            background: #e8f6f3;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 3px solid #27ae60;
+            font-size: 0.95em;
+            color: #2c3e50;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: 1px solid #2980b9;
+            color: #2980b9;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .toggle-btn:hover { background: #2980b9; color: white; }
+
+        .legend {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sim-area">
+        <h2>Regenerative Braking Simulation</h2>
+        <div class="canvas-wrapper">
+            <canvas id="simCanvas" width="800" height="500"></canvas>
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background:var(--active-wire)"></div> Active Current</div>
+                <div class="legend-item"><div class="dot" style="background:var(--inactive-wire)"></div> No Current</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn-a" onclick="setMode('A')">Pos A: Drive (Motor)</button>
+            <button class="btn-b" onclick="setMode('B')">Pos B: Coast (Open)</button>
+            <button class="btn-c" onclick="setMode('C')">Pos C: Brake (Gen)</button>
+        </div>
+    </div>
+
+    <div class="worksheet-area">
+        <div class="stats-box">
+            <div class="stat-row"><span>RPM:</span> <span id="val-rpm">0</span></div>
+            <div class="stat-row"><span>Time:</span> <span id="val-time">0.00s</span></div>
+            <div class="stat-row" style="margin-top:10px; font-weight:bold; color:var(--accent)"><span id="val-status">Select Mode</span></div>
+        </div>
+
+        <div class="question">
+            <span class="q-text">1. At which positions of the switch does the motor work as a (i) generator, (ii) motor?</span>
+            <button class="toggle-btn" onclick="toggle('ans1')">Check Answer</button>
+            <div id="ans1" class="answer-box">
+                (i) <b>Generator: Position C.</b> The spinning flywheel turns the motor, creating electricity for the bulb.<br>
+                (ii) <b>Motor: Position A.</b> Electricity drives the motor to spin the flywheel.
+            </div>
+        </div>
+
+        <div class="question">
+            <span class="q-text">2. Does the flywheel take a longer or shorter time to stop when the switch is turned to position C? Explain.</span>
+            <button class="toggle-btn" onclick="toggle('ans2')">Check Answer</button>
+            <div id="ans2" class="answer-box">
+                <b>Shorter time.</b> In Position C, kinetic energy is converted to electrical energy to light the bulb. This energy transfer creates a magnetic braking force. In Position B, energy is lost only to friction.
+            </div>
+        </div>
+        
+        <div style="font-size:0.9em; color:#666;">
+            <strong>Experiment Tip:</strong>
+            <ol>
+                <li>Speed up with <strong>A</strong>.</li>
+                <li>Switch to <strong>B</strong>. Watch how slowly it stops (No current).</li>
+                <li>Speed up again.</li>
+                <li>Switch to <strong>C</strong>. Watch how fast it stops (Current flowing).</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Physics State
+    let angularVelocity = 0; // 0 to 100
+    let switchPos = 'B'; 
+    let time = 0;
+    let isTiming = false;
+
+    // Physics Constants
+    const MAX_SPEED = 120;
+    const ACCEL = 0.8;
+    const FRICTION_AIR = 0.1; // Very low drag in Coast
+    const FRICTION_LOAD = 2.5; // High drag in Regen
+
+    // UI Refs
+    const uiRPM = document.getElementById('val-rpm');
+    const uiTime = document.getElementById('val-time');
+    const uiStatus = document.getElementById('val-status');
+    const btns = {
+        A: document.querySelector('.btn-a'),
+        B: document.querySelector('.btn-b'),
+        C: document.querySelector('.btn-c')
+    };
+
+    function setMode(pos) {
+        switchPos = pos;
+        
+        // Update Buttons
+        Object.values(btns).forEach(b => b.classList.remove('active'));
+        btns[pos].classList.add('active');
+
+        // Logic Reset
+        if(pos === 'A') {
+            uiStatus.innerText = "Accelerating...";
+            time = 0;
+            isTiming = false;
+        } else if (pos === 'B') {
+            uiStatus.innerText = "Coasting (Open Circuit)";
+            if(angularVelocity > 0) isTiming = true;
+        } else if (pos === 'C') {
+            uiStatus.innerText = "Braking (Generating)";
+            if(angularVelocity > 0) isTiming = true;
+        }
+    }
+
+    function toggle(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    /* --- Drawing Functions --- */
+
+    function drawWire(x1, y1, x2, y2, isActive) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        
+        // Style
+        ctx.lineWidth = isActive ? 4 : 2;
+        ctx.strokeStyle = isActive ? "#f1c40f" : "#bdc3c7";
+        ctx.lineCap = "round";
+        
+        // Glow if active
+        if(isActive) {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#f1c40f";
+        } else {
+            ctx.shadowBlur = 0;
+        }
+        
+        ctx.stroke();
+        ctx.shadowBlur = 0; // reset
+
+        // Current Animation (Dots)
+        if(isActive && angularVelocity > 1) { // Only move dots if active AND moving (or powered)
+            // If in mode A, dots always move. If mode C, only if spinning.
+            const shouldAnimate = (switchPos === 'A') || (angularVelocity > 0);
+            
+            if(shouldAnimate) {
+                const speed = (switchPos === 'A' ? 20 : angularVelocity/3);
+                const offset = (Date.now() / 1000 * speed) % 20;
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.setLineDash([5, 15]);
+                ctx.lineDashOffset = -offset;
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    }
+
+    function drawBox(x, y, w, h, color, title) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, w, h);
+        
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(title, x + w/2, y + h/2 + 5);
+    }
+
+    function drawFlywheel(x, y, speed) {
+        ctx.save();
+        ctx.translate(x, y);
+        const rot = (Date.now() * speed * 0.002) % 360;
+        ctx.rotate(rot * Math.PI / 180);
+        
+        // Wheel
+        ctx.beginPath();
+        ctx.arc(0, 0, 50, 0, Math.PI*2);
+        ctx.fillStyle = "#34495e";
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#95a5a6";
+        ctx.stroke();
+        
+        // Spokes
+        ctx.fillStyle = "#ecf0f1";
+        [0, 90, 180, 270].forEach(ang => {
+            const rad = ang * Math.PI/180;
+            ctx.beginPath();
+            ctx.arc(Math.cos(rad)*25, Math.sin(rad)*25, 8, 0, Math.PI*2);
+            ctx.fill();
+        });
+        
+        ctx.restore();
+    }
+
+    function drawBulb(x, y, brightness) {
+        // Socket
+        ctx.fillStyle = "#7f8c8d";
+        ctx.fillRect(x-10, y+20, 20, 15);
+
+        // Glass
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI*2);
+        
+        if(brightness > 0) {
+            ctx.fillStyle = `rgba(255, 230, 0, ${brightness})`;
+            ctx.shadowBlur = brightness * 40;
+            ctx.shadowColor = "#f1c40f";
+        } else {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+            ctx.shadowBlur = 0;
+        }
+        
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    function loop() {
+        // 1. Calculate Physics
+        if(switchPos === 'A') {
+            // Drive
+            if(angularVelocity < MAX_SPEED) angularVelocity += ACCEL;
+        } else if (switchPos === 'B') {
+            // Coast (Open Circuit)
+            if(angularVelocity > 0) angularVelocity -= FRICTION_AIR;
+        } else if (switchPos === 'C') {
+            // Regen (Closed Circuit with Load)
+            if(angularVelocity > 0) angularVelocity -= FRICTION_LOAD;
+        }
+
+        if(angularVelocity < 0) angularVelocity = 0;
+        
+        // Timer
+        if(angularVelocity === 0 && switchPos !== 'A') isTiming = false;
+        if(isTiming) time += 16;
+
+        // 2. UI Updates
+        uiRPM.innerText = Math.floor(angularVelocity * 10);
+        uiTime.innerText = (time/1000).toFixed(2) + "s";
+
+        // 3. Drawing
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+
+        // Coordinates
+        const psuX = 100, psuY = 250;
+        const motX = 400, motY = 150;
+        const bulbX = 700, bulbY = 250;
+        const switchX = 400, switchY = 380;
+        const groundY = 450;
+
+        // --- WIRE LOGIC (The crucial part) ---
+        // Is Current Flowing in Loop A?
+        const activeA = (switchPos === 'A');
+        // Is Current Flowing in Loop C? (Only if switch is C AND wheel is moving)
+        const activeC = (switchPos === 'C' && angularVelocity > 0);
+        
+        // Loop A: PSU -> Switch A -> Motor -> Ground -> PSU
+        
+        // 1. PSU(+) to Switch A
+        drawWire(psuX, psuY+25, 100, switchY, activeA); // Down
+        drawWire(100, switchY, switchX-30, switchY, activeA); // Right to switch
+
+        // 2. Switch Common to Motor (+)
+        // Common is strictly active if A OR C is providing a closed loop
+        const motorActive = activeA || activeC;
+        drawWire(switchX, switchY-20, switchX, motY+60, motorActive); // Up to motor
+
+        // 3. Motor (-) to Ground
+        drawWire(switchX, motY-60, switchX, 80, motorActive); // Up from motor top
+        drawWire(switchX, 80, 850, 80, motorActive); // Right across top (Visual return path style)
+        drawWire(850, 80, 850, groundY, motorActive); // Down to ground rail
+
+        // 4. Ground Return Logic
+        // The ground rail is active if there is a complete loop returning to source
+        // Ground Rail (Right side back to PSU)
+        drawWire(850, groundY, 100, groundY, motorActive); 
+        // Up to PSU(-)
+        drawWire(100, groundY, 100, psuY+25, activeA); 
+
+
+        // Loop C: Motor -> Switch C -> Bulb -> Ground -> Motor
+        
+        // 1. Motor -> Switch Common (Already drawn above in step 2)
+        
+        // 2. Switch C to Bulb (+)
+        drawWire(switchX+30, switchY, bulbX, switchY, activeC); // Right to bulb align
+        drawWire(bulbX, switchY, bulbX, bulbY+35, activeC); // Up to bulb
+
+        // 3. Bulb (-) to Ground Return
+        // Assuming bulb bottom connects to ground rail
+        // We'll draw a wire from bulb top (visual style) or create a return
+        drawWire(bulbX, bulbY-35, bulbX, 80, activeC); // Up to top return rail (joins motor return)
+
+        
+        // --- COMPONENTS ---
+        
+        // Power Supply
+        drawBox(psuX-40, psuY-25, 80, 50, "#e74c3c", "PSU");
+        ctx.fillStyle="white"; ctx.font="10px Arial"; ctx.fillText("12V DC", psuX, psuY+35);
+
+        // Motor Assembly
+        ctx.fillStyle = "#95a5a6";
+        ctx.fillRect(motX-60, motY-60, 120, 120); // Plate
+        drawFlywheel(motX, motY, angularVelocity);
+        ctx.fillStyle="#333"; ctx.fillText(activeA ? "MOTOR MODE" : (activeC ? "GENERATOR MODE" : "IDLE"), motX, motY+80);
+
+        // Bulb
+        drawBulb(bulbX, bulbY, activeC ? (angularVelocity/MAX_SPEED) : 0);
+        ctx.fillStyle="white"; ctx.textAlign="center"; ctx.fillText("Light Bulb", bulbX, bulbY+50);
+
+        // Switch Visuals
+        ctx.fillStyle = "#bdc3c7";
+        ctx.fillRect(switchX-60, switchY-20, 120, 40);
+        
+        // Terminals
+        ctx.beginPath();
+        ctx.arc(switchX-30, switchY, 5, 0, Math.PI*2); // A
+        ctx.arc(switchX, switchY, 5, 0, Math.PI*2);    // Common
+        ctx.arc(switchX+30, switchY, 5, 0, Math.PI*2); // C
+        ctx.fillStyle = "black"; ctx.fill();
+
+        // Labels
+        ctx.fillStyle = "black"; ctx.font="bold 12px Arial";
+        ctx.fillText("A", switchX-30, switchY-10);
+        ctx.fillText("Com", switchX, switchY+30);
+        ctx.fillText("C", switchX+30, switchY-10);
+
+        // Switch Arm
+        ctx.beginPath();
+        ctx.moveTo(switchX, switchY);
+        if(switchPos === 'A') ctx.lineTo(switchX-30, switchY);
+        else if (switchPos === 'B') ctx.lineTo(switchX, switchY-25); // Pointing up (Nowhere)
+        else if (switchPos === 'C') ctx.lineTo(switchX+30, switchY);
+        ctx.strokeStyle = "#c0392b";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        requestAnimationFrame(loop);
+    }
+
+    setMode('B');
+    loop();
+
+</script>
+</body>
+</html>
