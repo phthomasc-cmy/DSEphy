@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Hydroelectric Power Example</title>
+    <style>
+        :root {
+            --primary-orange: #f37021;
+            --text-dark: #333;
+            --water-blue: #4FA4F3;
+            --bg-gray: #f4f4f4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Header based on the textbook style */
+        .header {
+            background-color: white;
+            padding: 20px;
+            border-bottom: 4px solid var(--primary-orange);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .example-tag {
+            background-color: var(--primary-orange);
+            color: white;
+            padding: 5px 15px;
+            font-weight: bold;
+            transform: skew(-15deg);
+            border-radius: 4px;
+        }
+
+        .example-tag span {
+            display: block;
+            transform: skew(15deg);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-orange);
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 30px;
+        }
+
+        /* Left Column: Visuals & Controls */
+        .visual-column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* Right Column: Calculations */
+        .calc-column {
+            flex: 1;
+            min-width: 300px;
+            border-left: 1px solid #ddd;
+            padding-left: 20px;
+        }
+
+        @media (max-width: 700px) {
+            .calc-column {
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid #ddd;
+                padding-top: 20px;
+            }
+        }
+
+        /* SVG Diagram Styling */
+        .diagram-container {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(to bottom, #dbefff 0%, #dbefff 60%, #e8dec8 60%, #e8dec8 100%);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Controls Styling */
+        .controls {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--primary-orange);
+        }
+
+        .btn-reset {
+            background-color: var(--text-dark);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background-color: #555;
+        }
+
+        /* Calculation Steps Styling */
+        .step {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .step-title {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .step-math {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .final-result {
+            background-color: #fff4e6;
+            border: 2px solid var(--primary-orange);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .final-result h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary-orange);
+        }
+
+        .final-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: var(--primary-orange);
+        }
+
+        /* Turbine Animation */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        #turbine-blade {
+            transform-origin: 100px 180px; /* Adjust based on SVG coords */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="example-tag"><span>Example 4.4</span></div>
+        <h1>Hydroelectric Power Calculator</h1>
+    </div>
+
+    <div class="content">
+        <!-- Visuals and Inputs -->
+        <div class="visual-column">
+            
+            <div class="diagram-container">
+                <svg viewBox="0 0 400 250" preserveAspectRatio="none">
+                    <!-- Ground/Hill -->
+                    <path d="M0,150 L150,150 L200,200 L400,190 L400,250 L0,250 Z" fill="#a89f91" />
+                    
+                    <!-- Dam Wall -->
+                    <path d="M150,150 L150,60 L200,60 L220,200 L150,200 Z" fill="#777" stroke="#555" stroke-width="2"/>
+                    
+                    <!-- Water Reservoir (Dynamic Height) -->
+                    <!-- Max height y=70, Min height y=150 -->
+                    <rect id="water-rect" x="200" y="70" width="200" height="130" fill="var(--water-blue)" opacity="0.8" />
+                    <line id="water-top-line" x1="200" y1="70" x2="400" y2="70" stroke="#005bb5" stroke-width="2" stroke-dasharray="5,3"/>
+                    
+                    <!-- Height Arrow -->
+                    <line x1="350" y1="200" x2="350" y2="70" id="height-arrow" stroke="#333" stroke-width="1" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+                    <text x="360" y="140" id="height-text-svg" font-size="12" fill="#333">120m</text>
+
+                    <!-- Penstock (Pipe) -->
+                    <path d="M180,180 L220,180" stroke="#fff" stroke-width="10" opacity="0.5"/>
+
+                    <!-- Turbine House -->
+                    <rect x="120" y="140" width="60" height="60" fill="#eee" stroke="#333"/>
+                    <!-- Turbine -->
+                    <g id="turbine-blade" style="transform-origin: 150px 170px;">
+                        <circle cx="150" cy="170" r="10" fill="#333"/>
+                        <line x1="150" y1="150" x2="150" y2="190" stroke="#333" stroke-width="3"/>
+                        <line x1="130" y1="170" x2="170" y2="170" stroke="#333" stroke-width="3"/>
+                    </g>
+
+                    <!-- Water Out -->
+                    <path d="M120,180 Q80,180 0,190" stroke="var(--water-blue)" stroke-width="8" fill="none"/>
+
+                    <!-- Defs for arrows -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Water Level Difference (h): <span class="highlight"><span id="val-h">120</span> m</span></label>
+                    <input type="range" id="input-h" min="10" max="200" value="120">
+                </div>
+                <div class="control-group">
+                    <label>Flow Rate (Q): <span class="highlight"><span id="val-flow">200</span> m³s⁻¹</span></label>
+                    <input type="range" id="input-flow" min="10" max="500" value="200">
+                </div>
+                <div class="control-group">
+                    <label>Efficiency (η): <span class="highlight"><span id="val-eff">50</span>%</span></label>
+                    <input type="range" id="input-eff" min="10" max="100" value="50">
+                </div>
+                <button class="btn-reset" onclick="resetValues()">Reset to Textbook Values</button>
+            </div>
+        </div>
+
+        <!-- Solutions -->
+        <div class="calc-column">
+            <h2>Solution</h2>
+            <p><strong>Constants:</strong><br> Density of water (ρ) = 1000 kg m⁻³<br> Gravity (g) = 9.81 m s⁻²</p>
+
+            <div class="step">
+                <div class="step-title">1. Mass of water flowing per second</div>
+                <div class="step-math">
+                    <span id="math-flow">200</span> × 1000 = <span id="res-mass">2 × 10⁵</span> kg
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">2. Loss in Potential Energy (Input Power)</div>
+                <div class="step-title" style="font-style: italic;">P_in = mgh</div>
+                <div class="step-math">
+                    (<span id="math-mass">2 × 10⁵</span>)(9.81)(<span id="math-h">120</span>)
+                    <br>= <span id="res-pe">2.354 × 10⁸</span> J (Watts)
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">3. Output Power (Adjusted for Efficiency)</div>
+                <div class="step-math">
+                    (<span id="math-pe">2.354 × 10⁸</span>) × <span id="math-eff">50</span>%
+                </div>
+            </div>
+
+            <div class="final-result">
+                <h3>Power Output</h3>
+                <div class="final-value" id="final-watts">1.18 × 10⁸ W</div>
+                <div style="margin-top:5px; color:#555;">or <span id="final-mw">118 MW</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Elements
+    const inputH = document.getElementById('input-h');
+    const inputFlow = document.getElementById('input-flow');
+    const inputEff = document.getElementById('input-eff');
+
+    const valH = document.getElementById('val-h');
+    const valFlow = document.getElementById('val-flow');
+    const valEff = document.getElementById('val-eff');
+
+    // SVG Elements
+    const waterRect = document.getElementById('water-rect');
+    const waterLine = document.getElementById('water-top-line');
+    const heightArrow = document.getElementById('height-arrow');
+    const heightTextSvg = document.getElementById('height-text-svg');
+    const turbine = document.getElementById('turbine-blade');
+
+    // Result Elements
+    const mathFlow = document.getElementById('math-flow');
+    const resMass = document.getElementById('res-mass');
+    
+    const mathMass = document.getElementById('math-mass');
+    const mathH = document.getElementById('math-h');
+    const resPe = document.getElementById('res-pe');
+    
+    const mathPe = document.getElementById('math-pe');
+    const mathEff = document.getElementById('math-eff');
+    
+    const finalWatts = document.getElementById('final-watts');
+    const finalMw = document.getElementById('final-mw');
+
+    // Constants
+    const RHO = 1000;
+    const G = 9.81;
+
+    function toScientific(num) {
+        if (num === 0) return "0";
+        let exp = num.toExponential(3); // 3 decimal places
+        // Convert 2.354e+8 to 2.354 × 10⁸
+        let parts = exp.split('e');
+        let base = parts[0];
+        let power = parseInt(parts[1]);
+        
+        // Cleanup extra zeros if needed (optional, keeping strict for consistency)
+        return `${base} × 10<sup>${power}</sup>`;
+    }
+
+    function update() {
+        const h = parseInt(inputH.value);
+        const flow = parseInt(inputFlow.value);
+        const eff = parseInt(inputEff.value);
+
+        // Update Labels
+        valH.innerText = h;
+        valFlow.innerText = flow;
+        valEff.innerText = eff;
+
+        // --- Visual Updates ---
+        // Map height 10-200 to SVG Y coordinates (Max water y=70, Min water y=190ish)
+        // Diagram floor is around 200. Let's say max height (200m) is Y=50, min (10m) is Y=190.
+        const maxPixelY = 195;
+        const minPixelY = 50;
+        const percentH = (h - 10) / (200 - 10);
+        const newY = maxPixelY - (percentH * (maxPixelY - minPixelY));
+        const newHeight = 200 - newY; // 200 is roughly the bottom of the dam wall in SVG
+
+        waterRect.setAttribute('y', newY);
+        waterRect.setAttribute('height', newHeight);
+        waterLine.setAttribute('y1', newY);
+        waterLine.setAttribute('y2', newY);
+        
+        heightArrow.setAttribute('y2', newY);
+        heightTextSvg.setAttribute('y', (newY + 200)/2);
+        heightTextSvg.innerHTML = h + "m";
+
+        // Turbine speed (visual only)
+        const speed = flow / 50; // Arbitrary speed factor
+        turbine.style.animation = `spin ${1/speed}s linear infinite`;
+
+        // --- Calculation Updates ---
+        
+        // 1. Mass
+        const mass = flow * RHO;
+        mathFlow.innerText = flow;
+        resMass.innerHTML = toScientific(mass);
+
+        // 2. Potential Energy (Input Power)
+        const pe = mass * G * h;
+        mathMass.innerHTML = toScientific(mass);
+        mathH.innerText = h;
+        resPe.innerHTML = toScientific(pe);
+
+        // 3. Output Power
+        const outPower = pe * (eff / 100);
+        mathPe.innerHTML = toScientific(pe);
+        mathEff.innerText = eff;
+
+        finalWatts.innerHTML = toScientific(outPower) + " W";
+        
+        // Convert to MW for the subtitle
+        const mw = outPower / 1000000;
+        finalMw.innerText = mw.toFixed(1) + " MW";
+    }
+
+    function resetValues() {
+        inputH.value = 120;
+        inputFlow.value = 200;
+        inputEff.value = 50;
+        update();
+    }
+
+    // Event Listeners
+    inputH.addEventListener('input', update);
+    inputFlow.addEventListener('input', update);
+    inputEff.addEventListener('input', update);
+
+    // Initial run
+    update();
+
+</script>
+
+</body>
+</html>
