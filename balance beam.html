@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Balance Beam Simulator</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #d35400;
+            text-shadow: 2px 2px 0px #f1c40f;
+        }
+
+        .stage {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            background-color: #fff;
+            border: 4px solid #333;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* The Floor */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background-color: #f4d03f;
+            border-top: 3px solid #333;
+        }
+
+        /* The Beam */
+        .beam {
+            position: absolute;
+            top: 250px;
+            left: 100px;
+            width: 600px; /* Represents 4 meters */
+            height: 20px;
+            background-color: #e67e22;
+            border: 2px solid #333;
+            z-index: 2;
+        }
+
+        /* Supports */
+        .support {
+            position: absolute;
+            top: 270px; /* Below beam */
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 80px solid #d35400;
+            z-index: 1;
+        }
+
+        #supportA { left: 90px; } /* At 0m visual */
+        #supportB { left: 670px; } /* At 4m visual */
+
+        /* The Gymnast */
+        .gymnast {
+            position: absolute;
+            top: 170px; /* Standing on beam */
+            font-size: 80px;
+            left: 100px; /* Starting at A */
+            transition: left 0.1s linear;
+            cursor: grab;
+            z-index: 10;
+            user-select: none;
+        }
+
+        /* Speech Bubbles */
+        .bubble {
+            position: absolute;
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 15px;
+            padding: 10px;
+            width: 180px;
+            text-align: center;
+            font-size: 14px;
+            top: 360px;
+        }
+
+        .bubble:after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            border-width: 10px;
+            border-style: solid;
+            border-color: transparent transparent #000 transparent;
+            transform: translateX(-50%);
+        }
+
+        #bubbleA { left: 50px; }
+        #bubbleB { left: 570px; }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed #333;
+            text-align: center;
+            width: 600px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .force-val { color: #e74c3c; }
+        .math-box {
+            margin-top: 20px;
+            font-family: monospace;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎪 The Great Balance Beam Act 🎪</h1>
+
+    <div class="stage">
+        <!-- Gymnast Character -->
+        <div class="gymnast" id="gymnast">💃</div>
+        
+        <!-- The Beam Structure -->
+        <div class="beam">
+            <div style="position:absolute; left:0; top:25px; font-size:12px;">A (0m)</div>
+            <div style="position:absolute; right:0; top:25px; font-size:12px;">B (4m)</div>
+            <div style="position:absolute; left:50%; top:5px; width:2px; height:10px; background:#000;"></div> <!-- Center -->
+        </div>
+        
+        <!-- Supports -->
+        <div class="support" id="supportA"></div>
+        <div class="support" id="supportB"></div>
+
+        <!-- The Floor -->
+        <div class="floor"></div>
+
+        <!-- Speech Bubbles -->
+        <div class="bubble" id="bubbleA">Loading...</div>
+        <div class="bubble" id="bubbleB">Loading...</div>
+    </div>
+
+    <div class="controls">
+        <label for="posSlider">Move the Gymnast (0m to 4m):</label>
+        <br><br>
+        <input type="range" id="posSlider" min="0" max="400" value="100">
+        
+        <div class="stats">
+            <div>Current Pos: <span id="posDisplay">1.0</span>m</div>
+            <div>Force A: <span id="forceA" class="force-val">0</span> N</div>
+            <div>Force B: <span id="forceB" class="force-val">0</span> N</div>
+        </div>
+
+        <button onclick="document.getElementById('mathBox').style.display = 'block'" style="margin-top:15px; cursor:pointer;">🤓 Show Calculation</button>
+        
+        <div class="math-box" id="mathBox">
+            <strong>The Math (Torque at A):</strong><br>
+            (Gymnast Weight × Pos) + (Beam Weight × 2m) = Force B × 4m<br>
+            (500 × <span id="mathPos">1</span>) + (150 × 2) = 4 × F_B<br>
+            <span id="mathCalc">500 + 300 = 4 F_B</span><br>
+            <strong>F_B = <span id="mathFB">200</span> N</strong><br>
+            F_A = Total Weight (650) - F_B<br>
+            <strong>F_A = <span id="mathFA">450</span> N</strong>
+        </div>
+    </div>
+
+    <script>
+        // Constants from the problem
+        const WEIGHT_GYMNAST = 500;
+        const WEIGHT_BEAM = 150;
+        const LENGTH_BEAM = 4.0;
+        const TOTAL_WEIGHT = WEIGHT_GYMNAST + WEIGHT_BEAM;
+
+        // DOM Elements
+        const slider = document.getElementById('posSlider');
+        const gymnast = document.getElementById('gymnast');
+        const displayPos = document.getElementById('posDisplay');
+        const displayFA = document.getElementById('forceA');
+        const displayFB = document.getElementById('forceB');
+        const bubbleA = document.getElementById('bubbleA');
+        const bubbleB = document.getElementById('bubbleB');
+
+        // Math display elements
+        const mathPos = document.getElementById('mathPos');
+        const mathCalc = document.getElementById('mathCalc');
+        const mathFB = document.getElementById('mathFB');
+        const mathFA = document.getElementById('mathFA');
+
+        // Beam visual offset (left margin of the stage)
+        const BEAM_START_X = 100; // pixels
+        const PIXELS_PER_METER = 150; // 600px / 4m
+
+        function updateSimulation() {
+            // 1. Get Position
+            let positionMeters = slider.value / 100;
+            
+            // 2. Move Gymnast Visual
+            // -30px to center the emoji on the point
+            gymnast.style.left = (BEAM_START_X + (positionMeters * PIXELS_PER_METER) - 30) + "px";
+
+            // 3. Calculate Physics
+            // Sum of Torques around A = 0
+            // (W_g * x) + (W_b * L/2) - (F_b * L) = 0
+            // F_b = (500*x + 150*2) / 4
+            
+            let torqueGymnast = WEIGHT_GYMNAST * positionMeters;
+            let torqueBeam = WEIGHT_BEAM * (LENGTH_BEAM / 2); // Acts at 2m
+            
+            let forceB = (torqueGymnast + torqueBeam) / LENGTH_BEAM;
+            let forceA = TOTAL_WEIGHT - forceB;
+
+            // 4. Update Text
+            displayPos.innerText = positionMeters.toFixed(2);
+            displayFA.innerText = forceA.toFixed(1);
+            displayFB.innerText = forceB.toFixed(1);
+
+            // 5. Update Math Box
+            mathPos.innerText = positionMeters.toFixed(2);
+            let combinedTorque = (WEIGHT_GYMNAST * positionMeters) + 300;
+            mathCalc.innerText = `${(WEIGHT_GYMNAST * positionMeters).toFixed(0)} + 300 = 4 × F_B`;
+            mathFB.innerText = forceB.toFixed(1);
+            mathFA.innerText = forceA.toFixed(1);
+
+            // 6. Update Comic Dialogue
+            updateDialogue(forceA, bubbleA, "A");
+            updateDialogue(forceB, bubbleB, "B");
+        }
+
+        function updateDialogue(force, element, name) {
+            let text = "";
+            
+            if (force > 550) {
+                text = "🔥 MY BACK! GET HER OFF ME! 🔥";
+                element.style.backgroundColor = "#ffcccc";
+            } else if (force > 400) {
+                text = "Ugh... skipped leg day... too heavy...";
+                element.style.backgroundColor = "#fff";
+            } else if (force > 200) {
+                text = "This is fine. I'm strong.";
+                element.style.backgroundColor = "#fff";
+            } else if (force > 50) {
+                text = "Is she even on the beam? Too easy.";
+                element.style.backgroundColor = "#e8f8f5";
+            } else {
+                text = "Zzz... Wake me up when physics happens.";
+                element.style.backgroundColor = "#d4e6f1";
+            }
+            element.innerText = `${name}: "${text}"`;
+        }
+
+        // Initialize
+        slider.addEventListener('input', updateSimulation);
+        updateSimulation(); // Run once on load
+
+    </script>
+</body>
+</html>
