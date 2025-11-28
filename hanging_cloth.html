@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Physics: The Moving T-Shirt 👕</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #fff0f5; /* Lavender Blush */
+            color: #5d5d81;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(255, 182, 193, 0.4);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 4px solid #ffb7b2;
+        }
+
+        h1 {
+            color: #ff9aa2;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 2px dashed #b5ead7;
+            border-radius: 15px;
+            background-color: #fcfcfc;
+            margin-bottom: 20px;
+            width: 100%;
+            height: 400px; 
+            box-shadow: inset 0 0 20px #f0f0f0;
+        }
+
+        .controls {
+            background-color: #e2f0cb;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .slider-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label {
+            font-weight: bold;
+            color: #779ecb;
+        }
+
+        input[type=range] {
+            flex-grow: 1;
+            margin: 0 15px;
+            accent-color: #ff9aa2;
+            cursor: pointer;
+        }
+
+        .results {
+            display: flex;
+            justify-content: space-around;
+            background-color: #ffdac1;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+
+        .result-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff6f69;
+        }
+
+        .unit {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .btn-reset {
+            background-color: #ff9aa2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .btn-reset:hover {
+            transform: scale(1.05);
+            background-color: #ff848d;
+        }
+
+        .answer-b {
+            margin-top: 15px;
+            font-size: 0.9em;
+            background: #e0f7fa;
+            padding: 10px;
+            border-radius: 10px;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>✨ Moving Cloth Sim ✨</h1>
+        <div class="subtitle">Ceiling is fixed! Added geometry arcs.</div>
+
+        <canvas id="simCanvas" width="500" height="400"></canvas>
+
+        <div class="results">
+            <div class="result-box">
+                <span>String A (Left)</span>
+                <span class="value" id="valA">0.00</span>
+                <span class="unit">Newtons (N)</span>
+            </div>
+            <div class="result-box">
+                <span>String B (Right)</span>
+                <span class="value" id="valB">0.00</span>
+                <span class="unit">Newtons (N)</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="slider-group">
+                <label>Mass (kg): <span id="massDisplay">1.2</span></label>
+                <input type="range" id="massSlider" min="0.1" max="5.0" step="0.1" value="1.2">
+            </div>
+            
+            <div class="slider-group">
+                <label>Angle A (Left): <span id="angleADisplay">45</span>°</label>
+                <input type="range" id="angleASlider" min="15" max="75" step="1" value="45">
+            </div>
+
+            <div class="slider-group">
+                <label>Angle B (Right): <span id="angleBDisplay">30</span>°</label>
+                <input type="range" id="angleBSlider" min="15" max="75" step="1" value="30">
+            </div>
+        </div>
+
+        <button class="btn-reset" onclick="resetSim()">↺ Reset to Problem Values</button>
+
+        <div id="hintB" class="answer-b">
+            💡 <b>Part (b):</b> Even though the position changes, notice that lower mass still means lower tension!
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Inputs
+        const massSlider = document.getElementById('massSlider');
+        const angleASlider = document.getElementById('angleASlider');
+        const angleBSlider = document.getElementById('angleBSlider');
+
+        // Displays
+        const massDisplay = document.getElementById('massDisplay');
+        const angleADisplay = document.getElementById('angleADisplay');
+        const angleBDisplay = document.getElementById('angleBDisplay');
+        const valA = document.getElementById('valA');
+        const valB = document.getElementById('valB');
+        const hintB = document.getElementById('hintB');
+
+        const g = 9.81; // Gravity
+
+        // Fixed Geometry Constants
+        const CEILING_Y = 60;  // Moved down slightly to make room for arcs
+        const CEILING_WIDTH = 240; 
+        const CENTER_X = canvas.width / 2;
+        const LEFT_ANCHOR_X = CENTER_X - (CEILING_WIDTH / 2);
+        const RIGHT_ANCHOR_X = CENTER_X + (CEILING_WIDTH / 2);
+
+        function calculateAndDraw() {
+            // Get values
+            const m = parseFloat(massSlider.value);
+            const degA = parseFloat(angleASlider.value);
+            const degB = parseFloat(angleBSlider.value);
+
+            // Update Text Displays
+            massDisplay.textContent = m.toFixed(1);
+            angleADisplay.textContent = degA;
+            angleBDisplay.textContent = degB;
+
+            // Physics Calculation
+            const radA = degA * Math.PI / 180;
+            const radB = degB * Math.PI / 180;
+            const weight = m * g;
+
+            // Tensions
+            const tensionB = weight / ((Math.cos(radB) * Math.tan(radA)) + Math.sin(radB));
+            const tensionA = tensionB * (Math.cos(radB) / Math.cos(radA));
+
+            // Update Result UI
+            valA.textContent = tensionA.toFixed(2);
+            valB.textContent = tensionB.toFixed(2);
+
+            // Toggle Hint
+            if (m < 1.2) {
+                hintB.style.display = "block";
+                hintB.innerHTML = "📉 <b>Observation:</b> Mass decreased -> Tensions decreased.";
+            } else if (m > 1.2) {
+                hintB.style.display = "block";
+                hintB.innerHTML = "📈 <b>Observation:</b> Mass increased -> Tensions increased.";
+            } else {
+                hintB.style.display = "none";
+            }
+
+            // --- GEOMETRY CALCULATION ---
+            const tanA = Math.tan(radA);
+            const tanB = Math.tan(radB);
+            
+            const d1 = CEILING_WIDTH * tanB / (tanA + tanB);
+            const h = d1 * tanA;
+
+            const knotX = LEFT_ANCHOR_X + d1;
+            const knotY = CEILING_Y + h;
+
+            // --- DRAWING ---
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Ceiling (Fixed)
+            ctx.fillStyle = "#d3d3d3";
+            ctx.fillRect(LEFT_ANCHOR_X - 20, CEILING_Y - 10, CEILING_WIDTH + 40, 10);
+            
+            // --- DRAW CEILING ANGLE ARCS ---
+            const arcRadius = 40;
+
+            // Left Arc (Angle A)
+            ctx.beginPath();
+            ctx.moveTo(LEFT_ANCHOR_X, CEILING_Y); // Start at anchor
+            // Draw arc from Horizontal (0) down to String Angle (radA)
+            // Canvas Y is down, so positive angle is clockwise (down)
+            ctx.arc(LEFT_ANCHOR_X, CEILING_Y, arcRadius, 0, radA); 
+            ctx.lineTo(LEFT_ANCHOR_X, CEILING_Y); // Close shape
+            ctx.fillStyle = "rgba(255, 154, 162, 0.3)"; // Transparent Pink
+            ctx.fill();
+            ctx.strokeStyle = "#ff9aa2";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Right Arc (Angle B)
+            ctx.beginPath();
+            ctx.moveTo(RIGHT_ANCHOR_X, CEILING_Y); // Start at anchor
+            // Draw arc from String Angle (PI - radB) to Horizontal Left (PI)
+            ctx.arc(RIGHT_ANCHOR_X, CEILING_Y, arcRadius, Math.PI - radB, Math.PI);
+            ctx.lineTo(RIGHT_ANCHOR_X, CEILING_Y); // Close shape
+            ctx.fillStyle = "rgba(138, 198, 209, 0.3)"; // Transparent Blue
+            ctx.fill();
+            ctx.strokeStyle = "#8ac6d1";
+            ctx.stroke();
+
+            // Draw Anchors dots
+            ctx.fillStyle = "#aaa";
+            ctx.beginPath();
+            ctx.arc(LEFT_ANCHOR_X, CEILING_Y, 4, 0, Math.PI * 2);
+            ctx.arc(RIGHT_ANCHOR_X, CEILING_Y, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw String A (Left)
+            ctx.beginPath();
+            ctx.moveTo(LEFT_ANCHOR_X, CEILING_Y);
+            ctx.lineTo(knotX, knotY);
+            ctx.lineWidth = 3 + (tensionA / 20); 
+            ctx.strokeStyle = "#ff9aa2"; // Pink
+            ctx.stroke();
+
+            // Label A (Midpoint)
+            ctx.fillStyle = "#ff9aa2";
+            ctx.font = "bold 14px Quicksand";
+            ctx.fillText(`A (${degA}°)`, (LEFT_ANCHOR_X + knotX)/2 - 40, (CEILING_Y + knotY)/2);
+
+            // Draw String B (Right)
+            ctx.beginPath();
+            ctx.moveTo(RIGHT_ANCHOR_X, CEILING_Y);
+            ctx.lineTo(knotX, knotY);
+            ctx.lineWidth = 3 + (tensionB / 20); 
+            ctx.strokeStyle = "#8ac6d1"; // Blue
+            ctx.stroke();
+
+            // Label B (Midpoint)
+            ctx.fillStyle = "#8ac6d1";
+            ctx.fillText(`B (${degB}°)`, (RIGHT_ANCHOR_X + knotX)/2 + 10, (CEILING_Y + knotY)/2);
+
+            // Draw Dashed Horizontal line at Knot (Visual reference for Alternate Interior Angles)
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#ccc";
+            ctx.beginPath();
+            ctx.moveTo(knotX - 60, knotY);
+            ctx.lineTo(knotX + 60, knotY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw T-Shirt Emoji at Knot
+            const shirtSize = 40 + (m * 10);
+            ctx.font = `${shirtSize}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            
+            ctx.fillText("👕", knotX, knotY - 5);
+
+            // Draw Hanger Hook point
+            ctx.beginPath();
+            ctx.arc(knotX, knotY, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = "#555";
+            ctx.fill();
+        }
+
+        function resetSim() {
+            massSlider.value = 1.2;
+            angleASlider.value = 45;
+            angleBSlider.value = 30;
+            calculateAndDraw();
+        }
+
+        // Event Listeners
+        massSlider.addEventListener('input', calculateAndDraw);
+        angleASlider.addEventListener('input', calculateAndDraw);
+        angleBSlider.addEventListener('input', calculateAndDraw);
+
+        // Initial Run
+        calculateAndDraw();
+
+    </script>
+</body>
+</html>
