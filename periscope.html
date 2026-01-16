@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Periscopes Flip Light</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .main-title { color: #2c3e50; margin-bottom: 10px; }
+        .setup-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 450px; display: flex; flex-direction: column; align-items: center; }
+        .card h2 { margin-top: 0; font-size: 1.2rem; color: #34495e; border-bottom: 2px solid #eee; width: 100%; text-align: center; padding-bottom: 10px; }
+        
+        canvas { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; }
+        
+        .view-circle { width: 120px; height: 120px; border-radius: 50%; border: 5px solid #333; overflow: hidden; position: relative; background: #fff; margin-bottom: 10px; }
+        .view-canvas { width: 100%; height: 100%; }
+
+        .explanation { font-size: 0.9rem; line-height: 1.4; color: #555; height: 80px; text-align: center; }
+        .legend { display: flex; gap: 15px; margin-bottom: 20px; background: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
+        
+        .status-up { color: #27ae60; font-weight: bold; }
+        .status-down { color: #e67e22; font-weight: bold; }
+        
+        .ray-label { font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">Why does the image flip?</h1>
+    <p>Follow the <b>Red Ray (Top)</b> and the <b>Blue Ray (Bottom)</b> to see what happens.</p>
+
+    <div class="legend">
+        <span style="color: #ff4757;">● Top of Object</span>
+        <span style="color: #2f3542;">| Mirror Surface</span>
+        <span style="color: #1e90ff;">● Bottom of Object</span>
+    </div>
+
+    <div class="setup-container">
+        
+        <!-- DESIGN A -->
+        <div class="card">
+            <h2>Design A: Parallel Mirrors</h2>
+            <canvas id="canvasA" width="400" height="300"></canvas>
+            <div class="view-circle">
+                <canvas id="viewA" width="120" height="120" class="view-canvas"></canvas>
+            </div>
+            <div class="explanation">
+                The top ray stays on top! <br>
+                The first mirror flips it down, the second mirror flips it back.<br>
+                <span class="status-up">RESULT: UPRIGHT IMAGE</span>
+            </div>
+        </div>
+
+        <!-- DESIGN B -->
+        <div class="card">
+            <h2>Design B: Same-Direction Mirrors</h2>
+            <canvas id="canvasB" width="400" height="300"></canvas>
+            <div class="view-circle">
+                <canvas id="viewB" width="120" height="120" class="view-canvas"></canvas>
+            </div>
+            <div class="explanation">
+                The top ray ends up on the bottom! <br>
+                Because the second mirror faces the same way, it doesn't "undo" the first flip.<br>
+                <span class="status-down">RESULT: UPSIDE DOWN</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function drawSimulation(id, viewId, isParallel) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            const vCanvas = document.getElementById(viewId);
+            const vCtx = vCanvas.getContext('2d');
+            
+            let offset = 0;
+
+            function render() {
+                offset += 0.05;
+                const objY = 50 + Math.sin(offset) * 10;
+                const objSize = 40;
+
+                ctx.clearRect(0, 0, 400, 300);
+                vCtx.clearRect(0, 0, 120, 120);
+
+                // --- 1. Draw Mirrors ---
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#2f3542';
+                // Top Mirror
+                ctx.beginPath(); ctx.moveTo(100, 30); ctx.lineTo(180, 110); ctx.stroke();
+                // Bottom Mirror
+                ctx.beginPath();
+                if(isParallel) {
+                    ctx.moveTo(100, 190); ctx.lineTo(180, 270);
+                } else {
+                    ctx.moveTo(180, 190); ctx.lineTo(100, 270);
+                }
+                ctx.stroke();
+
+                // --- 2. Draw Object (The Arrow) ---
+                function drawArrow(c, x, y, size, inverted) {
+                    c.save();
+                    c.translate(x, y);
+                    if(inverted) c.scale(1, -1);
+                    c.lineWidth = 6;
+                    // Shaft
+                    c.strokeStyle = '#333';
+                    c.beginPath(); c.moveTo(0, -size/2); c.lineTo(0, size/2); c.stroke();
+                    // Red Head (TOP)
+                    c.fillStyle = '#ff4757';
+                    c.beginPath(); c.arc(0, -size/2, 6, 0, Math.PI*2); c.fill();
+                    // Blue Base (BOTTOM)
+                    c.fillStyle = '#1e90ff';
+                    c.beginPath(); c.arc(0, size/2, 6, 0, Math.PI*2); c.fill();
+                    c.restore();
+                }
+
+                drawArrow(ctx, 30, objY + 40, objSize, false);
+
+                // --- 3. Trace Light Rays ---
+                const rayTopY = objY + 40 - objSize/2;
+                const rayBottomY = objY + 40 + objSize/2;
+
+                function trace(startY, color, isTopRay) {
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(30, startY);
+                    
+                    // To first mirror
+                    let hit1X = 100 + (startY - 30);
+                    ctx.lineTo(hit1X, startY);
+                    
+                    // Down to second mirror
+                    let hit2Y;
+                    if(isParallel) {
+                        hit2Y = 190 + (hit1X - 100);
+                        ctx.lineTo(hit1X, hit2Y);
+                        ctx.lineTo(350, hit2Y); // To eye (right)
+                    } else {
+                        // In Design B, mirror is reversed
+                        hit2Y = 190 + (180 - hit1X);
+                        ctx.lineTo(hit1X, hit2Y);
+                        ctx.lineTo(30, hit2Y); // To eye (left)
+                    }
+                    ctx.stroke();
+                }
+
+                trace(rayTopY, '#ff4757', true);    // Red Ray
+                trace(rayBottomY, '#1e90ff', false); // Blue Ray
+
+                // --- 4. Draw Viewer View ---
+                vCtx.save();
+                vCtx.translate(60, 60);
+                drawArrow(vCtx, 0, 0, 60, !isParallel);
+                vCtx.restore();
+
+                requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        drawSimulation('canvasA', 'viewA', true);
+        drawSimulation('canvasB', 'viewB', false);
+    </script>
+</body>
+</html>
