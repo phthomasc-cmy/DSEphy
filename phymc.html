@@ -233,13 +233,16 @@
         <h2>Ready to practice?</h2>
         <p>Select a year above and click Start.</p>
         <button onclick="startQuiz()" style="background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 1.1rem;">Start Quiz</button>
-    </div>
-
-    <div style="margin-bottom: 15px;">
+        
+        <div style="margin-bottom: 15px;">
         <p></p>
       
         <p style="font-size: 15px; margin-top: 5px;"> <img src="https://hitwebcounter.com/counter/counter.php?page=21474695&style=0002&nbdigits=4&type=page&initCount=0" title="Free Tools" Alt="Free Tools"   border="0" /> Students have practiced here</p>
-   </div>
+       </div>
+    </div>
+
+
+    
 
     <!-- Quiz Area -->
     <div id="quizInterface" style="display: none;">
@@ -297,7 +300,7 @@
         const years = ["2023", "2022", "2021"];
         years.forEach(y => {
             if(!answerKeys[y]) answerKeys[y] = {};
-            for(let i=1; i<=36; i++) {
+            for(let i=1; i<=33; i++) {
                 if(!answerKeys[y][i]) {
                     const opts = ['A','B','C','D'];
                     answerKeys[y][i] = opts[Math.floor(Math.random() * 4)];
@@ -355,7 +358,7 @@
 
     function startQuiz() {
         currentYear = yearSelect.value;
-        questionOrder = Array.from({length: 36}, (_, i) => i + 1);
+        questionOrder = Array.from({length: 33}, (_, i) => i + 1);
         shuffleArray(questionOrder);
         
         currentIndex = 0;
@@ -389,7 +392,7 @@
         // --- IMAGE PATH LOGIC ---
         // Change these URLs to your local path: `images/${currentYear}/q_${qNum}.jpg`
         const qSrc = `images/${currentYear}/q_${qNum}.JPG`;
-        const aSrc = `images/${currentYear}/q_${qNum}.JPG`;
+        const aSrc = `images/${currentYear}/a_${qNum}.JPG`;
 
         document.getElementById('questionImage').src = qSrc;
         document.getElementById('answerImage').src = aSrc;
