@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic-Based MCQ (Separated Data)</title>
+    <style>
+        :root {
+            --primary: #2980b9; /* Blue */
+            --success: #27ae60;
+            --danger: #c0392b;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --warning: #f39c12;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* --- Header Styles --- */
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 15px;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .timer-display {
+            font-family: monospace;
+            font-size: 1.1rem;
+            background: var(--dark);
+            color: var(--light);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        /* --- Standard UI --- */
+        select, button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        select {
+            border: 1px solid #ccc;
+            min-width: 200px;
+        }
+
+        .btn-next {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            display: none; /* Hidden until answered */
+            margin-top: 15px;
+        }
+
+        .question-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .question-img, .answer-img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid var(--dark);
+            color: var(--dark);
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--light);
+        }
+
+        /* State Styles */
+        .option-btn.correct {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+
+        .feedback-area.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .feedback-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        /* --- History Section Styles --- */
+        .history-container {
+            margin-top: 30px;
+            border-top: 2px solid var(--light);
+            padding-top: 20px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .history-table th, .history-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-table th {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .status-correct { color: var(--success); font-weight: bold; }
+        .status-wrong { color: var(--danger); font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <label for="topicSelect"><strong>Select Topic: </strong></label>
+            <select id="topicSelect" onchange="resetQuiz()">
+                <!-- Options populated by JS -->
+            </select>
+        </div>
+        
+        <div class="header-controls">
+            <div id="timerBox" class="timer-display">
+                Total: 00:00 | Q: 00s
+            </div>
+        </div>
+    </header>
+
+    <div style="text-align: right; margin-bottom: 10px; font-weight: bold; color: #7f8c8d;" id="progress">
+        Question 0 / 0
+    </div>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="empty-state">
+        <h2>Physics Practice</h2>
+        <p>Select a <strong>Topic</strong> above to begin.</p>
+        <button onclick="startQuiz()" style="background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 1.1rem; border-radius: 5px;">Start Topic Quiz</button>
+    </div>
+
+    <!-- Quiz Area -->
+    <div id="quizInterface" style="display: none;">
+        <!-- Question Info Header -->
+        <div style="text-align: center; margin-bottom: 10px; font-size: 0.9rem; color: #666;">
+            Source: <span id="qSourceTag" style="background: #eee; padding: 2px 8px; border-radius: 4px; font-weight: bold;"></span>
+        </div>
+
+        <div class="question-area">
+            <img id="questionImage" src="" alt="Question" class="question-img">
+        </div>
+
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkAnswer('A')">A</button>
+            <button class="option-btn" onclick="checkAnswer('B')">B</button>
+            <button class="option-btn" onclick="checkAnswer('C')">C</button>
+            <button class="option-btn" onclick="checkAnswer('D')">D</button>
+        </div>
+
+        <div id="feedback" class="feedback-area">
+            <div id="feedbackText" class="feedback-text"></div>
+            <p><strong>Explanation / Correct Answer:</strong></p>
+            <img id="answerImage" src="" alt="Answer Explanation" class="answer-img">
+            <br>
+            <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Next Question ➜</button>
+        </div>
+    </div>
+
+    <!-- History Log -->
+    <div id="historySection" class="history-container" style="display: none;">
+        <h3>📝 Session History</h3>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>My Answer</th>
+                    <th>Correct</th>
+                    <th>Result</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                <!-- Rows added by JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. DATA STORAGE (SEPARATED)
+    // ==========================================
+    
+    // --- Data Source A: Answers (Year -> Question ID -> Answer) ---
+    const dbAnswers = {
+         "2023": { 1: "B", 2: "D", 3: "C", 4: "A", 5: "B", 6: "D", 7: "B", 8: "C", 9: "C", 10: "A", 11: "B", 12: "C", 13: "D", 14: "C", 15: "D", 16: "B", 17: "A", 18: "B", 19: "A", 20: "A", 21: "A", 22: "D", 23: "D", 24: "C", 25: "A", 26: "D", 27: "B", 28: "C", 29: "A", 30: "B", 31: "C", 32: "D", 33: "D" },
+        "2022": { 1: "A", 2: "B", 3: "D", 4: "C", 5: "A", 6: "B", 7: "B", 8: "B", 9: "D", 10: "D", 11: "A", 12: "D", 13: "C", 14: "A", 15: "B", 16: "C", 17: "D", 18: "B", 19: "C", 20: "A", 21: "C", 22: "D", 23: "C", 24: "D", 25: "D", 26: "B", 27: "A", 28: "C", 29: "B", 30: "A", 31: "C", 32: "A", 33: "C" },
+        "2021": { 1: "A", 2: "A", 3: "C", 4: "B", 5: "D", 6: "D", 7: "C", 8: "A", 9: "A", 10: "C", 11: "B", 12: "C", 13: "B", 14: "D", 15: "B", 16: "B", 17: "D", 18: "C", 19: "A", 20: "C", 21: "D", 22: "A", 23: "B", 24: "A", 25: "C", 26: "C", 27: "B", 28: "A", 29: "C", 30: "D", 31: "B", 32: "D", 33: "D" }
+    };
+
+    // --- Data Source B: Topics (Year -> Question ID -> Topic Name) ---
+    const dbTopics = {
+        "2021": {
+            1: "Heat", 2: "Heat", 3: "Gas", 4: "Force", 5: "Force", 
+            6: "Force", 7: "Motion", 8: "Momentum", 9: "Circular motion", 10: "Wave", 
+            11: "Wave", 12: "Wave", 13: "Optic", 14: "Wave", 15: "Wave", 
+            16: "Light", 17: "Light", 18: "Optic", 19: "Light", 20: "Sound", 
+            21: "Electrostatic", 22: "Electrostatic", 23: "Circuit", 24: "Circuit", 25: "Electromagnetism", 
+            26: "Electromagnetism", 27: "Circuit", 28: "Circuit", 29: "Electromagnetism", 30: "Electromagnetism", 
+            31: "Radiation", 32: "Radiation", 33: "Radiation"
+        },
+        "2022": {
+            1: "Heat", 2: "Heat", 3: "Gas", 4: "Motion", 5: "Force", 
+            6: "Force", 7: "Momentum", 8: "Force", 9: "Circular motion", 10: "Energy", 
+            11: "Motion", 12: "Momentum", 13: "Projectile motion", 14: "Gravitation", 15: "Wave", 
+            16: "Wave", 17: "Wave", 18: "Light", 19: "Wave", 20: "Optic", 
+            21: "Optic", 22: "Sound", 23: "Electrostatic", 24: "Electrostatic", 25: "Circuit", 
+            26: "Circuit", 27: "Electromagnetism", 28: "Electromagnetism", 29: "Electromagnetism", 30: "Circuit", 
+            31: "Radiation", 32: "Radiation", 33: "Nuclear energy"
+        },
+        "2023": {
+            1: "Heat", 2: "Heat", 3: "Gas", 4: "Momentum", 5: "Force", 
+            6: "Force", 7: "Force", 8: "Force", 9: "Force", 10: "Energy", 
+            11: "Momentum", 12: "Force", 13: "Projectile motion", 14: "Wave", 15: "Wave", 
+            16: "Optic", 17: "Light", 18: "Light", 19: "Wave", 20: "Optic", 
+            21: "Optic", 22: "Light", 23: "Electrostatic", 24: "Electrostatic", 25: "Circuit", 
+            26: "Circuit", 27: "Electromagnetism", 28: "Circuit", 29: "Electromagnetism", 30: "Electromagnetism", 
+            31: "Radiation", 32: "Nuclear energy", 33: "Nuclear energy"
+        }	
+    };
+
+    // ==========================================
+    // 2. DATA PROCESSING (MERGE LOGIC)
+    // ==========================================
+    
+    let fullQuestionBank = [];
+
+    function initializeData() {
+        fullQuestionBank = []; // Reset
+        
+        // Loop through every year in the Topic Database
+        for (const [year, questions] of Object.entries(dbTopics)) {
+            
+            // Loop through every question in that year
+            for (const [qId, topicName] of Object.entries(questions)) {
+                
+                // Find the corresponding answer from dbAnswers
+                // We use optional chaining (?.) just in case an answer is missing
+                const correctAns = dbAnswers[year]?.[qId];
+
+                // Only add if we have both a Topic and an Answer
+                if (topicName && correctAns) {
+                    fullQuestionBank.push({
+                        id: qId,
+                        year: year,
+                        topic: topicName,
+                        answer: correctAns
+                    });
+                }
+            }
+        }
+        
+        // Debug: Check console to see merged data
+        console.log("Merged Data:", fullQuestionBank);
+        populateTopicDropdown();
+    }
+
+    // ==========================================
+    // 3. STATE VARIABLES
+    // ==========================================
+    let activeQuestionSet = [];
+    let currentIndex = 0;
+    let isAnswered = false;
+    let timerInterval = null;
+    let totalSeconds = 0;
+    let questionSeconds = 0;
+
+    // ==========================================
+    // 4. UI INITIALIZATION
+    // ==========================================
+    const topicSelect = document.getElementById('topicSelect');
+
+    function populateTopicDropdown() {
+        // Get unique topics from our merged list
+        const uniqueTopics = [...new Set(fullQuestionBank.map(q => q.topic))].sort();
+        
+        topicSelect.innerHTML = ""; // Clear existing
+        
+        // Add default placeholder
+        let defaultOption = document.createElement("option");
+        defaultOption.text = "-- Select a Topic --";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        topicSelect.appendChild(defaultOption);
+
+        uniqueTopics.forEach(topic => {
+            let option = document.createElement("option");
+            option.value = topic;
+            option.text = topic;
+            topicSelect.appendChild(option);
+        });
+    }
+
+    // Run initialization immediately
+    initializeData();
+
+    // ==========================================
+    // 5. CORE LOGIC
+    // ==========================================
+
+    function resetQuiz() {
+        stopTimer();
+        document.getElementById('startScreen').style.display = 'block';
+        document.getElementById('quizInterface').style.display = 'none';
+        document.getElementById('historySection').style.display = 'none';
+        document.getElementById('progress').innerText = "Question 0 / 0";
+        document.getElementById('timerBox').innerText = "Total: 00:00 | Q: 00s";
+        document.getElementById('historyBody').innerHTML = "";
+    }
+
+    function startQuiz() {
+        const selectedTopic = topicSelect.value;
+        if (!selectedTopic || selectedTopic.includes("--")) return;
+
+        // Filter: Get all questions that match the selected topic
+        activeQuestionSet = fullQuestionBank.filter(q => q.topic === selectedTopic);
+
+        if (activeQuestionSet.length === 0) {
+            alert("No questions found for this topic.");
+            return;
+        }
+
+        // Shuffle
+        shuffleArray(activeQuestionSet);
+
+        currentIndex = 0;
+        totalSeconds = 0;
+        questionSeconds = 0;
+
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('quizInterface').style.display = 'block';
+        document.getElementById('historySection').style.display = 'block';
+        
+        loadQuestion();
+        startTimer();
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= activeQuestionSet.length) {
+            stopTimer();
+            alert(`Topic Completed!\nTotal Time: ${formatTime(totalSeconds)}`);
+            return;
+        }
+
+        isAnswered = false;
+        questionSeconds = 0;
+        
+        const currentQ = activeQuestionSet[currentIndex];
+
+        document.getElementById('progress').innerText = `Question ${currentIndex + 1} / ${activeQuestionSet.length}`;
+        document.getElementById('qSourceTag').innerText = `Year: ${currentQ.year} | No: ${currentQ.id}`;
+
+        // --- IMAGE PATH LOGIC ---
+        // Generates dynamic URL: images/YEAR/q_ID.jpg
+        const qSrc = `images/${currentQ.year}/q_${currentQ.id}.JPG`;
+        const aSrc = `images/${currentQ.year}/a_${currentQ.id}.JPG`;
+
+        // If using local files, uncomment this:
+        // const qSrc = `images/${currentQ.year}/q_${currentQ.id}.jpg`;
+        // const aSrc = `images/${currentQ.year}/ans_${currentQ.id}.jpg`;
+
+        document.getElementById('questionImage').src = qSrc;
+        document.getElementById('answerImage').src = aSrc;
+
+        document.getElementById('feedback').classList.remove('show');
+        document.getElementById('nextBtn').style.display = 'none';
+        
+        const btns = document.querySelectorAll('.option-btn');
+        btns.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('correct', 'wrong');
+        });
+    }
+
+    function checkAnswer(selectedOption) {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        const currentQ = activeQuestionSet[currentIndex];
+        const correctOption = currentQ.answer;
+        
+        const feedbackDiv = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedbackText');
+        const btns = document.querySelectorAll('.option-btn');
+
+        btns.forEach(btn => {
+            btn.disabled = true;
+            if (btn.innerText === correctOption) btn.classList.add('correct');
+            if (btn.innerText === selectedOption && selectedOption !== correctOption) btn.classList.add('wrong');
+        });
+
+        let isCorrect = (selectedOption === correctOption);
+        if (isCorrect) {
+            feedbackText.innerHTML = `<span style="color:var(--success)">✔ Correct!</span>`;
+            feedbackDiv.style.border = "2px solid var(--success)";
+        } else {
+            feedbackText.innerHTML = `<span style="color:var(--danger)">✘ Incorrect. The answer was ${correctOption}.</span>`;
+            feedbackDiv.style.border = "2px solid var(--danger)";
+        }
+
+        feedbackDiv.classList.add('show');
+        document.getElementById('nextBtn').style.display = 'inline-block';
+
+        addToHistory(currentQ.year, currentQ.id, selectedOption, correctOption, isCorrect, questionSeconds);
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        loadQuestion();
+    }
+
+    // ==========================================
+    // 6. UTILITIES
+    // ==========================================
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            totalSeconds++;
+            if(!isAnswered) questionSeconds++;
+            document.getElementById('timerBox').innerHTML = `Total: ${formatTime(totalSeconds)} | Q: ${questionSeconds}s`;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    function formatTime(secs) {
+        const m = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = (secs % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function addToHistory(year, id, myAns, correctAns, isCorrect, timeTaken) {
+        const tbody = document.getElementById('historyBody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${year} (#${id})</td>
+            <td>${myAns}</td>
+            <td>${correctAns}</td>
+            <td class="${isCorrect ? 'status-correct' : 'status-wrong'}">
+                ${isCorrect ? '✔ Correct' : '✘ Wrong'}
+            </td>
+            <td>${timeTaken}s</td>
+        `;
+        tbody.prepend(row);
+    }
+
+</script>
+
+</body>
+</html>
