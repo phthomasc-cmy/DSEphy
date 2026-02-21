@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Elective Quiz (E3 & E4)</title>
+    <style>
+        :root {
+            --primary: #8e44ad; /* Purple */
+            --secondary: #2980b9;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --dark: #2c3e50;
+            --light: #f4f6f7;
+            --player-bg: #34495e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            max-width: 900px;
+            width: 100%;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- Header & Controls --- */
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 15px;
+            gap: 15px;
+        }
+
+        .selection-area {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        select {
+            padding: 8px 12px;
+            font-size: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            background: white;
+            min-width: 160px;
+        }
+
+        /* --- Music Player Styles --- */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .music-player {
+            background-color: var(--player-bg);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .music-player:hover {
+            transform: translateY(-1px);
+        }
+
+        .music-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .music-btn:hover { color: #3498db; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 70px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* --- Timer Display --- */
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--dark);
+            background: #ecf0f1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #bdc3c7;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* --- Quiz UI --- */
+        .question-img, .answer-img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid var(--dark);
+            color: var(--dark);
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .option-btn:disabled { cursor: default; opacity: 1; }
+        .option-btn.correct { background-color: var(--success); border-color: var(--success); color: white; }
+        .option-btn.wrong { background-color: var(--danger); border-color: var(--danger); color: white; opacity: 0.6; }
+
+        .feedback-area {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+
+        .feedback-area.show { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-next, .btn-start {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #6c3483;
+            transition: transform 0.1s;
+        }
+
+        .btn-next:active, .btn-start:active { transform: translateY(4px); box-shadow: none; }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+        .history-table th { background-color: var(--light); padding: 10px; text-align: left; }
+        .history-table td { padding: 10px; border-bottom: 1px solid #eee; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="selection-area">
+            <div class="control-group">
+                <label for="electiveSelect">Elective Module</label>
+                <select id="electiveSelect" onchange="updateTopics()">
+                    <option value="" disabled selected>-- Select --</option>
+                    <option value="e3">E3: Energy</option>
+                    <option value="e4">E4: Medical</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="topicSelect">Topic</label>
+                <select id="topicSelect" disabled onchange="resetQuiz()">
+                    <option value="" selected>-- Select Elective --</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <!-- Music Player -->
+            <div class="music-player">
+                <button id="musicBtn" class="music-btn" onclick="toggleMusic()" title="Play/Pause">▶</button>
+                <span style="font-size: 0.8rem;">♫</span>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.3" oninput="adjustVolume()" title="Volume">
+            </div>
+
+            <!-- Timer -->
+            <div id="timerBox" class="timer-display">00:00</div>
+        </div>
+    </header>
+
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112762.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Start Screen -->
+    <div id="startScreen" style="text-align: center; padding: 60px 20px; color: #7f8c8d;">
+        <h2 style="color: var(--dark);">Physics Elective Practice</h2>
+        <p>Select an Elective and a Topic to begin.</p>
+        <br>
+
+	<!-- 【新增】姓名輸入框 -->
+        <div style="margin-bottom: 25px;">
+            <label for="userNameInput" style="display: block; font-size: 1rem; color: var(--dark); margin-bottom: 8px;"><strong>Your Name:</strong></label>
+            <input type="text" id="userNameInput" placeholder="Enter your name" style="padding: 10px 15px; font-size: 16px; border-radius: 6px; border: 1px solid #bdc3c7; width: 200px; text-align: center;">
+        </div>
+
+        <button onclick="startQuiz()" class="btn-start">Start Quiz</button>
+    </div>
+
+    <!-- Quiz Interface -->
+    <div id="quizInterface" style="display: none;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; color: #666;">
+            <span id="progressText">Question 1</span>
+            <span id="qInfoTag" style="background: #eee; padding: 2px 8px; border-radius: 4px; font-weight: bold;"></span>
+        </div>
+
+        <div style="text-align: center;">
+            <img id="questionImage" src="" alt="Question Image" class="question-img">
+        </div>
+
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkAnswer('A')">A</button>
+            <button class="option-btn" onclick="checkAnswer('B')">B</button>
+            <button class="option-btn" onclick="checkAnswer('C')">C</button>
+            <button class="option-btn" onclick="checkAnswer('D')">D</button>
+        </div>
+
+        <div id="feedback" class="feedback-area">
+            <div id="feedbackText" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;"></div>
+            <img id="answerImage" src="" alt="Answer Explanation" class="answer-img">
+            <br>
+            <button class="btn-next" onclick="nextQuestion()">Next Question ➜</button>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div id="historySection" style="margin-top: 30px; display: none;">
+        <h3>📝 Session History</h3>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>My Ans</th>
+                    <th>Correct</th>
+                    <th>Result</th>
+                    <th>Time</th> <!-- ADDED TIME COLUMN -->
+                </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. DATA (Compact)
+    // ==========================================
+    
+    // Answers: Year -> Elective -> ID -> Answer
+    const dbAnswers = {
+        "2012": {
+            "e3": { 1: "A", 2: "C", 3: "D", 4: "C", 5: "B", 6: "B", 7: "C", 8: "A" },
+            "e4": { 1: "A", 2: "C", 3: "B", 4: "B", 5: "C", 6: "D", 7: "D", 8: "A" }
+        },
+        "2013": {
+            "e3": { 1: "B", 2: "D", 3: "A", 4: "D", 5: "A", 6: "B", 7: "C", 8: "C"},
+            "e4": { 1: "A", 2: "C", 3: "C", 4: "A", 5: "D", 6: "B", 7: "B", 8: "D" }
+        },
+        "2014": {
+            "e3": { 1: "D", 2: "A", 3: "C", 4: "A", 5: "B", 6: "B", 7: "C", 8: "B" },
+            "e4": { 1: "A", 2: "D", 3: "B", 4: "C", 5: "C", 6: "D", 7: "B", 8: "A" }
+        },
+	"2015": {
+            "e3": { 1: "A", 2: "D", 3: "B", 4: "C", 5: "B", 6: "C", 7: "C", 8: "A" },
+            "e4": { 1: "B", 2: "D", 3: "D", 4: "D", 5: "B", 6: "C", 7: "A", 8: "A" }
+        }
+    };
+
+    // Topics: Year -> Elective -> ID -> Topic
+    const dbTopics = {
+        "2012": {
+            "e3": { 1: "efficiency", 2: "light", 3: "vehicle", 4: "conduction", 5: "air conditioner", 6: "wind power", 7: "hydroelectric", 8: "nuclear" },
+            "e4": { 1: "sight", 2: "endoscope", 3: "hearing", 4: "ultrasound", 5: "x-ray", 6: "x-ray", 7: "RNI", 8: "RNI" }
+        },
+        "2013": {
+            "e3": { 1: "light", 2: "vehicle", 3: "solar power", 4: "wind power", 5: "conduction", 6: "conduction", 7: "air conditioner", 8: "nuclear" },
+            "e4": { 1: "sight", 2: "sight", 3: "endoscope", 4: "hearing", 5: "hearing", 6: "RNI", 7: "ultrasound", 8: "CT-scan" }
+        },
+        "2014": {
+            "e3": { 1: "light", 2: "air conditioner", 3: "conduction", 4: "conduction", 5: "wind power", 6: "vehicle", 7: "nuclear", 8: "nuclear" },
+            "e4": { 1: "sight", 2: "hearing", 3: "ultrasound", 4: "endoscope", 5: "ultrasound", 6: "x-ray", 7: "CT-scan", 8: "RNI" }
+        },
+	"2015": {
+            "e3": { 1: "light", 2: "solar power", 3: "solar power", 4: "efficiency", 5: "conduction", 6: "conduction", 7: "hydroelectric", 8: "nuclear" },
+            "e4": { 1: "sight", 2: "endoscope", 3: "ultrasound", 4: "ultrasound", 5: "x-ray", 6: "CT-scan", 7: "RNI", 8: "RNI" }
+        }
+
+    };
+
+    // ==========================================
+    // 2. INITIALIZATION
+    // ==========================================
+    let fullQuestionBank = [];
+
+    function initializeData() {
+        fullQuestionBank = [];
+        for (const [year, electives] of Object.entries(dbTopics)) {
+            for (const [elective, questions] of Object.entries(electives)) {
+                for (const [qId, topicName] of Object.entries(questions)) {
+                    const correctAns = dbAnswers[year]?.[elective]?.[qId];
+                    if (topicName && correctAns) {
+                        fullQuestionBank.push({
+                            year: year,
+                            elective: elective,
+                            id: qId,
+                            topic: topicName,
+                            ans: correctAns
+                        });
+                    }
+                }
+            }
+        }
+    }
+    initializeData();
+
+    // ==========================================
+    // 3. GAME STATE
+    // ==========================================
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let isAnswered = false;
+    let timerInterval = null;
+    let totalSeconds = 0;
+    let questionSeconds = 0; // Tracks time for current question
+
+    // 【新增】記錄學生姓名與 Google Apps Script 網址
+    let userName = "";
+    // ⚠️ 記得把下面這串換成你在「第三步」複製的網址！
+    const GOOGLE_SHEET_URL = "https://script.google.com/a/macros/gapps.stteresa.edu.hk/s/AKfycbwAmLMbh365HhxqjK4ntGaH_jM1zVZqj6JPU6BBMl93UGyVvT7iQZG0wrNMkNnHZiORow/exec";
+
+    // ==========================================
+    // 4. LOGIC FUNCTIONS
+    // ==========================================
+
+    function updateTopics() {
+        const electiveVal = document.getElementById('electiveSelect').value;
+        const topicSelect = document.getElementById('topicSelect');
+        resetQuiz();
+        topicSelect.innerHTML = '<option value="" selected>-- Select Topic --</option>';
+        if (!electiveVal) { topicSelect.disabled = true; return; }
+
+        const relevantQs = fullQuestionBank.filter(q => q.elective === electiveVal);
+        const uniqueTopics = [...new Set(relevantQs.map(q => q.topic))].sort();
+
+        uniqueTopics.forEach(topic => {
+            let option = document.createElement("option");
+            option.value = topic;
+            option.text = topic;
+            topicSelect.appendChild(option);
+        });
+        topicSelect.disabled = false;
+    }
+
+    function startQuiz() {
+	// 【新增】檢查姓名是否有填寫
+        const nameInput = document.getElementById('userNameInput').value.trim();
+        if (nameInput === "") {
+            alert("Please enter your name before starting!");
+            return;
+        }
+        userName = nameInput; // 儲存姓名
+
+        const elSelect = document.getElementById('electiveSelect').value;
+        const topSelect = document.getElementById('topicSelect').value;
+        if (!elSelect || !topSelect) return alert("Select Elective & Topic");
+
+        activeQuestions = fullQuestionBank.filter(q => q.elective === elSelect && q.topic === topSelect);
+        if (activeQuestions.length === 0) return alert("No questions.");
+
+        activeQuestions.sort(() => Math.random() - 0.5);
+
+        currentIndex = 0;
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('quizInterface').style.display = 'block';
+        document.getElementById('historySection').style.display = 'block';
+        
+        loadQuestion();
+        startTimer();
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= activeQuestions.length) {
+            stopTimer();
+            alert(`Topic Completed! Total Time: ${formatTime(totalSeconds)}`);
+            return;
+        }
+
+        isAnswered = false;
+        questionSeconds = 0; // Reset Q timer
+        
+        const currentQ = activeQuestions[currentIndex];
+        document.getElementById('progressText').innerText = `Question ${currentIndex + 1} / ${activeQuestions.length}`;
+        document.getElementById('qInfoTag').innerText = `${currentQ.year} | ${currentQ.elective.toUpperCase()} | Q${currentQ.id}`;
+
+        const qSrc = `elective/${currentQ.year}/${currentQ.elective}q_${currentQ.id}.JPG`;
+        const aSrc = `elective/${currentQ.year}/${currentQ.elective}a_${currentQ.id}.JPG`;
+        
+        document.getElementById('questionImage').src = qSrc;
+        document.getElementById('answerImage').src = aSrc;
+
+        document.getElementById('feedback').classList.remove('show');
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('correct', 'wrong');
+        });
+    }
+
+    function checkAnswer(selectedOption) {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        const currentQ = activeQuestions[currentIndex];
+        const isCorrect = (selectedOption === currentQ.ans);
+        const timeTaken = questionSeconds; // Capture time
+
+        const feedbackText = document.getElementById('feedbackText');
+        feedbackText.innerHTML = isCorrect ? 
+            `<span style="color:var(--success)">✔ Correct!</span>` : 
+            `<span style="color:var(--danger)">✘ Incorrect. Answer: ${currentQ.ans}</span>`;
+        
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.disabled = true;
+            if (btn.innerText === currentQ.ans) btn.classList.add('correct');
+            else if (btn.innerText === selectedOption) btn.classList.add('wrong');
+        });
+
+        document.getElementById('feedback').classList.add('show');
+        
+        // Add to History with Time
+        const tbody = document.getElementById('historyBody');
+        const row = `
+            <tr>
+                <td>${currentQ.year} (${currentQ.elective.toUpperCase()}#${currentQ.id})</td>
+                <td>${selectedOption}</td>
+                <td style="color:${isCorrect?'var(--success)':'var(--danger)'}; font-weight:bold">${isCorrect?'✔':'✘'}</td>
+                <td>${isCorrect?'Pass':'Fail'}</td>
+                <td style="font-family:monospace; color:#555;">${timeTaken}s</td> <!-- Time Column -->
+            </tr>`;
+        tbody.innerHTML = row + tbody.innerHTML;
+
+	// 【新增】打包資料並傳送到 Google Sheets
+        const recordData = {
+            userName: userName,
+            year: currentQ.year,
+            elective: currentQ.elective.toUpperCase(), // 紀錄是 E3 或 E4
+            topic: currentQ.topic,
+            qId: currentQ.id,
+            myAns: selectedOption,
+            correctAns: currentQ.ans,
+            isCorrect: isCorrect,
+            timeTaken: timeTaken
+        };
+
+        fetch(GOOGLE_SHEET_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(recordData)
+        })
+        .then(response => console.log(`Q${currentQ.id} 紀錄上傳成功`))
+        .catch(error => console.error("上傳失敗:", error));
+
+    }
+
+    function nextQuestion() { currentIndex++; loadQuestion(); }
+
+    function resetQuiz() {
+        stopTimer();
+        document.getElementById('timerBox').innerText = "00:00";
+        document.getElementById('startScreen').style.display = 'block';
+        document.getElementById('quizInterface').style.display = 'none';
+        document.getElementById('historySection').style.display = 'none';
+        document.getElementById('historyBody').innerHTML = "";
+    }
+
+    // ==========================================
+    // 5. TIMER & MEDIA
+    // ==========================================
+
+    function startTimer() {
+        stopTimer();
+        totalSeconds = 0;
+        questionSeconds = 0;
+        document.getElementById('timerBox').innerText = "00:00";
+        
+        timerInterval = setInterval(() => {
+            totalSeconds++;
+            if(!isAnswered) questionSeconds++; // Only count if not answered
+            document.getElementById('timerBox').innerText = formatTime(totalSeconds);
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function formatTime(secs) {
+        const m = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = (secs % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // Music
+    const bgMusic = document.getElementById('bgMusic');
+    function toggleMusic() {
+        const btn = document.getElementById('musicBtn');
+        if (bgMusic.paused) { bgMusic.play(); btn.innerText = "⏸"; } 
+        else { bgMusic.pause(); btn.innerText = "▶"; }
+    }
+    function adjustVolume() { bgMusic.volume = document.getElementById('volumeSlider').value; }
+
+</script>
+
+</body>
+</html>
