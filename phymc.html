@@ -232,6 +232,10 @@
     <div id="startScreen" class="empty-state">
         <h2>Ready to practice?</h2>
         <p>Select a year above and click Start.</p>
+        <div style="margin-bottom: 20px;">
+            <label for="userNameInput"><strong>Your Name: </strong></label>
+            <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Tom)" style="padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc;">
+        </div>
         <button onclick="startQuiz()" style="background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 1.1rem;">Start Quiz</button>
         
         <div style="margin-bottom: 15px;">
@@ -325,7 +329,8 @@
     let questionOrder = [];
     let currentIndex = 0;
     let isAnswered = false;
-
+    let userName = "";
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwTcgDYQkfO7o_AT8hEtT1lRJgV6u4LHXJdh2DflmxABerjNVpEOxXDqAwNpS-9Vc-R/exec";
     // Timer Variables
     let timerInterval = null;
     let totalSeconds = 0;
@@ -365,6 +370,14 @@
     }
 
     function startQuiz() {
+        // 【新增】檢查姓名
+        const nameInput = document.getElementById('userNameInput').value.trim();
+        if(nameInput === "") {
+            alert("Please enter your name before starting!");
+            return;
+        }
+        userName = nameInput; // 儲存名字
+        
         currentYear = yearSelect.value;
         questionOrder = Array.from({length: 33}, (_, i) => i + 1);
         shuffleArray(questionOrder);
@@ -513,6 +526,33 @@
         
         // Insert at the top
         tbody.prepend(row);
+
+        // 【新增】將資料打包發送到 Google Sheets
+        const recordData = {
+            userName: userName,
+            year: currentYear,
+            qNum: qNum,
+            myAns: myAns,
+            correctAns: correctAns,
+            isCorrect: isCorrect,
+            timeTaken: timeTaken
+        };
+
+        // 發送資料給 Google Apps Script
+        fetch(GOOGLE_SHEET_URL, {
+            method: 'POST',
+            // 注意：這裡必須用 text/plain 以避開瀏覽器的 CORS (跨來源請求) 阻擋問題
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(recordData)
+        })
+        .then(response => {
+            console.log("Q" + qNum + " 紀錄已成功上傳至 Google 試算表");
+        })
+        .catch(error => {
+            console.error("上傳失敗：", error);
+        });
     }
 
     /* --- Feature 3: Music Logic --- */
