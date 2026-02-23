@@ -213,6 +213,13 @@
     <div id="startScreen" class="empty-state">
         <h2>Physics Practice</h2>
         <p>Select a <strong>Topic</strong> above to begin.</p>
+
+        <!-- 【新增這段】姓名輸入框 -->
+        <div style="margin-bottom: 20px;">
+            <label for="userNameInput" style="display: block; font-size: 1rem; color: var(--dark); margin-bottom: 8px;"><strong>Your Name:</strong></label>
+            <input type="text" id="userNameInput" placeholder="Enter your name" style="padding: 10px 15px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; width: 80%; max-width: 300px;">
+        </div>
+        
         <button onclick="startQuiz()" style="background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 1.1rem; border-radius: 5px;">Start Topic Quiz</button>
     </div>
 
@@ -362,6 +369,11 @@
     let totalSeconds = 0;
     let questionSeconds = 0;
 
+    // 【新增】儲存學生姓名與您的 Google API 網址
+    let userName = "";
+    // ⚠️ 請把引號內的網址換成您在「第三步」複製出來的網址！
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwzCAcPo0eJf0LifZekq5bC7klfyytpxD6cWTiK4wxEo5lKv_t6xAU4eAp5q3TF-6Y/exec";
+
     // ==========================================
     // 4. UI INITIALIZATION
     // ==========================================
@@ -406,6 +418,14 @@
     }
 
     function startQuiz() {
+        // 【新增】檢查姓名是否有填寫
+        const nameInput = document.getElementById('userNameInput').value.trim();
+        if (nameInput === "") {
+            alert("Please enter your name before starting!");
+            return;
+        }
+        userName = nameInput; // 儲存姓名
+        
         const selectedTopic = topicSelect.value;
         if (!selectedTopic || selectedTopic.includes("--")) return;
 
@@ -498,7 +518,7 @@
         feedbackDiv.classList.add('show');
         document.getElementById('nextBtn').style.display = 'inline-block';
 
-        addToHistory(currentQ.year, currentQ.id, selectedOption, correctOption, isCorrect, questionSeconds);
+        addToHistory(currentQ, selectedOption, correctOption, isCorrect, questionSeconds);
     }
 
     function nextQuestion() {
@@ -536,11 +556,11 @@
         return `${m}:${s}`;
     }
 
-    function addToHistory(year, id, myAns, correctAns, isCorrect, timeTaken) {
+    function addToHistory(currentQ, myAns, correctAns, isCorrect, timeTaken) {
         const tbody = document.getElementById('historyBody');
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${year} (#${id})</td>
+            <td>${currentQ.year} (#${currentQ.id})</td>
             <td>${myAns}</td>
             <td>${correctAns}</td>
             <td class="${isCorrect ? 'status-correct' : 'status-wrong'}">
@@ -549,6 +569,27 @@
             <td>${timeTaken}s</td>
         `;
         tbody.prepend(row);
+
+        // 【新增】將資料打包發送到 Google Sheets
+        const recordData = {
+            userName: userName,
+            topic: currentQ.topic,  // 將主題名稱記錄下來
+            year: currentQ.year,
+            qId: currentQ.id,
+            myAns: myAns,
+            correctAns: correctAns,
+            isCorrect: isCorrect,
+            timeTaken: timeTaken
+        };
+
+        // 發送資料 (使用 text/plain 避免 CORS 問題)
+        fetch(GOOGLE_SHEET_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(recordData)
+        })
+        .then(response => console.log(`[${currentQ.topic}] Year ${currentQ.year} Q${currentQ.id} 紀錄上傳成功`))
+        .catch(error => console.error("上傳失敗:", error));
     }
 
 </script>
