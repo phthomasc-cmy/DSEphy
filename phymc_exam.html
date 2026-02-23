@@ -256,6 +256,12 @@
     <div id="startScreen" class="empty-state">
         <h2>Exam Mode</h2>
         <p>Complete all questions for the selected year.</p>
+        
+        <!-- 【新增】姓名輸入框 -->
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="userNameInput" placeholder="Enter your name" style="padding: 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; width: 80%; max-width: 250px; text-align: center;">
+        </div>
+
         <button class="btn-action" style="max-width: 200px;" onclick="startQuiz()">Start Quiz</button>
     </div>
 
@@ -331,7 +337,12 @@
     let currentYear = "";
     let questionOrder = [];
     let currentIndex = 0;
-    
+
+    // 【新增】記錄學生姓名與 Google API 網址
+    let userName = "";
+    // ⚠️ 請把引號內的網址換成您在「第三步」複製出來的網址！
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxUcO8E6McSvH2g2uYXkyrCrkuByWDVyhl9d52n31gk2bo8bl0C2acUePRE2ylLW8fz/exec";
+	
     // User Answers stores: { qNum, selected, timeSpent }
     let userAnswers = []; 
     let currentSelection = null; 
@@ -371,7 +382,15 @@
     }
 
     function startQuiz() {
-        currentYear = yearSelect.value;
+        / 【新增】檢查姓名是否有填寫
+        const nameInput = document.getElementById('userNameInput').value.trim();
+        if (nameInput === "") {
+            alert("Please enter your name before starting!");
+            return;
+        }
+        userName = nameInput; // 儲存姓名
+		
+		currentYear = yearSelect.value;
         const totalQs = Object.keys(answerKeys[currentYear]).length;
         questionOrder = Array.from({length: totalQs}, (_, i) => i + 1);
         
@@ -440,6 +459,32 @@
             selected: currentSelection,
             timeSpent: duration
         });
+
+		// ==========================================
+        // 【新增】在背景把這題的作答紀錄送到 Google Sheets
+        // ==========================================
+        const currentQNum = questionOrder[currentIndex];
+        const correctChoice = answerKeys[currentYear][currentQNum];
+        const isCorrect = (currentSelection === correctChoice);
+
+        const recordData = {
+            userName: userName,
+            year: currentYear,
+            qNum: currentQNum,
+            myAns: currentSelection,
+            correctAns: correctChoice,
+            isCorrect: isCorrect,
+            timeSpent: duration
+        };
+
+        fetch(GOOGLE_SHEET_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(recordData)
+        })
+        .then(() => console.log(`Q${currentQNum} 上傳成功`))
+        .catch(e => console.error("上傳失敗", e));
+        // ==========================================
 
         currentIndex++;
         if (currentIndex < questionOrder.length) {
