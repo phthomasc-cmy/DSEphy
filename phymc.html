@@ -92,6 +92,55 @@
         .question-area {
             text-align: center;
             margin-bottom: 20px;
+
+	/* --- Drawing Canvas Styles --- */
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        #drawingCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: crosshair;
+            border-radius: 5px; 
+        }
+
+        .drawing-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .tool-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            background: white;
+            border: 1px solid var(--dark);
+            color: var(--dark);
+            transition: 0.2s;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tool-btn.active {
+            background: var(--dark);
+            color: white;
+        }
+
+        .tool-btn:hover:not(.active) {
+            background: var(--light);
+        }
         }
 
         .question-img, .answer-img {
@@ -251,7 +300,21 @@
     <!-- Quiz Area -->
     <div id="quizInterface" style="display: none;">
         <div class="question-area">
-            <img id="questionImage" src="" alt="Question" class="question-img">
+            <!-- Canvas Container -->
+            <div class="canvas-container" id="canvasContainer">
+                <img id="questionImage" src="" alt="Question" class="question-img">
+                <canvas id="drawingCanvas"></canvas>
+            </div>
+            
+            <!-- Drawing Tools -->
+            <div class="drawing-controls">
+                <button type="button" id="btnDraw" class="tool-btn active" onclick="setDrawMode('draw')">🖊️ Pen</button>
+                <button type="button" id="btnErase" class="tool-btn" onclick="setDrawMode('erase')">🧽 Eraser</button>
+                <button type="button" class="tool-btn" onclick="clearCanvas()">🗑️ Clear</button>
+                <input type="color" id="penColor" value="#e74c3c" title="Pick Color">
+                <label for="penSize" style="font-size: 14px; font-weight: bold;">Size:</label>
+                <input type="range" id="penSize" min="1" max="10" value="3" style="width: 80px;">
+            </div>
         </div>
 
         <div class="options-grid">
@@ -426,6 +489,12 @@
             btn.disabled = false;
             btn.classList.remove('correct', 'wrong');
         });
+	// Setup canvas after the new image is fully loaded
+        const imgElement = document.getElementById('questionImage');
+        imgElement.onload = () => {
+            setupCanvasSize(); // This sizes the canvas AND clears the old drawing
+        };
+
     }
 
     function checkAnswer(selectedOption) {
@@ -572,6 +641,122 @@
             });
         }
     }
+
+// ==========================================
+    // 6. DRAWING LOGIC (Canvas Feature)
+    // ==========================================
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    const imgElement = document.getElementById('questionImage');
+    
+    let isDrawing = false;
+    let drawMode = 'draw'; 
+    let lastX = 0;
+    let lastY = 0;
+
+    // Adjust canvas size to match the image perfectly
+    function setupCanvasSize() {
+        canvas.width = imgElement.offsetWidth;
+        canvas.height = imgElement.offsetHeight;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    // Handle window resize (e.g., rotating phone)
+    window.addEventListener('resize', () => {
+        if (document.getElementById('quizInterface').style.display === 'block') {
+            setupCanvasSize();
+        }
+    });
+
+    // Get exact cursor/touch position
+    function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function startDrawing(e) {
+        e.preventDefault(); // Prevents screen scrolling while drawing
+        isDrawing = true;
+        const pos = getPointerPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const pos = getPointerPos(e);
+        const penColor = document.getElementById('penColor').value;
+        const penSize = document.getElementById('penSize').value;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+
+        if (drawMode === 'erase') {
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.lineWidth = penSize * 4; // Eraser is thicker
+        } else {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.strokeStyle = penColor;
+            ctx.lineWidth = penSize;
+        }
+
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+    }
+
+    function setDrawMode(mode) {
+        drawMode = mode;
+        document.getElementById('btnDraw').classList.remove('active');
+        document.getElementById('btnErase').classList.remove('active');
+        
+        if (mode === 'draw') {
+            document.getElementById('btnDraw').classList.add('active');
+            canvas.style.cursor = 'crosshair';
+        } else {
+            document.getElementById('btnErase').classList.add('active');
+            canvas.style.cursor = 'cell'; 
+        }
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events for phones/tablets
+    canvas.addEventListener('touchstart', startDrawing, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
 
 </script>
 
