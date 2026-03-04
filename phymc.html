@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -94,6 +94,13 @@
             margin-bottom: 20px;
         }
 
+        /* --- 新增：畫布與圖片疊加樣式 --- */
+        .canvas-container {
+            position: relative;
+             display: inline-block; /* 讓容器大小貼合圖片 */
+            max-width: 100%;
+        )
+        
         .question-img, .answer-img {
             max-width: 100%;
             height: auto;
@@ -109,6 +116,58 @@
             margin-bottom: 20px;
         }
 
+        #drawingCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: crosshair;
+            /* 邊框繼承自底下的圖片，使其對齊 */
+            border-radius: 5px; 
+        }
+
+        /* 繪圖工具列樣式 */
+        .drawing-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .tool-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            background: white;
+            border: 1px solid var(--dark);
+            color: var(--dark);
+            transition: 0.2s;
+        }
+
+        .tool-btn.active {
+            background: var(--dark);
+            color: white;
+        }
+
+        .tool-btn:hover {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+
+        /* --- Options & Feedback --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+            
         .option-btn {
             background-color: white;
             border: 2px solid var(--dark);
@@ -118,7 +177,7 @@
             font-weight: bold;
             transition: all 0.2s;
         }
-
+            
         .option-btn:hover:not(:disabled) {
             background-color: var(--light);
         }
@@ -251,7 +310,21 @@
     <!-- Quiz Area -->
     <div id="quizInterface" style="display: none;">
         <div class="question-area">
-            <img id="questionImage" src="" alt="Question" class="question-img">
+            <!-- 新增：畫布與圖片的容器 -->
+            <div class="canvas-container" id="canvasContainer">
+                <img id="questionImage" src="" alt="Question" class="question-img">
+                <canvas id="drawingCanvas"></canvas>
+            </div>
+            
+            <!-- 新增：繪圖工具列 -->
+            <div class="drawing-controls">
+                <button type="button" id="btnDraw" class="tool-btn active" onclick="setDrawMode('draw')">🖊️ pen</button>
+                <button type="button" id="btnErase" class="tool-btn" onclick="setDrawMode('erase')">🧽 eraser</button>
+                <button type="button" class="tool-btn" onclick="clearCanvas()">🗑️ clear</button>
+                <input type="color" id="penColor" value="#e74c3c" title="colour">
+                <label for="penSize" style="font-size: 14px;">size:</label>
+                <input type="range" id="penSize" min="1" max="10" value="3" style="width: 80px;">
+            </div>
         </div>
 
         <div class="options-grid">
@@ -426,6 +499,11 @@
             btn.disabled = false;
             btn.classList.remove('correct', 'wrong');
         });
+
+        // 當圖片加載完成後，重置並設定畫布大小，以確保畫布與圖片完全吻合
+        qImage.onload = () => {
+            setupCanvasSize();
+        };
     }
 
     function checkAnswer(selectedOption) {
@@ -572,6 +650,132 @@
             });
         }
     }
+
+    // ==========================================
+    // 6. 新增：DRAWING LOGIC (畫板草稿功能)
+    // ==========================================
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    const imgElement = document.getElementById('questionImage');
+    
+    let isDrawing = false;
+    let drawMode = 'draw'; // 'draw' or 'erase'
+    let lastX = 0;
+    let lastY = 0;
+
+    // 調整畫布尺寸以貼合圖片
+    function setupCanvasSize() {
+        // 設定 Canvas 實際解析度等於圖片的顯示尺寸
+        canvas.width = imgElement.offsetWidth;
+        canvas.height = imgElement.offsetHeight;
+        
+        // 設定 ctx 預設屬性
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    // 當視窗大小改變時（例如手機旋轉），重新調整畫布大小 (這會清空畫布)
+    window.addEventListener('resize', () => {
+        if (document.getElementById('quizInterface').style.display === 'block') {
+            setupCanvasSize();
+        }
+    });
+
+    // 取得滑鼠或觸控在畫布上的相對座標
+    function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        
+        // 判斷是否為觸控事件
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        // 計算縮放比例 (防錯機制，確保筆跡落在正確位置)
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    // 開始繪圖
+    function startDrawing(e) {
+        e.preventDefault(); // 防止手機端滑動頁面
+        isDrawing = true;
+        const pos = getPointerPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    // 繪圖中
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const pos = getPointerPos(e);
+        const penColor = document.getElementById('penColor').value;
+        const penSize = document.getElementById('penSize').value;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+
+        if (drawMode === 'erase') {
+            ctx.globalCompositeOperation = "destination-out"; // 橡皮擦模式
+            ctx.lineWidth = penSize * 4; // 橡皮擦預設粗一點
+        } else {
+            ctx.globalCompositeOperation = "source-over"; // 正常繪圖模式
+            ctx.strokeStyle = penColor;
+            ctx.lineWidth = penSize;
+        }
+
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    // 停止繪圖
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+    }
+
+    // 切換畫筆與橡皮擦模式
+    function setDrawMode(mode) {
+        drawMode = mode;
+        document.getElementById('btnDraw').classList.remove('active');
+        document.getElementById('btnErase').classList.remove('active');
+        
+        if (mode === 'draw') {
+            document.getElementById('btnDraw').classList.add('active');
+            canvas.style.cursor = 'crosshair';
+        } else {
+            document.getElementById('btnErase').classList.add('active');
+            canvas.style.cursor = 'cell'; // 改變游標提示這是橡皮擦
+        }
+    }
+
+    // 清空畫布
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 綁定電腦滑鼠事件
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // 綁定手機平板觸控事件 (設定 passive: false 以允許 preventDefault 防止螢幕滑動)
+    canvas.addEventListener('touchstart', startDrawing, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
 
 </script>
 
