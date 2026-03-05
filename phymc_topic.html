@@ -85,7 +85,6 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        
 
         .question-img, .answer-img {
             max-width: 100%;
@@ -186,16 +185,6 @@
         .status-correct { color: var(--success); font-weight: bold; }
         .status-wrong { color: var(--danger); font-weight: bold; }
 
-
-        #drawCanvas {
-        cursor: crosshair;
-        /* 確保觸控時不會觸發頁面捲動 */
-        touch-action: none; 
-        }
-        #canvas-container {
-        max-width: 100%;
-        }
-        
     </style>
 </head>
 <body>
@@ -241,17 +230,9 @@
             Source: <span id="qSourceTag" style="background: #eee; padding: 2px 8px; border-radius: 4px; font-weight: bold;"></span>
         </div>
 
-       <div class="question-area" style="position: relative;">
-    <!-- 將原本的圖片包在容器中 -->
-    <div id="canvas-container" style="position: relative; display: inline-block;">
-        <img id="questionImage" src="" alt="Question" class="question-img">
-        <canvas id="drawCanvas" style="position: absolute; top:0; left:0; touch-action: none;"></canvas>
-    </div>
-    <div style="margin-top: 10px;">
-        <button onclick="clearCanvas()">清除筆跡</button>
-        <input type="color" id="colorPicker" value="#ff0000">
-    </div>
-    </div>
+        <div class="question-area">
+            <img id="questionImage" src="" alt="Question" class="question-img">
+        </div>
 
         <div class="options-grid">
             <button class="option-btn" onclick="checkAnswer('A')">A</button>
@@ -611,68 +592,6 @@
         .catch(error => console.error("上傳失敗:", error));
     }
 
-const canvas = document.getElementById('drawCanvas');
-const ctx = canvas.getContext('2d');
-let drawing = false;
-
-// 設定畫布大小與圖片同步
-function resizeCanvas() {
-    const img = document.getElementById('questionImage');
-    canvas.width = img.clientWidth;
-    canvas.height = img.clientHeight;
-}
-
-// 繪圖事件處理
-function startDrawing(e) {
-    drawing = true;
-    draw(e);
-}
-
-function stopDrawing() {
-    drawing = false;
-    ctx.beginPath(); // 重置路徑
-}
-
-function draw(e) {
-    if (!drawing) return;
-    
-    // 取得座標 (同時支援滑鼠與觸控)
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = document.getElementById('colorPicker').value;
-
-    ctx.lineTo(clientX - rect.left, clientY - rect.top);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(clientX - rect.left, clientY - rect.top);
-}
-
-// 事件綁定
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-
-canvas.addEventListener('touchstart', startDrawing);
-canvas.addEventListener('touchmove', draw);
-canvas.addEventListener('touchend', stopDrawing);
-
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-// 在載入題目時重新調整畫布大小
-function loadQuestion() {
-    // ... 原有程式碼 ...
-    const img = document.getElementById('questionImage');
-    img.onload = resizeCanvas; // 圖片載入後調整畫布
-    clearCanvas();
-    // ...
-}
-    
 </script>
 
 </body>
