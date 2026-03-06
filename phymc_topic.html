@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic-Based MCQ (Separated Data)</title>
+    <title>Topic-Based MCQ (Separated Data + Canvas)</title>
     <style>
         :root {
             --primary: #2980b9; /* Blue */
@@ -84,6 +84,55 @@
         .question-area {
             text-align: center;
             margin-bottom: 20px;
+        }
+
+        /* --- Drawing Canvas Styles --- */
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        #drawingCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: crosshair;
+            border-radius: 5px; 
+        }
+
+        .drawing-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .tool-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            background: white;
+            border: 1px solid var(--dark);
+            color: var(--dark);
+            transition: 0.2s;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tool-btn.active {
+            background: var(--dark);
+            color: white;
+        }
+
+        .tool-btn:hover:not(.active) {
+            background: var(--light);
         }
 
         .question-img, .answer-img {
@@ -214,7 +263,7 @@
         <h2>Physics Practice</h2>
         <p>Select a <strong>Topic</strong> above to begin.</p>
 
-        <!-- 【新增這段】姓名輸入框 -->
+        <!-- 姓名輸入框 -->
         <div style="margin-bottom: 20px;">
             <label for="userNameInput" style="display: block; font-size: 1rem; color: var(--dark); margin-bottom: 8px;"><strong>Your Name:</strong></label>
             <input type="text" id="userNameInput" placeholder="Enter your name" style="padding: 10px 15px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; width: 80%; max-width: 300px;">
@@ -231,7 +280,21 @@
         </div>
 
         <div class="question-area">
-            <img id="questionImage" src="" alt="Question" class="question-img">
+            <!-- Canvas Container -->
+            <div class="canvas-container" id="canvasContainer">
+                <img id="questionImage" src="" alt="Question" class="question-img">
+                <canvas id="drawingCanvas"></canvas>
+            </div>
+            
+            <!-- Drawing Tools -->
+            <div class="drawing-controls">
+                <button type="button" id="btnDraw" class="tool-btn active" onclick="setDrawMode('draw')">🖊️ Pen</button>
+                <button type="button" id="btnErase" class="tool-btn" onclick="setDrawMode('erase')">🧽 Eraser</button>
+                <button type="button" class="tool-btn" onclick="clearCanvas()">🗑️ Clear</button>
+                <input type="color" id="penColor" value="#e74c3c" title="Pick Color">
+                <label for="penSize" style="font-size: 14px; font-weight: bold;">Size:</label>
+                <input type="range" id="penSize" min="1" max="10" value="3" style="width: 80px;">
+            </div>
         </div>
 
         <div class="options-grid">
@@ -275,7 +338,6 @@
     // 1. DATA STORAGE (SEPARATED)
     // ==========================================
     
-    // --- Data Source A: Answers (Year -> Question ID -> Answer) ---
     const dbAnswers = {
         "2024": {1: "C", 2: "B", 3: "B", 4: "D", 5: "B", 6: "C", 7: "C", 8: "D", 9: "A", 10: "A", 11: "C", 12: "A", 13: "D", 14: "A", 15: "D", 16: "D", 17: "C", 18: "D", 19: "A", 20: "D", 21: "B", 22: "B", 23: "C", 24: "C", 25: "A", 26: "B", 27: "C", 28: "C", 29: "B", 30: "A", 31: "A", 32: "D", 33: "B"}, 
         "2023": { 1: "B", 2: "D", 3: "C", 4: "A", 5: "B", 6: "D", 7: "B", 8: "C", 9: "C", 10: "A", 11: "B", 12: "C", 13: "D", 14: "C", 15: "D", 16: "B", 17: "A", 18: "B", 19: "A", 20: "A", 21: "A", 22: "D", 23: "D", 24: "C", 25: "A", 26: "D", 27: "B", 28: "C", 29: "A", 30: "B", 31: "C", 32: "D", 33: "D" },
@@ -283,7 +345,6 @@
         "2021": { 1: "A", 2: "A", 3: "C", 4: "B", 5: "D", 6: "D", 7: "C", 8: "A", 9: "A", 10: "C", 11: "B", 12: "C", 13: "B", 14: "D", 15: "B", 16: "B", 17: "D", 18: "C", 19: "A", 20: "C", 21: "D", 22: "A", 23: "B", 24: "A", 25: "C", 26: "C", 27: "B", 28: "A", 29: "C", 30: "D", 31: "B", 32: "D", 33: "D" }
     };
 
-    // --- Data Source B: Topics (Year -> Question ID -> Topic Name) ---
     const dbTopics = {
         "2021": {
             1: "Heat", 2: "Heat", 3: "Gas", 4: "Force", 5: "Force", 
@@ -330,19 +391,10 @@
     let fullQuestionBank = [];
 
     function initializeData() {
-        fullQuestionBank = []; // Reset
-        
-        // Loop through every year in the Topic Database
+        fullQuestionBank = []; 
         for (const [year, questions] of Object.entries(dbTopics)) {
-            
-            // Loop through every question in that year
             for (const [qId, topicName] of Object.entries(questions)) {
-                
-                // Find the corresponding answer from dbAnswers
-                // We use optional chaining (?.) just in case an answer is missing
                 const correctAns = dbAnswers[year]?.[qId];
-
-                // Only add if we have both a Topic and an Answer
                 if (topicName && correctAns) {
                     fullQuestionBank.push({
                         id: qId,
@@ -353,9 +405,6 @@
                 }
             }
         }
-        
-        // Debug: Check console to see merged data
-        console.log("Merged Data:", fullQuestionBank);
         populateTopicDropdown();
     }
 
@@ -369,9 +418,7 @@
     let totalSeconds = 0;
     let questionSeconds = 0;
 
-    // 【新增】儲存學生姓名與您的 Google API 網址
     let userName = "";
-    // ⚠️ 請把引號內的網址換成您在「第三步」複製出來的網址！
     const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwzCAcPo0eJf0LifZekq5bC7klfyytpxD6cWTiK4wxEo5lKv_t6xAU4eAp5q3TF-6Y/exec";
 
     // ==========================================
@@ -380,12 +427,8 @@
     const topicSelect = document.getElementById('topicSelect');
 
     function populateTopicDropdown() {
-        // Get unique topics from our merged list
         const uniqueTopics = [...new Set(fullQuestionBank.map(q => q.topic))].sort();
-        
-        topicSelect.innerHTML = ""; // Clear existing
-        
-        // Add default placeholder
+        topicSelect.innerHTML = ""; 
         let defaultOption = document.createElement("option");
         defaultOption.text = "-- Select a Topic --";
         defaultOption.disabled = true;
@@ -400,7 +443,6 @@
         });
     }
 
-    // Run initialization immediately
     initializeData();
 
     // ==========================================
@@ -418,18 +460,16 @@
     }
 
     function startQuiz() {
-        // 【新增】檢查姓名是否有填寫
         const nameInput = document.getElementById('userNameInput').value.trim();
         if (nameInput === "") {
             alert("Please enter your name before starting!");
             return;
         }
-        userName = nameInput; // 儲存姓名
+        userName = nameInput; 
         
         const selectedTopic = topicSelect.value;
         if (!selectedTopic || selectedTopic.includes("--")) return;
 
-        // Filter: Get all questions that match the selected topic
         activeQuestionSet = fullQuestionBank.filter(q => q.topic === selectedTopic);
 
         if (activeQuestionSet.length === 0) {
@@ -437,7 +477,6 @@
             return;
         }
 
-        // Shuffle
         shuffleArray(activeQuestionSet);
 
         currentIndex = 0;
@@ -467,14 +506,8 @@
         document.getElementById('progress').innerText = `Question ${currentIndex + 1} / ${activeQuestionSet.length}`;
         document.getElementById('qSourceTag').innerText = `Year: ${currentQ.year} | No: ${currentQ.id}`;
 
-        // --- IMAGE PATH LOGIC ---
-        // Generates dynamic URL: images/YEAR/q_ID.jpg
         const qSrc = `images/${currentQ.year}/q_${currentQ.id}.JPG`;
         const aSrc = `images/${currentQ.year}/a_${currentQ.id}.JPG`;
-
-        // If using local files, uncomment this:
-        // const qSrc = `images/${currentQ.year}/q_${currentQ.id}.jpg`;
-        // const aSrc = `images/${currentQ.year}/ans_${currentQ.id}.jpg`;
 
         document.getElementById('questionImage').src = qSrc;
         document.getElementById('answerImage').src = aSrc;
@@ -487,6 +520,11 @@
             btn.disabled = false;
             btn.classList.remove('correct', 'wrong');
         });
+
+        // Setup canvas after the new image is fully loaded
+        document.getElementById('questionImage').onload = () => {
+            setupCanvasSize(); // This sizes the canvas AND clears the old drawing
+        };
     }
 
     function checkAnswer(selectedOption) {
@@ -570,10 +608,9 @@
         `;
         tbody.prepend(row);
 
-        // 【新增】將資料打包發送到 Google Sheets
         const recordData = {
             userName: userName,
-            topic: currentQ.topic,  // 將主題名稱記錄下來
+            topic: currentQ.topic,  
             year: currentQ.year,
             qId: currentQ.id,
             myAns: myAns,
@@ -582,7 +619,6 @@
             timeTaken: timeTaken
         };
 
-        // 發送資料 (使用 text/plain 避免 CORS 問題)
         fetch(GOOGLE_SHEET_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -591,6 +627,122 @@
         .then(response => console.log(`[${currentQ.topic}] Year ${currentQ.year} Q${currentQ.id} 紀錄上傳成功`))
         .catch(error => console.error("上傳失敗:", error));
     }
+
+    // ==========================================
+    // 7. DRAWING LOGIC (Canvas Feature)
+    // ==========================================
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let isDrawing = false;
+    let drawMode = 'draw'; 
+    let lastX = 0;
+    let lastY = 0;
+
+    // Adjust canvas size to match the image perfectly
+    function setupCanvasSize() {
+        const imgElement = document.getElementById('questionImage');
+        canvas.width = imgElement.offsetWidth;
+        canvas.height = imgElement.offsetHeight;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    // Handle window resize (e.g., rotating phone)
+    window.addEventListener('resize', () => {
+        if (document.getElementById('quizInterface').style.display === 'block') {
+            setupCanvasSize();
+        }
+    });
+
+    // Get exact cursor/touch position
+    function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function startDrawing(e) {
+        e.preventDefault(); // Prevents screen scrolling while drawing
+        isDrawing = true;
+        const pos = getPointerPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const pos = getPointerPos(e);
+        const penColor = document.getElementById('penColor').value;
+        const penSize = document.getElementById('penSize').value;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+
+        if (drawMode === 'erase') {
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.lineWidth = penSize * 4; // Eraser is thicker
+        } else {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.strokeStyle = penColor;
+            ctx.lineWidth = penSize;
+        }
+
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+    }
+
+    function setDrawMode(mode) {
+        drawMode = mode;
+        document.getElementById('btnDraw').classList.remove('active');
+        document.getElementById('btnErase').classList.remove('active');
+        
+        if (mode === 'draw') {
+            document.getElementById('btnDraw').classList.add('active');
+            canvas.style.cursor = 'crosshair';
+        } else {
+            document.getElementById('btnErase').classList.add('active');
+            canvas.style.cursor = 'cell'; 
+        }
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events for phones/tablets
+    canvas.addEventListener('touchstart', startDrawing, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
 
 </script>
 
