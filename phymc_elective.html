@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Elective Quiz (E3 & E4)</title>
+    <title>Physics Elective Quiz (E3 & E4 + Canvas)</title>
     <style>
         :root {
             --primary: #8e44ad; /* Purple */
@@ -144,6 +144,55 @@
             text-align: center;
         }
 
+        /* --- Drawing Canvas Styles --- */
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        #drawingCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: crosshair;
+            border-radius: 8px; 
+        }
+
+        .drawing-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .tool-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+            background: white;
+            border: 1px solid var(--dark);
+            color: var(--dark);
+            transition: 0.2s;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .tool-btn.active {
+            background: var(--dark);
+            color: white;
+        }
+
+        .tool-btn:hover:not(.active) {
+            background: var(--light);
+        }
+
         /* --- Quiz UI --- */
         .question-img, .answer-img {
             max-width: 100%;
@@ -152,6 +201,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: block; /* Helps with canvas alignment */
         }
 
         .options-grid {
@@ -266,10 +316,10 @@
         <p>Select an Elective and a Topic to begin.</p>
         <br>
 
-	<!-- 【新增】姓名輸入框 -->
+        <!-- 姓名輸入框 -->
         <div style="margin-bottom: 25px;">
             <label for="userNameInput" style="display: block; font-size: 1rem; color: var(--dark); margin-bottom: 8px;"><strong>Your Name:</strong></label>
-            <input type="text" id="userNameInput" placeholder="Enter your name" style="padding: 10px 15px; font-size: 16px; border-radius: 6px; border: 1px solid #bdc3c7; width: 200px; text-align: center;">
+            <input type="text" id="userNameInput" placeholder="Enter your name" style="padding: 10px 15px; font-size: 16px; border-radius: 6px; border: 1px solid #bdc3c7; width: 200px; text-align: center; margin: 0 auto;">
         </div>
 
         <button onclick="startQuiz()" class="btn-start">Start Quiz</button>
@@ -283,7 +333,21 @@
         </div>
 
         <div style="text-align: center;">
-            <img id="questionImage" src="" alt="Question Image" class="question-img">
+            <!-- Canvas Container -->
+            <div class="canvas-container" id="canvasContainer">
+                <img id="questionImage" src="" alt="Question Image" class="question-img">
+                <canvas id="drawingCanvas"></canvas>
+            </div>
+            
+            <!-- Drawing Tools -->
+            <div class="drawing-controls">
+                <button type="button" id="btnDraw" class="tool-btn active" onclick="setDrawMode('draw')">🖊️ Pen</button>
+                <button type="button" id="btnErase" class="tool-btn" onclick="setDrawMode('erase')">🧽 Eraser</button>
+                <button type="button" class="tool-btn" onclick="clearCanvas()">🗑️ Clear</button>
+                <input type="color" id="penColor" value="#8e44ad" title="Pick Color">
+                <label for="penSize" style="font-size: 14px; font-weight: bold;">Size:</label>
+                <input type="range" id="penSize" min="1" max="10" value="3" style="width: 80px;">
+            </div>
         </div>
 
         <div class="options-grid">
@@ -311,7 +375,7 @@
                     <th>My Ans</th>
                     <th>Correct</th>
                     <th>Result</th>
-                    <th>Time</th> <!-- ADDED TIME COLUMN -->
+                    <th>Time</th>
                 </tr>
             </thead>
             <tbody id="historyBody"></tbody>
@@ -338,11 +402,11 @@
             "e3": { 1: "D", 2: "A", 3: "C", 4: "A", 5: "B", 6: "B", 7: "C", 8: "B" },
             "e4": { 1: "A", 2: "D", 3: "B", 4: "C", 5: "C", 6: "D", 7: "B", 8: "A" }
         },
-	"2015": {
+	    "2015": {
             "e3": { 1: "A", 2: "D", 3: "B", 4: "C", 5: "B", 6: "C", 7: "C", 8: "A" },
             "e4": { 1: "B", 2: "D", 3: "D", 4: "D", 5: "B", 6: "C", 7: "A", 8: "A" }
         },
-	"2016": {
+	    "2016": {
             "e3": { 1: "B", 2: "A", 3: "C", 4: "B", 5: "A", 6: "D", 7: "C", 8: "C" },
             "e4": { 1: "A", 2: "A", 3: "D", 4: "C", 5: "B", 6: "B", 7: "D", 8: "D" }
         }
@@ -362,11 +426,11 @@
             "e3": { 1: "light", 2: "air conditioner", 3: "conduction", 4: "conduction", 5: "wind power", 6: "vehicle", 7: "nuclear", 8: "nuclear" },
             "e4": { 1: "sight", 2: "hearing", 3: "ultrasound", 4: "endoscope", 5: "ultrasound", 6: "x-ray", 7: "CT-scan", 8: "RNI" }
         },
-	"2015": {
+	    "2015": {
             "e3": { 1: "light", 2: "solar power", 3: "solar power", 4: "efficiency", 5: "conduction", 6: "conduction", 7: "hydroelectric", 8: "nuclear" },
             "e4": { 1: "sight", 2: "endoscope", 3: "ultrasound", 4: "ultrasound", 5: "x-ray", 6: "CT-scan", 7: "RNI", 8: "RNI" }
         },
-	"2016": {
+	    "2016": {
             "e3": { 1: "light", 2: "light", 3: "vehicle", 4: "solar power", 5: "conduction", 6: "unit", 7: "air conditioner", 8: "conduction" },
             "e4": { 1: "sight", 2: "sight", 3: "hearing", 4: "endoscope", 5: "hearing", 6: "ultrasound", 7: "x-ray", 8: "CT-scan" }
         }
@@ -408,9 +472,7 @@
     let totalSeconds = 0;
     let questionSeconds = 0; // Tracks time for current question
 
-    // 【新增】記錄學生姓名與 Google Apps Script 網址
     let userName = "";
-    // ⚠️ 記得把下面這串換成你在「第三步」複製的網址！
     const GOOGLE_SHEET_URL = "https://script.google.com/a/macros/gapps.stteresa.edu.hk/s/AKfycbwAmLMbh365HhxqjK4ntGaH_jM1zVZqj6JPU6BBMl93UGyVvT7iQZG0wrNMkNnHZiORow/exec";
 
     // ==========================================
@@ -437,13 +499,12 @@
     }
 
     function startQuiz() {
-	// 【新增】檢查姓名是否有填寫
         const nameInput = document.getElementById('userNameInput').value.trim();
         if (nameInput === "") {
             alert("Please enter your name before starting!");
             return;
         }
-        userName = nameInput; // 儲存姓名
+        userName = nameInput;
 
         const elSelect = document.getElementById('electiveSelect').value;
         const topSelect = document.getElementById('topicSelect').value;
@@ -471,7 +532,7 @@
         }
 
         isAnswered = false;
-        questionSeconds = 0; // Reset Q timer
+        questionSeconds = 0;
         
         const currentQ = activeQuestions[currentIndex];
         document.getElementById('progressText').innerText = `Question ${currentIndex + 1} / ${activeQuestions.length}`;
@@ -488,6 +549,11 @@
             btn.disabled = false;
             btn.classList.remove('correct', 'wrong');
         });
+
+        // Setup canvas after the new image is fully loaded
+        document.getElementById('questionImage').onload = () => {
+            setupCanvasSize(); // Sizes canvas and clears old drawing
+        };
     }
 
     function checkAnswer(selectedOption) {
@@ -496,7 +562,7 @@
 
         const currentQ = activeQuestions[currentIndex];
         const isCorrect = (selectedOption === currentQ.ans);
-        const timeTaken = questionSeconds; // Capture time
+        const timeTaken = questionSeconds;
 
         const feedbackText = document.getElementById('feedbackText');
         feedbackText.innerHTML = isCorrect ? 
@@ -511,7 +577,6 @@
 
         document.getElementById('feedback').classList.add('show');
         
-        // Add to History with Time
         const tbody = document.getElementById('historyBody');
         const row = `
             <tr>
@@ -519,15 +584,14 @@
                 <td>${selectedOption}</td>
                 <td style="color:${isCorrect?'var(--success)':'var(--danger)'}; font-weight:bold">${isCorrect?'✔':'✘'}</td>
                 <td>${isCorrect?'Pass':'Fail'}</td>
-                <td style="font-family:monospace; color:#555;">${timeTaken}s</td> <!-- Time Column -->
+                <td style="font-family:monospace; color:#555;">${timeTaken}s</td>
             </tr>`;
         tbody.innerHTML = row + tbody.innerHTML;
 
-	// 【新增】打包資料並傳送到 Google Sheets
         const recordData = {
             userName: userName,
             year: currentQ.year,
-            elective: currentQ.elective.toUpperCase(), // 紀錄是 E3 或 E4
+            elective: currentQ.elective.toUpperCase(),
             topic: currentQ.topic,
             qId: currentQ.id,
             myAns: selectedOption,
@@ -543,7 +607,6 @@
         })
         .then(response => console.log(`Q${currentQ.id} 紀錄上傳成功`))
         .catch(error => console.error("上傳失敗:", error));
-
     }
 
     function nextQuestion() { currentIndex++; loadQuestion(); }
@@ -569,7 +632,7 @@
         
         timerInterval = setInterval(() => {
             totalSeconds++;
-            if(!isAnswered) questionSeconds++; // Only count if not answered
+            if(!isAnswered) questionSeconds++;
             document.getElementById('timerBox').innerText = formatTime(totalSeconds);
         }, 1000);
     }
@@ -584,7 +647,6 @@
         return `${m}:${s}`;
     }
 
-    // Music
     const bgMusic = document.getElementById('bgMusic');
     function toggleMusic() {
         const btn = document.getElementById('musicBtn');
@@ -592,6 +654,125 @@
         else { bgMusic.pause(); btn.innerText = "▶"; }
     }
     function adjustVolume() { bgMusic.volume = document.getElementById('volumeSlider').value; }
+
+    // ==========================================
+    // 6. DRAWING LOGIC (Canvas Feature)
+    // ==========================================
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let isDrawing = false;
+    let drawMode = 'draw'; 
+    let lastX = 0;
+    let lastY = 0;
+
+    // Adjust canvas size to match the image perfectly
+    function setupCanvasSize() {
+        const imgElement = document.getElementById('questionImage');
+        // Ensure image has loaded dimensions
+        if(imgElement.offsetWidth > 0 && imgElement.offsetHeight > 0) {
+            canvas.width = imgElement.offsetWidth;
+            canvas.height = imgElement.offsetHeight;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+    }
+
+    // Handle window resize (e.g., rotating phone)
+    window.addEventListener('resize', () => {
+        if (document.getElementById('quizInterface').style.display === 'block') {
+            setupCanvasSize();
+        }
+    });
+
+    // Get exact cursor/touch position
+    function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function startDrawing(e) {
+        e.preventDefault(); // Prevents screen scrolling while drawing
+        isDrawing = true;
+        const pos = getPointerPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const pos = getPointerPos(e);
+        const penColor = document.getElementById('penColor').value;
+        const penSize = document.getElementById('penSize').value;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+
+        if (drawMode === 'erase') {
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.lineWidth = penSize * 4; // Eraser is thicker
+        } else {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.strokeStyle = penColor;
+            ctx.lineWidth = penSize;
+        }
+
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+    }
+
+    function setDrawMode(mode) {
+        drawMode = mode;
+        document.getElementById('btnDraw').classList.remove('active');
+        document.getElementById('btnErase').classList.remove('active');
+        
+        if (mode === 'draw') {
+            document.getElementById('btnDraw').classList.add('active');
+            canvas.style.cursor = 'crosshair';
+        } else {
+            document.getElementById('btnErase').classList.add('active');
+            canvas.style.cursor = 'cell'; 
+        }
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events for phones/tablets
+    canvas.addEventListener('touchstart', startDrawing, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
 
 </script>
 
