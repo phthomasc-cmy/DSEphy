@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SI Prefixes & 3 Significant Figures Practice</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 1.6rem;
+        }
+
+        .instructions {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 14px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Quick Reference Banner */
+        .ref-banner {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .question-card {
+            background: var(--card);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            padding: 8px 12px;
+            width: 120px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        select.prefix-select {
+            padding: 8px 10px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: white;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="number"]:focus, select.prefix-select:focus {
+            border-color: var(--primary);
+        }
+
+        .unit {
+            color: #475569;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .feedback.correct { color: var(--success); }
+        .feedback.incorrect { color: var(--danger); }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .check-btn { background-color: var(--primary); color: white; }
+        .reset-btn { background-color: #94a3b8; color: white; }
+
+        #score-board {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #dcfce7;
+            color: #15803d;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SI Prefixes & Significant Figures Practice</h1>
+        <p>Convert raw physics quantities to appropriate prefixes rounded to 3 sig. fig.</p>
+    </header>
+
+    <div class="instructions">
+        <strong>Task:</strong> Convert each given value using an appropriate SI prefix so the resulting number is between 1 and 1000. Round your numerical answer to <strong>3 significant figures (3 sig. fig.)</strong>.
+    </div>
+
+    <!-- Reference Banner -->
+    <div class="ref-banner">
+        <span>G = 10<sup>9</sup></span>
+        <span>M = 10<sup>6</sup></span>
+        <span>k = 10<sup>3</sup></span>
+        <span>m = 10<sup>-3</sup></span>
+        <span>μ = 10<sup>-6</sup></span>
+        <span>n = 10<sup>-9</sup></span>
+    </div>
+
+    <form id="quiz-form">
+
+        <!-- Q1 -->
+        <div class="question-card">
+            <div class="question-text">1. Convert <strong>3454 J</strong> into a prefixed unit (3 sig. fig.):</div>
+            <div class="input-row">
+                <input type="number" step="any" id="q1-num" placeholder="e.g. 3.45">
+                <select class="prefix-select" id="q1-prefix">
+                    <option value="">Prefix</option>
+                    <option value="G">G (Giga)</option>
+                    <option value="M">M (Mega)</option>
+                    <option value="k">k (kilo)</option>
+                    <option value="m">m (milli)</option>
+                    <option value="μ">μ (micro)</option>
+                    <option value="n">n (nano)</option>
+                </select>
+                <span class="unit">J</span>
+            </div>
+            <div class="feedback" id="q1-fb"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-card">
+            <div class="question-text">2. Convert <strong>0.004568 A</strong> into a prefixed unit (3 sig. fig.):</div>
+            <div class="input-row">
+                <input type="number" step="any" id="q2-num" placeholder="Number">
+                <select class="prefix-select" id="q2-prefix">
+                    <option value="">Prefix</option>
+                    <option value="G">G (Giga)</option>
+                    <option value="M">M (Mega)</option>
+                    <option value="k">k (kilo)</option>
+                    <option value="m">m (milli)</option>
+                    <option value="μ">μ (micro)</option>
+                    <option value="n">n (nano)</option>
+                </select>
+                <span class="unit">A</span>
+            </div>
+            <div class="feedback" id="q2-fb"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-card">
+            <div class="question-text">3. Convert <strong>12890000 Hz</strong> into a prefixed unit (3 sig. fig.):</div>
+            <div class="input-row">
+                <input type="number" step="any" id="q3-num" placeholder="Number">
+                <select class="prefix-select" id="q3-prefix">
+                    <option value="">Prefix</option>
+                    <option value="G">G (Giga)</option>
+                    <option value="M">M (Mega)</option>
+                    <option value="k">k (kilo)</option>
+                    <option value="m">m (milli)</option>
+                    <option value="μ">μ (micro)</option>
+                    <option value="n">n (nano)</option>
+                </select>
+                <span class="unit">Hz</span>
+            </div>
+            <div class="feedback" id="q3-fb"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question-card">
+            <div class="question-text">4. Convert <strong>0.000006824 F</strong> into a prefixed unit (3 sig. fig.):</div>
+            <div class="input-row">
+                <input type="number" step="any" id="q4-num" placeholder="Number">
+                <select class="prefix-select" id="q4-prefix">
+                    <option value="">Prefix</option>
+                    <option value="G">G (Giga)</option>
+                    <option value="M">M (Mega)</option>
+                    <option value="k">k (kilo)</option>
+                    <option value="m">m (milli)</option>
+                    <option value="μ">μ (micro)</option>
+                    <option value="n">n (nano)</option>
+                </select>
+                <span class="unit">F</span>
+            </div>
+            <div class="feedback" id="q4-fb"></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question-card">
+            <div class="question-text">5. Convert <strong>2748000000 W</strong> into a prefixed unit (3 sig. fig.):</div>
+            <div class="input-row">
+                <input type="number" step="any" id="q5-num" placeholder="Number">
+                <select class="prefix-select" id="q5-prefix">
+                    <option value="">Prefix</option>
+                    <option value="G">G (Giga)</option>
+                    <option value="M">M (Mega)</option>
+                    <option value="k">k (kilo)</option>
+                    <option value="m">m (milli)</option>
+                    <option value="μ">μ (micro)</option>
+                    <option value="n">n (nano)</option>
+                </select>
+                <span class="unit">W</span>
+            </div>
+            <div class="feedback" id="q5-fb"></div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="question-card">
+            <div class="question-text">6. Convert <strong>0.00000008432 s</strong> into a prefixed unit (3 sig. fig.):</div>
+            <div class="input-row">
+                <input type="number" step="any" id="q6-num" placeholder="Number">
+                <select class="prefix-select" id="q6-prefix">
+                    <option value="">Prefix</option>
+                    <option value="G">G (Giga)</option>
+                    <option value="M">M (Mega)</option>
+                    <option value="k">k (kilo)</option>
+                    <option value="m">m (milli)</option>
+                    <option value="μ">μ (micro)</option>
+                    <option value="n">n (nano)</option>
+                </select>
+                <span class="unit">s</span>
+            </div>
+            <div class="feedback" id="q6-fb"></div>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="check-btn" onclick="checkAnswers()">Check Answers</button>
+            <button type="button" class="reset-btn" onclick="resetForm()">Reset</button>
+        </div>
+    </form>
+
+    <div id="score-board"></div>
+
+    <script>
+        const answers = {
+            q1: { num: 3.45, prefix: "k", display: "3.45 kJ", working: "3454 J = 3.454 kJ → rounded to 3 sig. fig. = 3.45 kJ" },
+            q2: { num: 4.57, prefix: "m", display: "4.57 mA", working: "0.004568 A = 4.568 mA → rounded to 3 sig. fig. = 4.57 mA" },
+            q3: { num: 12.9, prefix: "M", display: "12.9 MHz", working: "12890000 Hz = 12.89 MHz → rounded to 3 sig. fig. = 12.9 MHz" },
+            q4: { num: 6.82, prefix: "μ", display: "6.82 μF", working: "0.000006824 F = 6.824 μF → rounded to 3 sig. fig. = 6.82 μF" },
+            q5: { num: 2.75, prefix: "G", display: "2.75 GW", working: "2748000000 W = 2.748 GW → rounded to 3 sig. fig. = 2.75 GW" },
+            q6: { num: 84.3, prefix: "n", display: "84.3 ns", working: "0.00000008432 s = 84.32 ns → rounded to 3 sig. fig. = 84.3 ns" }
+        };
+
+        function checkAnswers() {
+            let score = 0;
+            const total = Object.keys(answers).length;
+
+            for (let i = 1; i <= total; i++) {
+                const key = 'q' + i;
+                const userNum = parseFloat(document.getElementById(`${key}-num`).value);
+                const userPrefix = document.getElementById(`${key}-prefix`).value;
+                const fb = document.getElementById(`${key}-fb`);
+                const target = answers[key];
+
+                fb.style.display = 'block';
+
+                // Check tolerance for floating point comparison (e.g. 3.45 ± 0.01)
+                const isNumCorrect = !isNaN(userNum) && Math.abs(userNum - target.num) < 0.015;
+                const isPrefixCorrect = userPrefix === target.prefix;
+
+                if (isNumCorrect && isPrefixCorrect) {
+                    fb.textContent = "✓ Correct!";
+                    fb.className = "feedback correct";
+                    score++;
+                } else {
+                    fb.textContent = `✗ Incorrect. Correct answer: ${target.display} (${target.working})`;
+                    fb.className = "feedback incorrect";
+                }
+            }
+
+            const scoreBoard = document.getElementById('score-board');
+            scoreBoard.style.display = 'block';
+            scoreBoard.innerHTML = `Your Score: ${score} / ${total}`;
+        }
+
+        function resetForm() {
+            document.getElementById('quiz-form').reset();
+            const total = Object.keys(answers).length;
+            for (let i = 1; i <= total; i++) {
+                document.getElementById(`q${i}-fb`).style.display = 'none';
+            }
+            document.getElementById('score-board').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

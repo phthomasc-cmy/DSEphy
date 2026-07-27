@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Practice: SI Prefixes & Scientific Notation</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --secondary: #475569;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Collapsible Reference Sheet */
+        details.reference-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        details.reference-card summary {
+            font-weight: bold;
+            color: var(--primary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .prefix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .prefix-item {
+            background-color: #f1f5f9;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .instructions {
+            background-color: #e0f2fe;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .section-header {
+            font-size: 1.3rem;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 6px;
+            margin: 30px 0 15px 0;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .question-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .context-tag {
+            display: inline-block;
+            background-color: #f1f5f9;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        input.mantissa {
+            width: 110px;
+        }
+
+        input.exponent {
+            width: 75px;
+        }
+
+        .unit {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button.check-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 2;
+            transition: background-color 0.2s;
+        }
+
+        button.check-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.reset-btn {
+            background-color: #94a3b8;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+            transition: background-color 0.2s;
+        }
+
+        button.reset-btn:hover {
+            background-color: #64748b;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            color: var(--success);
+        }
+
+        .feedback.incorrect {
+            color: var(--danger);
+        }
+
+        .solution {
+            display: none;
+            background-color: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            padding: 12px 15px;
+            border-radius: 0 6px 6px 0;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        #score-board {
+            display: none;
+            background-color: #dcfce7;
+            color: #14532d;
+            border: 1px solid #bbf7d0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 25px;
+        }
+
+        sup {
+            line-height: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Physics SI Prefixes & Scientific Notation Practice</h1>
+        <p>Master metric unit conversions and calculations for physics problems</p>
+    </header>
+
+    <!-- Reference Sheet -->
+    <details class="reference-card">
+        <summary>💡 Click to View SI Prefix Reference Table</summary>
+        <div class="prefix-grid">
+            <div class="prefix-item"><strong>Giga- (G)</strong><br>10<sup>9</sup></div>
+            <div class="prefix-item"><strong>Mega- (M)</strong><br>10<sup>6</sup></div>
+            <div class="prefix-item"><strong>kilo- (k)</strong><br>10<sup>3</sup></div>
+            <div class="prefix-item"><strong>milli- (m)</strong><br>10<sup>-3</sup></div>
+            <div class="prefix-item"><strong>micro- (μ)</strong><br>10<sup>-6</sup></div>
+            <div class="prefix-item"><strong>nano- (n)</strong><br>10<sup>-9</sup></div>
+            <div class="prefix-item"><strong>pico- (p)</strong><br>10<sup>-12</sup></div>
+        </div>
+    </details>
+
+    <div class="instructions">
+        <strong>Instructions:</strong> Express all final answers in standard scientific notation format: 
+        <code>a × 10<sup>b</sup></code>, where <code>1 ≤ |a| &lt; 10</code>. Round the mantissa (<code>a</code>) to 
+        <strong>3 significant figures</strong> unless the value terminates earlier.
+    </div>
+
+    <form id="quiz-form">
+
+        <div class="section-header">Part 1: Converting Prefixes to Standard SI Units</div>
+        
+        <!-- Question 1 -->
+        <div class="question-card" id="q1">
+            <span class="context-tag">Electronics</span>
+            <div class="question-title">Q1. Capacitance in Microfarads</div>
+            <p>A capacitor has a rating of <code>4.7 μF</code> (microfarads). Express this capacitance in standard SI units (farads, F) using scientific notation.</p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q1-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q1-e" placeholder="b"></sup>
+                <span class="unit">F</span>
+            </div>
+            <div class="feedback" id="q1-fb"></div>
+            <div class="solution" id="q1-sol">Correct Answer: 4.70 × 10<sup>-6</sup> F <br><em>Note: micro (μ) = 10<sup>-6</sup>. So 4.7 μF = 4.70 × 10<sup>-6</sup> F.</em></div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" id="q2">
+            <span class="context-tag">Power Generation</span>
+            <div class="question-title">Q2. Power Station Output</div>
+            <p>A wind turbine generates <code>2.5 MW</code> (megawatts) of electrical power. Convert this power into watts (W) in scientific notation.</p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q2-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q2-e" placeholder="b"></sup>
+                <span class="unit">W</span>
+            </div>
+            <div class="feedback" id="q2-fb"></div>
+            <div class="solution" id="q2-sol">Correct Answer: 2.50 × 10<sup>6</sup> W <br><em>Note: Mega (M) = 10<sup>6</sup>. So 2.5 MW = 2.50 × 10<sup>6</sup> W.</em></div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" id="q3">
+            <span class="context-tag">Atomic Scale</span>
+            <div class="question-title">Q3. Atomic Radius</div>
+            <p>The radius of a silicon atom is <code>110 pm</code> (picometers). Express this distance in meters (m) in standard scientific notation.</p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q3-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q3-e" placeholder="b"></sup>
+                <span class="unit">m</span>
+            </div>
+            <div class="feedback" id="q3-fb"></div>
+            <div class="solution" id="q3-sol">Correct Answer: 1.10 × 10<sup>-10</sup> m <br><em>Workings: 110 pm = 110 × 10<sup>-12</sup> m = 1.10 × 10<sup>-10</sup> m.</em></div>
+        </div>
+
+        <div class="section-header">Part 2: Multi-Step Physics Calculations</div>
+
+        <!-- Question 4 -->
+        <div class="question-card" id="q4">
+            <span class="context-tag">Circuits (Ohm's Law)</span>
+            <div class="question-title">Q4. Electric Current</div>
+            <p>A potential difference of <code>12.0 V</code> is applied across a <code>6.80 kΩ</code> resistor. Calculate the current <em>I</em> flowing through the circuit in amperes (A). <br><em>(Formula: I = V / R)</em></p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q4-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q4-e" placeholder="b"></sup>
+                <span class="unit">A</span>
+            </div>
+            <div class="feedback" id="q4-fb"></div>
+            <div class="solution" id="q4-sol">Correct Answer: 1.76 × 10<sup>-3</sup> A <br><em>Workings:<br>R = 6.80 kΩ = 6.80 × 10<sup>3</sup> Ω<br>I = 12.0 / (6.80 × 10<sup>3</sup>) = 0.0017647... A ≈ 1.76 × 10<sup>-3</sup> A</em></div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" id="q5">
+            <span class="context-tag">Wave Motion</span>
+            <div class="question-title">Q5. Light Wave Frequency</div>
+            <p>A green laser emits light with a wavelength of <code>532 nm</code>. Given the speed of light <em>c</em> = 3.00 × 10<sup>8</sup> m s<sup>-1</sup>, calculate the frequency <em>f</em> of the wave. <br><em>(Formula: c = f × λ)</em></p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q5-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q5-e" placeholder="b"></sup>
+                <span class="unit">Hz</span>
+            </div>
+            <div class="feedback" id="q5-fb"></div>
+            <div class="solution" id="q5-sol">Correct Answer: 5.64 × 10<sup>14</sup> Hz <br><em>Workings:<br>λ = 532 nm = 532 × 10<sup>-9</sup> m = 5.32 × 10<sup>-7</sup> m<br>f = c / λ = (3.00 × 10<sup>8</sup>) / (5.32 × 10<sup>-7</sup>) = 5.6391... × 10<sup>14</sup> Hz ≈ 5.64 × 10<sup>14</sup> Hz</em></div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card" id="q6">
+            <span class="context-tag">Energy & Power</span>
+            <div class="question-title">Q6. Pulsed Laser Energy</div>
+            <p>An ultra-fast research laser emits a power pulse of <code>1.50 GW</code> (gigawatts) for a duration of <code>20.0 ns</code> (nanoseconds). Calculate the total energy delivered in the pulse in Joules (J). <br><em>(Formula: E = P × t)</em></p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q6-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q6-e" placeholder="b"></sup>
+                <span class="unit">J</span>
+            </div>
+            <div class="feedback" id="q6-fb"></div>
+            <div class="solution" id="q6-sol">Correct Answer: 3.00 × 10<sup>1</sup> J (or 3.00 × 10<sup>1</sup> J)<br><em>Workings:<br>P = 1.50 × 10<sup>9</sup> W<br>t = 20.0 × 10<sup>-9</sup> s<br>E = (1.50 × 10<sup>9</sup>) × (20.0 × 10<sup>-9</sup>) = 30.0 J = 3.00 × 10<sup>1</sup> J</em></div>
+        </div>
+
+        <div class="btn-container">
+            <button type="button" class="check-btn" onclick="checkAnswers()">Submit and Check Answers</button>
+            <button type="button" class="reset-btn" onclick="resetForm()">Reset</button>
+        </div>
+    </form>
+
+    <div id="score-board"></div>
+
+    <script>
+        const answers = {
+            q1: { m: 4.70, e: -6, mTol: 0.02 },
+            q2: { m: 2.50, e: 6, mTol: 0.02 },
+            q3: { m: 1.10, e: -10, mTol: 0.02 },
+            q4: { m: 1.76, e: -3, mTol: 0.02 },
+            q5: { m: 5.64, e: 14, mTol: 0.03 },
+            q6: { m: 3.00, e: 1, mTol: 0.02 }
+        };
+
+        function checkAnswers() {
+            let score = 0;
+            const totalQuestions = Object.keys(answers).length;
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const qKey = 'q' + i;
+                const userM = parseFloat(document.getElementById(`${qKey}-m`).value);
+                const userE = parseInt(document.getElementById(`${qKey}-e`).value);
+                
+                const fbEl = document.getElementById(`${qKey}-fb`);
+                const solEl = document.getElementById(`${qKey}-sol`);
+
+                fbEl.style.display = 'block';
+                solEl.style.display = 'block';
+
+                const target = answers[qKey];
+
+                // Check tolerance for float comparison on mantissa
+                const isMantissaCorrect = !isNaN(userM) && Math.abs(userM - target.m) <= target.mTol;
+                const isExponentCorrect = userE === target.e;
+
+                if (isMantissaCorrect && isExponentCorrect) {
+                    fbEl.textContent = "✓ Correct!";
+                    fbEl.className = "feedback correct";
+                    score++;
+                } else {
+                    fbEl.textContent = "✗ Incorrect";
+                    fbEl.className = "feedback incorrect";
+                }
+            }
+
+            const scoreBoard = document.getElementById('score-board');
+            scoreBoard.style.display = 'block';
+            
+            let message = "";
+            if (score === totalQuestions) {
+                message = "🎉 Perfect Score! You have fully mastered physics prefixes and standard scientific notation.";
+            } else if (score >= totalQuestions / 2) {
+                message = "Good job! Review the detailed solutions above to fix your minor errors.";
+            } else {
+                message = "Keep practicing! Use the reference table above and check the step-by-step workings.";
+            }
+
+            scoreBoard.innerHTML = `<strong>Your Score: ${score} / ${totalQuestions}</strong><br>${message}`;
+            scoreBoard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('quiz-form').reset();
+            const totalQuestions = Object.keys(answers).length;
+            for (let i = 1; i <= totalQuestions; i++) {
+                const qKey = 'q' + i;
+                document.getElementById(`${qKey}-fb`).style.display = 'none';
+                document.getElementById(`${qKey}-sol`).style.display = 'none';
+            }
+            document.getElementById('score-board').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
