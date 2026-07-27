@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE Physics: Scientific Notation Practice</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #4a5568;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background-color: #e9ecef;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .question-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .context-tag {
+            display: inline-block;
+            background-color: #e2e8f0;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        input.mantissa {
+            width: 100px;
+        }
+
+        input.exponent {
+            width: 70px;
+        }
+
+        .unit {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        button.check-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        button.check-btn:hover {
+            background-color: #004085;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            color: var(--success);
+        }
+
+        .feedback.incorrect {
+            color: var(--danger);
+        }
+
+        .solution {
+            display: none;
+            background-color: #f1f3f5;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        #score-board {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        sup {
+            line-height: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HKDSE Physics Foundation Series</h1>
+        <p>Topic: Scientific Notation, Standard Form & Physics Quantities</p>
+    </header>
+
+    <div class="instructions">
+        <strong>Instructions:</strong> Express all final answers in standard scientific notation format: 
+        <code>a × 10<sup>b</sup></code>, where <code>1 ≤ |a| &lt; 10</code>. Round the mantissa (<code>a</code>) to 
+        <strong>3 significant figures</strong> unless specified otherwise.
+    </div>
+
+    <form id="quiz-form">
+        
+        <!-- Question 1 -->
+        <div class="question-card" id="q1">
+            <span class="context-tag">Electromagnetism</span>
+            <div class="question-title">Q1. Fundamental Charge</div>
+            <p>The magnitude of the charge of a single electron is approximately <code>0.0000000000000000001602 C</code>. Express this in scientific notation.</p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q1-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q1-e" placeholder="b"></sup>
+                <span class="unit">C</span>
+            </div>
+            <div class="feedback" id="q1-fb"></div>
+            <div class="solution" id="q1-sol">Correct Answer: 1.60 × 10<sup>-19</sup> C</div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" id="q2">
+            <span class="context-tag">Astrophysics / Gravitation</span>
+            <div class="question-title">Q2. Earth's Mass</div>
+            <p>The mass of the Earth is measured to be <code>5,970,000,000,000,000,000,000,000 kg</code>. Convert this quantity to standard scientific notation (3 sig. fig.).</p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q2-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q2-e" placeholder="b"></sup>
+                <span class="unit">kg</span>
+            </div>
+            <div class="feedback" id="q2-fb"></div>
+            <div class="solution" id="q2-sol">Correct Answer: 5.97 × 10<sup>24</sup> kg</div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" id="q3">
+            <span class="context-tag">Wave Motion (Optics)</span>
+            <div class="question-title">Q3. Wavelength of Red Light</div>
+            <p>A helium-neon laser emits red light with a wavelength of <code>632.8 nm</code> (nanometers). Convert this value into meters (m) and express it in scientific notation (3 sig. fig.). <br><em>(Hint: 1 nm = 10<sup>-9</sup> m)</em></p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q3-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q3-e" placeholder="b"></sup>
+                <span class="unit">m</span>
+            </div>
+            <div class="feedback" id="q3-fb"></div>
+            <div class="solution" id="q3-sol">Correct Answer: 6.33 × 10<sup>-7</sup> m (632.8 × 10<sup>-9</sup> m = 6.328 × 10<sup>-7</sup> m ≈ 6.33 × 10<sup>-7</sup> m)</div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card" id="q4">
+            <span class="context-tag">Atomic & Nuclear Physics</span>
+            <div class="question-title">Q4. Energy of a Photon (Calculation)</div>
+            <p>The energy <em>E</em> of a photon is given by <em>E</em> = <em>h f</em>. <br>Calculate <em>E</em> if Planck's constant <em>h</em> = 6.63 × 10<sup>-34</sup> J s and frequency <em>f</em> = 7.50 × 10<sup>14</sup> Hz. Give your answer in scientific notation (3 sig. fig.).</p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q4-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q4-e" placeholder="b"></sup>
+                <span class="unit">J</span>
+            </div>
+            <div class="feedback" id="q4-fb"></div>
+            <div class="solution" id="q4-sol">Correct Answer: 4.97 × 10<sup>-19</sup> J <br><em>Workings: (6.63 × 7.50) × 10<sup>-34 + 14</sup> = 49.725 × 10<sup>-20</sup> = 4.9725 × 10<sup>-19</sup> J ≈ 4.97 × 10<sup>-19</sup> J</em></div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" id="q5">
+            <span class="context-tag">Electricity</span>
+            <div class="question-title">Q5. Number of Electrons Transferred</div>
+            <p>A current of <code>2.00 A</code> flows through a circuit for <code>4.00 minutes</code>. Calculate the total number of electrons that passed through the circuit.<br>
+            <em>(Charge Q = I × t, e = 1.60 × 10<sup>-19</sup> C)</em></p>
+            <div class="input-group">
+                <input type="number" step="any" class="mantissa" id="q5-m" placeholder="a">
+                <span>× 10</span>
+                <sup><input type="number" class="exponent" id="q5-e" placeholder="b"></sup>
+                <span class="unit">electrons</span>
+            </div>
+            <div class="feedback" id="q5-fb"></div>
+            <div class="solution" id="q5-sol">Correct Answer: 3.00 × 10<sup>21</sup> electrons<br>
+            <em>Workings:<br>
+            t = 4.00 × 60 = 240 s<br>
+            Q = 2.00 × 240 = 480 C<br>
+            N = Q / e = 480 / (1.60 × 10<sup>-19</sup>) = 3.00 × 10<sup>21</sup></em></div>
+        </div>
+
+        <button type="button" class="check-btn" onclick="checkAnswers()">Submit and Check Answers</button>
+    </form>
+
+    <div id="score-board"></div>
+
+    <script>
+        const answers = {
+            q1: { m: 1.60, e: -19, mTol: 0.01 },
+            q2: { m: 5.97, e: 24, mTol: 0.01 },
+            q3: { m: 6.33, e: -7, mTol: 0.01 },
+            q4: { m: 4.97, e: -19, mTol: 0.01 },
+            q5: { m: 3.00, e: 21, mTol: 0.01 }
+        };
+
+        function checkAnswers() {
+            let score = 0;
+            const totalQuestions = Object.keys(answers).length;
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const qKey = 'q' + i;
+                const userM = parseFloat(document.getElementById(`${qKey}-m`).value);
+                const userE = parseInt(document.getElementById(`${qKey}-e`).value);
+                
+                const fbEl = document.getElementById(`${qKey}-fb`);
+                const solEl = document.getElementById(`${qKey}-sol`);
+
+                fbEl.style.display = 'block';
+                solEl.style.display = 'block';
+
+                const target = answers[qKey];
+
+                // Check tolerance for float comparison on mantissa
+                const isMantissaCorrect = !isNaN(userM) && Math.abs(userM - target.m) <= target.mTol;
+                const isExponentCorrect = userE === target.e;
+
+                if (isMantissaCorrect && isExponentCorrect) {
+                    fbEl.textContent = "✓ Correct!";
+                    fbEl.className = "feedback correct";
+                    score++;
+                } else {
+                    fbEl.textContent = "✗ Incorrect";
+                    fbEl.className = "feedback incorrect";
+                }
+            }
+
+            const scoreBoard = document.getElementById('score-board');
+            scoreBoard.style.display = 'block';
+            scoreBoard.innerHTML = `<strong>Your Score: ${score} / ${totalQuestions}</strong><br>` + 
+                (score === totalQuestions ? "Excellent! You have mastered HKDSE scientific notation." : "Review the solutions above to correct your errors.");
+            
+            scoreBoard.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
