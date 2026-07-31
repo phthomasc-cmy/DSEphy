@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,20 +12,30 @@
             color: #ffffff;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
         }
 
         /* --- Header Styles --- */
         header {
             text-align: center;
-            padding: 40px 0;
-            margin-bottom: 30px;
+            padding: 30px 20px;
+            margin-bottom: 25px;
             background: linear-gradient(90deg, #ff00cc, #333399); /* Colorful Gradient */
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         h1 {
-            font-size: 3em;
+            font-size: 2.5em;
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -32,115 +43,204 @@
         }
 
         p.subtitle {
-            font-size: 1.2em;
+            font-size: 1.1em;
             opacity: 0.9;
+            margin: 5px 0 0 0;
         }
 
-        /* --- Grid Layout for Chapters --- */
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto;
+        /* --- Navigation Tabs --- */
+        .tabs-nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 5px 5px 15px 5px;
+            margin-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: #e94560 #16213e;
         }
 
-        /* --- Chapter Card Styles --- */
-        .chapter-card {
+        .tabs-nav::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .tabs-nav::-webkit-scrollbar-track {
+            background: #16213e;
+            border-radius: 10px;
+        }
+
+        .tabs-nav::-webkit-scrollbar-thumb {
+            background: #e94560;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            background-color: #16213e;
+            color: #a0a0c0;
+            border: 1px solid #2a2a4e;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .tab-btn:hover {
+            color: #ffffff;
+            background-color: #0f3460;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        /* Specific Color Accents for Active Tabs */
+        .tab-btn[data-target="ch-math"].active { background: linear-gradient(45deg, #00c6ff, #0072ff); border-color: transparent; }
+        .tab-btn[data-target="ch1"].active { background: linear-gradient(45deg, #ff416c, #ff4b2b); border-color: transparent; }
+        .tab-btn[data-target="ch2"].active { background: linear-gradient(45deg, #f7971e, #ffd200); border-color: transparent; color: #1a1a2e; }
+        .tab-btn[data-target="ch3"].active { background: linear-gradient(45deg, #56ab2f, #a8e063); border-color: transparent; color: #1a1a2e; }
+        .tab-btn[data-target="ch4"].active { background: linear-gradient(45deg, #11998e, #38ef7d); border-color: transparent; color: #1a1a2e; }
+        .tab-btn[data-target="ch5"].active { background: linear-gradient(45deg, #00b09b, #96c93d); border-color: transparent; color: #1a1a2e; }
+        .tab-btn[data-target="ch6"].active { background: linear-gradient(45deg, #2193b0, #6dd5ed); border-color: transparent; color: #1a1a2e; }
+        .tab-btn[data-target="ch7"].active { background: linear-gradient(45deg, #3a1c71, #d76d77); border-color: transparent; }
+        .tab-btn[data-target="ch8"].active { background: linear-gradient(45deg, #8e2de2, #4a00e0); border-color: transparent; }
+        .tab-btn[data-target="ch9"].active { background: linear-gradient(45deg, #ec008c, #fc6767); border-color: transparent; }
+
+        /* --- Tab Content Container --- */
+        .tab-content {
+            display: none;
             background-color: #16213e;
             border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             border: 1px solid #2a2a4e;
+            animation: fadeIn 0.4s ease-in-out;
         }
 
-        .chapter-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        .tab-content.active {
+            display: block;
         }
 
-        .card-header {
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.4em;
-            color: white;
-        }
-
-        /* --- Individual Colors for Chapters --- */
-        .ch-math .card-header { background: linear-gradient(45deg, #00c6ff, #0072ff); } /* Electric Blue */
-        .ch1 .card-header { background: linear-gradient(45deg, #ff416c, #ff4b2b); } /* Red */
-        .ch2 .card-header { background: linear-gradient(45deg, #f7971e, #ffd200); } /* Orange/Yellow */
-        .ch3 .card-header { background: linear-gradient(45deg, #56ab2f, #a8e063); } /* Green */
-        .ch4 .card-header { background: linear-gradient(45deg, #11998e, #38ef7d); } /* Teal */
-        .ch5 .card-header { background: linear-gradient(45deg, #00b09b, #96c93d); } /* Mint */
-        .ch6 .card-header { background: linear-gradient(45deg, #2193b0, #6dd5ed); } /* Blue */
-        .ch7 .card-header { background: linear-gradient(45deg, #3a1c71, #d76d77, #ffaf7b); } /* Purple/Pink */
-        .ch8 .card-header { background: linear-gradient(45deg, #8e2de2, #4a00e0); } /* Deep Purple */
-        .ch9 .card-header { background: linear-gradient(45deg, #ec008c, #fc6767); } /* Pink */
-
-        /* --- Link Slots Styles --- */
-        .links-container {
-            padding: 15px;
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            border-bottom: 2px solid #2a2a4e;
+            padding-bottom: 10px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 10px;
         }
 
+        /* --- Link Cards Grid inside Content --- */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+        }
+
         .sim-link {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-decoration: none;
             color: #fff;
             background-color: #0f3460;
-            padding: 12px;
+            padding: 16px;
+            min-height: 50px;
             text-align: center;
-            border-radius: 8px;
-            transition: background 0.2s;
+            border-radius: 10px;
+            transition: all 0.2s ease;
             border: 1px solid #1f4068;
+            font-weight: 500;
         }
 
         .sim-link:hover {
-            background-color: #e94560; /* Highlight color on hover */
+            background-color: #e94560;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+            border-color: #e94560;
             font-weight: bold;
+        }
+
+        /* Grayed out style for empty links */
+        .sim-link[href="#"] {
+            opacity: 0.5;
+            cursor: default;
+        }
+        .sim-link[href="#"]:hover {
+            background-color: #0f3460;
+            transform: none;
+            box-shadow: none;
+            border-color: #1f4068;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- Footer --- */
         footer {
             text-align: center;
-            margin-top: 50px;
+            margin-top: 40px;
+            padding: 20px 0;
             color: #666;
             font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .tab-content { padding: 20px; }
+            .links-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Mr. Chan Physics Lab</h1>
-        <p class="subtitle">Interactive Simulations & Experiments</p>
-    </header>
+    <div class="main-wrapper">
+        <header>
+            <h1>Mr. Chan Physics Lab</h1>
+            <p class="subtitle">Interactive Simulations & Experiments</p>
+        </header>
 
-    <div class="container">
+        <!-- Navigation Tabs -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-target="ch-math">Basic Maths</button>
+            <button class="tab-btn" data-target="ch1">Book 1</button>
+            <button class="tab-btn" data-target="ch2">Book 2</button>
+            <button class="tab-btn" data-target="ch3">Book 3</button>
+            <button class="tab-btn" data-target="ch4">Book 4</button>
+            <button class="tab-btn" data-target="ch5">Book 5</button>
+            <button class="tab-btn" data-target="ch6">Book 6</button>
+            <button class="tab-btn" data-target="ch7">Book 7</button>
+            <button class="tab-btn" data-target="ch8">Book 8</button>
+            <button class="tab-btn" data-target="ch9">Book 9</button>
+        </div>
 
-
-        <!-- Maths Section -->
-        <div class="chapter-card ch-math">
-            <div class="card-header">Basic Maths for Phys</div>
-            <div class="links-container">
+        <!-- Tab 0: Basic Maths -->
+        <div id="ch-math" class="tab-content active">
+            <h2 class="section-title">Basic Mathematics for Physics</h2>
+            <div class="links-grid">
                 <a href="Basic%20Mathematics/Scientific_notation_01.html" class="sim-link">Scientific Notation Ex.1</a>
                 <a href="Basic%20Mathematics/Scientific_notation_02.html" class="sim-link">Scientific Notation Ex.2</a>
-                <a href="Basic%20Mathematics/SI_Prefixes_01.html" class="sim-link">SI Prefixes & Significant Figures Practice 1</a>
-                <a href="Basic%20Mathematics/SI_Prefixes_02.html" class="sim-link">SI Prefixes & Significant Figures Practice 2</a>
+                <a href="Basic%20Mathematics/SI_Prefixes_01.html" class="sim-link">SI Prefixes & Sig. Figures Practice 1</a>
+                <a href="Basic%20Mathematics/SI_Prefixes_02.html" class="sim-link">SI Prefixes & Sig. Figures Practice 2</a>
                 <a href="#" class="sim-link">Topic 3</a>
                 <a href="#" class="sim-link">Topic 4</a>
             </div>
         </div>
-        
-        <!-- Chapter 1 -->
-        <div class="chapter-card ch1">
-            <div class="card-header">Book 1</div>
-            <div class="links-container">
+
+        <!-- Tab 1: Book 1 -->
+        <div id="ch1" class="tab-content">
+            <h2 class="section-title">Book 1</h2>
+            <div class="links-grid">
                 <a href="#" class="sim-link">1.1 Simulation Name</a>
                 <a href="#" class="sim-link">1.2 Simulation Name</a>
                 <a href="#" class="sim-link">1.3 Simulation Name</a>
@@ -149,23 +249,23 @@
             </div>
         </div>
 
-        <!-- Chapter 2 -->
-        <div class="chapter-card ch2">
-            <div class="card-header">Book 2</div>
-            <div class="links-container">
-                <a href="Projectile_motion" class="sim-link">Projectile motion</a>
-                <a href="balance_beam.html" class="sim-link">balance beam</a>
-                <a href="hanging_cloth.html" class="sim-link">hanging cloth</a>
+        <!-- Tab 2: Book 2 -->
+        <div id="ch2" class="tab-content">
+            <h2 class="section-title">Book 2</h2>
+            <div class="links-grid">
+                <a href="Projectile_motion" class="sim-link">Projectile Motion</a>
+                <a href="balance_beam.html" class="sim-link">Balance Beam</a>
+                <a href="hanging_cloth.html" class="sim-link">Hanging Cloth</a>
                 <a href="collision.html" class="sim-link">Collision</a>
                 <a href="#" class="sim-link">2.5 Simulation Name</a>
             </div>
         </div>
 
-        <!-- Chapter 3 -->
-        <div class="chapter-card ch3">
-            <div class="card-header">Book 3</div>
-            <div class="links-container">
-                <a href="periscope.html" class="sim-link">periscope</a>
+        <!-- Tab 3: Book 3 -->
+        <div id="ch3" class="tab-content">
+            <h2 class="section-title">Book 3</h2>
+            <div class="links-grid">
+                <a href="periscope.html" class="sim-link">Periscope</a>
                 <a href="#" class="sim-link">3.2 Simulation Name</a>
                 <a href="#" class="sim-link">3.3 Simulation Name</a>
                 <a href="#" class="sim-link">3.4 Simulation Name</a>
@@ -173,10 +273,10 @@
             </div>
         </div>
 
-        <!-- Chapter 4 -->
-        <div class="chapter-card ch4">
-            <div class="card-header">Book 4</div>
-            <div class="links-container">
+        <!-- Tab 4: Book 4 -->
+        <div id="ch4" class="tab-content">
+            <h2 class="section-title">Book 4</h2>
+            <div class="links-grid">
                 <a href="#" class="sim-link">4.1 Simulation Name</a>
                 <a href="#" class="sim-link">4.2 Simulation Name</a>
                 <a href="#" class="sim-link">4.3 Simulation Name</a>
@@ -185,10 +285,10 @@
             </div>
         </div>
 
-        <!-- Chapter 5 -->
-        <div class="chapter-card ch5">
-            <div class="card-header">Book 5</div>
-            <div class="links-container">
+        <!-- Tab 5: Book 5 -->
+        <div id="ch5" class="tab-content">
+            <h2 class="section-title">Book 5</h2>
+            <div class="links-grid">
                 <a href="#" class="sim-link">5.1 Simulation Name</a>
                 <a href="#" class="sim-link">5.2 Simulation Name</a>
                 <a href="#" class="sim-link">5.3 Simulation Name</a>
@@ -197,10 +297,10 @@
             </div>
         </div>
 
-        <!-- Chapter 6 -->
-        <div class="chapter-card ch6">
-            <div class="card-header">Book 6</div>
-            <div class="links-container">
+        <!-- Tab 6: Book 6 -->
+        <div id="ch6" class="tab-content">
+            <h2 class="section-title">Book 6</h2>
+            <div class="links-grid">
                 <a href="#" class="sim-link">6.1 Simulation Name</a>
                 <a href="#" class="sim-link">6.2 Simulation Name</a>
                 <a href="#" class="sim-link">6.3 Simulation Name</a>
@@ -209,10 +309,10 @@
             </div>
         </div>
 
-        <!-- Chapter 7 -->
-        <div class="chapter-card ch7">
-            <div class="card-header">Book 7</div>
-            <div class="links-container">
+        <!-- Tab 7: Book 7 -->
+        <div id="ch7" class="tab-content">
+            <h2 class="section-title">Book 7</h2>
+            <div class="links-grid">
                 <a href="#" class="sim-link">7.1 Simulation Name</a>
                 <a href="#" class="sim-link">7.2 Simulation Name</a>
                 <a href="#" class="sim-link">7.3 Simulation Name</a>
@@ -221,24 +321,24 @@
             </div>
         </div>
 
-        <!-- Chapter 8 -->
-        <div class="chapter-card ch8">
-            <div class="card-header">Book 8</div>
-            <div class="links-container">
+        <!-- Tab 8: Book 8 -->
+        <div id="ch8" class="tab-content">
+            <h2 class="section-title">Book 8</h2>
+            <div class="links-grid">
                 <a href="ai_studio_code (24).html" class="sim-link">Rate of Conduction</a>
                 <a href="OTTV.html" class="sim-link">OTTV</a>
-                <a href="OTTV_2.html" class="sim-link">How window size affect OTTV</a>
+                <a href="OTTV_2.html" class="sim-link">Window Size & OTTV</a>
                 <a href="RegenerativeBraking.html" class="sim-link">Regenerative Braking</a>
-                <a href="solar_cell.html" class="sim-link">Solar cell</a>
-                <a href="Wind_turbine.html" class="sim-link">Wind energy</a>
-                <a href="Hydroelectric.html" class="sim-link">Hydroelectric energy</a>
+                <a href="solar_cell.html" class="sim-link">Solar Cell</a>
+                <a href="Wind_turbine.html" class="sim-link">Wind Energy</a>
+                <a href="Hydroelectric.html" class="sim-link">Hydroelectric Energy</a>
             </div>
         </div>
 
-        <!-- Chapter 9 -->
-        <div class="chapter-card ch9">
-            <div class="card-header">Book 9</div>
-            <div class="links-container">
+        <!-- Tab 9: Book 9 -->
+        <div id="ch9" class="tab-content">
+            <h2 class="section-title">Book 9</h2>
+            <div class="links-grid">
                 <a href="#" class="sim-link">9.1 Simulation Name</a>
                 <a href="#" class="sim-link">9.2 Simulation Name</a>
                 <a href="#" class="sim-link">9.3 Simulation Name</a>
@@ -253,17 +353,26 @@
         &copy; 2025 Mr. Chan Physics Lab. All rights reserved.
     </footer>
 
+    <!-- JavaScript Tab Switch Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+
+                    // Remove active state from all buttons & contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active state to clicked button & target content
+                    button.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
