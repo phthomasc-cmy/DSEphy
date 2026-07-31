@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Similar Triangles Practice</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --correct: #16a34a;
+            --incorrect: #dc2626;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .easy { background-color: #dcfce7; color: #15803d; }
+        .medium { background-color: #fef9c3; color: #a16207; }
+        .hard { background-color: #fee2e2; color: #b91c1c; }
+
+        .question-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 250px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.secondary {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        button.secondary:hover {
+            background-color: #f1f5f9;
+            color: var(--text);
+        }
+
+        .feedback {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback.correct {
+            display: block;
+            background-color: #dcfce7;
+            color: var(--correct);
+            border: 1px solid #bbf7d0;
+        }
+
+        .feedback.incorrect {
+            display: block;
+            background-color: #fee2e2;
+            color: var(--incorrect);
+            border: 1px solid #fecaca;
+        }
+
+        .hint-box {
+            display: none;
+            background-color: #eff6ff;
+            color: #1e40af;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #bfdbfe;
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .end-screen {
+            text-align: center;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Similar Triangles</h1>
+        <div class="stats">
+            <span id="question-count">Q: 1/10</span>
+            <span id="score">Score: 0</span>
+        </div>
+    </header>
+
+    <main id="quiz-body">
+        <div class="question-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="difficulty-badge" class="badge easy">Easy</span>
+            </div>
+            
+            <p class="question-text" id="question-text">Loading question...</p>
+            
+            <div class="canvas-container">
+                <svg id="svg-canvas" viewBox="0 0 500 220"></svg>
+            </div>
+
+            <div class="input-group">
+                <label for="user-answer"><strong>x =</strong></label>
+                <input type="number" id="user-answer" step="any" placeholder="Enter value">
+                <button id="submit-btn" onclick="checkAnswer()">Submit</button>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+            <div id="hint-box" class="hint-box"></div>
+        </div>
+
+        <div class="actions" style="margin-top: 10px;">
+            <button class="secondary" onclick="toggleHint()">Show Hint</button>
+            <button id="next-btn" class="hidden" onclick="nextQuestion()">Next Question &rarr;</button>
+        </div>
+    </main>
+
+    <div id="end-screen" class="end-screen hidden">
+        <h2>Practice Complete! 🎉</h2>
+        <p id="final-score" style="font-size: 1.25rem;">Your final score is 0 out of 10.</p>
+        <button onclick="restartQuiz()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // Level 1: Basic Direct Scale Factors
+        {
+            difficulty: "easy",
+            text: "Triangle ABC is similar to Triangle DEF (△ABC ~ △DEF). Find the length of missing side x.",
+            scale: 2,
+            a: 3, b: 4, c: 5,
+            target: "DEF_a", // x corresponds to side 'a' in DEF
+            hint: "The triangles are similar, so corresponding sides are proportional: EF/BC = DF/AC."
+        },
+        {
+            difficulty: "easy",
+            text: "Triangle ABC is similar to Triangle DEF. Find side x.",
+            scale: 3,
+            a: 2, b: 3, c: 4,
+            target: "DEF_b",
+            hint: "Find the scale factor by dividing a known side of △DEF by its matching side on △ABC."
+        },
+        {
+            difficulty: "easy",
+            text: "Triangle ABC ~ Triangle DEF. Calculate the value of x.",
+            scale: 2.5,
+            a: 4, b: 6, c: 8,
+            target: "DEF_c",
+            hint: "Multiply the corresponding side of △ABC by the ratio of the known sides."
+        },
+
+        // Level 2: Scaled Down or Fractional Scale Factors
+        {
+            difficulty: "medium",
+            text: "Triangle ABC ~ Triangle DEF. Find the missing side x of the smaller triangle.",
+            scale: 0.5,
+            a: 10, b: 12, c: 14,
+            target: "DEF_a",
+            hint: "Because △DEF is smaller, set up the proportion: x / 10 = known_side_DEF / known_side_ABC."
+        },
+        {
+            difficulty: "medium",
+            text: "Triangle ABC ~ Triangle DEF. Find the exact value of x.",
+            scale: 1.5,
+            a: 6, b: 8, c: 10,
+            target: "DEF_b",
+            hint: "Use ratios: DEF_side / ABC_side = Scale Factor."
+        },
+        {
+            difficulty: "medium",
+            text: "Triangle ABC ~ Triangle DEF. Solve for x.",
+            scale: 0.75,
+            a: 8, b: 12, c: 16,
+            target: "DEF_c",
+            hint: "Set up the equal ratios: x / 16 = DF / AC."
+        },
+        {
+            difficulty: "medium",
+            text: "Triangle ABC ~ Triangle DEF. Find side x.",
+            scale: 2.25,
+            a: 4, b: 8, c: 10,
+            target: "DEF_a",
+            hint: "Determine scale ratio = DEF_known / ABC_known, then multiply by side a."
+        },
+
+        // Level 3: Algebraic Equations / Harder Ratios
+        {
+            difficulty: "hard",
+            text: "Triangle ABC ~ Triangle DEF. Find x where side EF = 2x + 1.",
+            scale: 3,
+            a: 5, b: 7, c: 9,
+            target: "algebra_1", // Special target solver
+            hint: "Set up equation: (2x + 1) / BC = Scale Factor. Solve for x algebraically."
+        },
+        {
+            difficulty: "hard",
+            text: "Triangle ABC ~ Triangle DEF. If DF = x - 2, solve for x.",
+            scale: 2,
+            a: 6, b: 8, c: 10,
+            target: "algebra_2",
+            hint: "Set up: (x - 2) / AC = Scale Factor, then solve for x."
+        },
+        {
+            difficulty: "hard",
+            text: "Triangle ABC ~ Triangle DEF with a scale factor of 3.5. Find x.",
+            scale: 3.5,
+            a: 6, b: 10, c: 12,
+            target: "DEF_b",
+            hint: "Multiply side b (10) by scale factor 3.5."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let currentCorrectAnswer = 0;
+
+    function initQuestion() {
+        const q = questions[currentIdx];
+        
+        // Update Header & Badge
+        document.getElementById('question-count').innerText = `Q: ${currentIdx + 1}/${questions.length}`;
+        const badge = document.getElementById('difficulty-badge');
+        badge.innerText = q.difficulty.toUpperCase();
+        badge.className = `badge ${q.difficulty}`;
+        
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('user-answer').value = '';
+        document.getElementById('feedback').className = 'feedback';
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('hint-box').innerText = q.hint;
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('submit-btn').disabled = false;
+
+        // Draw Triangle SVG & Calculate Answer
+        calculateAnswerAndDraw(q);
+    }
+
+    function calculateAnswerAndDraw(q) {
+        // Base triangle ABC sides
+        let a1 = q.a, b1 = q.b, c1 = q.c;
+        // Scaled triangle DEF sides
+        let a2 = a1 * q.scale;
+        let b2 = b1 * q.scale;
+        let c2 = c1 * q.scale;
+
+        let display_a2 = a2, display_b2 = b2, display_c2 = c2;
+
+        if (q.target === "DEF_a") {
+            currentCorrectAnswer = a2;
+            display_a2 = "x";
+        } else if (q.target === "DEF_b") {
+            currentCorrectAnswer = b2;
+            display_b2 = "x";
+        } else if (q.target === "DEF_c") {
+            currentCorrectAnswer = c2;
+            display_c2 = "x";
+        } else if (q.target === "algebra_1") {
+            // EF = 2x + 1 = a2 => 2x = a2 - 1 => x = (a2 - 1)/2
+            currentCorrectAnswer = (a2 - 1) / 2;
+            display_a2 = "2x + 1";
+        } else if (q.target === "algebra_2") {
+            // DF = x - 2 = b2 => x = b2 + 2
+            currentCorrectAnswer = b2 + 2;
+            display_b2 = "x - 2";
+        }
+
+        renderSVG(a1, b1, c1, display_a2, display_b2, display_c2, c2);
+    }
+
+    function renderSVG(a1, b1, c1, a2_str, b2_str, c2_str, actual_c2) {
+        const svg = document.getElementById('svg-canvas');
+        
+        // Render two simple triangles side by side
+        svg.innerHTML = `
+            <g transform="translate(30, 20)">
+                <polygon points="10,140 130,140 40,40" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/>
+                <text x="5" y="155" font-size="12" fill="#333">B</text>
+                <text x="135" y="155" font-size="12" fill="#333">C</text>
+                <text x="35" y="30" font-size="12" fill="#333">A</text>
+                
+                <text x="70" y="158" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e1b4b">${a1}</text>
+                <text x="15" y="90" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e1b4b">${c1}</text>
+                <text x="95" y="90" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e1b4b">${b1}</text>
+            </g>
+
+            <g transform="translate(250, 10)">
+                <polygon points="10,160 170,160 50,30" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+                <text x="5" y="175" font-size="12" fill="#333">E</text>
+                <text x="175" y="175" font-size="12" fill="#333">F</text>
+                <text x="45" y="20" font-size="12" fill="#333">D</text>
+
+                <text x="90" y="178" font-size="13" font-weight="bold" text-anchor="middle" fill="#78350f">${a2_str}</text>
+                <text x="15" y="100" font-size="13" font-weight="bold" text-anchor="middle" fill="#78350f">${c2_str}</text>
+                <text x="125" y="100" font-size="13" font-weight="bold" text-anchor="middle" fill="#78350f">${b2_str}</text>
+            </g>
+        `;
+    }
+
+    function checkAnswer() {
+        const userVal = parseFloat(document.getElementById('user-answer').value);
+        const feedback = document.getElementById('feedback');
+        
+        if (isNaN(userVal)) {
+            feedback.className = 'feedback incorrect';
+            feedback.innerText = 'Please enter a valid numeric answer.';
+            return;
+        }
+
+        // Allow small rounding tolerance for floating points
+        const isCorrect = Math.abs(userVal - currentCorrectAnswer) < 0.05;
+
+        if (isCorrect) {
+            feedback.className = 'feedback correct';
+            feedback.innerText = 'Correct! Great job.';
+            score++;
+            document.getElementById('score').innerText = `Score: ${score}`;
+        } else {
+            feedback.className = 'feedback incorrect';
+            feedback.innerText = `Incorrect. The correct answer was ${currentCorrectAnswer}.`;
+        }
+
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function toggleHint() {
+        const hintBox = document.getElementById('hint-box');
+        hintBox.style.display = hintBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            initQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        document.getElementById('quiz-body').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `Your final score is ${score} out of ${questions.length}.`;
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        document.getElementById('score').innerText = `Score: 0`;
+        document.getElementById('end-screen').classList.add('hidden');
+        document.getElementById('quiz-body').classList.remove('hidden');
+        initQuestion();
+    }
+
+    // Initialize first question on load
+    initQuestion();
+</script>
+
+</body>
+</html>

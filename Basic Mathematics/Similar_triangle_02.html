@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Similar Triangles Practice: Shared Sides & Overlaps</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --correct: #16a34a;
+            --incorrect: #dc2626;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 720px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: var(--text);
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .easy { background-color: #dcfce7; color: #15803d; }
+        .medium { background-color: #fef9c3; color: #a16207; }
+        .hard { background-color: #fee2e2; color: #b91c1c; }
+
+        .question-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 260px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.secondary {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        button.secondary:hover {
+            background-color: #f1f5f9;
+            color: var(--text);
+        }
+
+        .feedback {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback.correct {
+            display: block;
+            background-color: #dcfce7;
+            color: var(--correct);
+            border: 1px solid #bbf7d0;
+        }
+
+        .feedback.incorrect {
+            display: block;
+            background-color: #fee2e2;
+            color: var(--incorrect);
+            border: 1px solid #fecaca;
+        }
+
+        .hint-box {
+            display: none;
+            background-color: #eff6ff;
+            color: #1e40af;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #bfdbfe;
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .end-screen {
+            text-align: center;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Shared-Side Triangles</h1>
+        <div class="stats">
+            <span id="question-count">Q: 1/10</span>
+            <span id="score">Score: 0</span>
+        </div>
+    </header>
+
+    <main id="quiz-body">
+        <div class="question-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="difficulty-badge" class="badge easy">Easy</span>
+            </div>
+            
+            <p class="question-text" id="question-text">Loading question...</p>
+            
+            <div class="canvas-container">
+                <svg id="svg-canvas" viewBox="0 0 500 240"></svg>
+            </div>
+
+            <div class="input-group">
+                <label for="user-answer"><strong>x =</strong></label>
+                <input type="number" id="user-answer" step="any" placeholder="Enter value">
+                <button id="submit-btn" onclick="checkAnswer()">Submit</button>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+            <div id="hint-box" class="hint-box"></div>
+        </div>
+
+        <div class="actions" style="margin-top: 10px;">
+            <button class="secondary" onclick="toggleHint()">Show Hint</button>
+            <button id="next-btn" class="hidden" onclick="nextQuestion()">Next Question &rarr;</button>
+        </div>
+    </main>
+
+    <div id="end-screen" class="end-screen hidden">
+        <h2>Practice Complete! 🎉</h2>
+        <p id="final-score" style="font-size: 1.25rem;">Your final score is 0 out of 10.</p>
+        <button onclick="restartQuiz()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // Level 1: Nested Triangles with Parallel Line (Easy)
+        {
+            type: "nested",
+            difficulty: "easy",
+            text: "Line DE is parallel to BC, forming nested similar triangles △ADE ~ △ABC. Given AD = 4, DB = 2, and DE = 6, find the length of base BC (x).",
+            ad: 4, db: 2, de: 6,
+            target: "bc",
+            answer: 9,
+            hint: "The entire side AB = AD + DB = 6. Set up ratio: AD / AB = DE / BC => 4 / 6 = 6 / x."
+        },
+        {
+            type: "nested",
+            difficulty: "easy",
+            text: "Line DE is parallel to BC (△ADE ~ △ABC). Given AD = 3, AB = 9, and BC = 12, find length DE (x).",
+            ad: 3, db: 6, de: "x",
+            target: "de",
+            answer: 4,
+            hint: "Set up the ratio of small side to large side: AD / AB = DE / BC => 3 / 9 = x / 12."
+        },
+        {
+            type: "nested",
+            difficulty: "easy",
+            text: "Line DE is parallel to BC. If AD = 5, DB = 5, and AE = 6, find length AC (x).",
+            ad: 5, db: 5, de: 7,
+            target: "ac",
+            answer: 12,
+            hint: "Side AB = AD + DB = 10. The ratio is AD / AB = 5 / 10 = 1/2. Thus AE / AC = 1/2 => 6 / x = 1/2."
+        },
+
+        // Level 2: Shared Altitude Right Triangles & Bowtie Triangles (Medium)
+        {
+            type: "right_altitude",
+            difficulty: "medium",
+            text: "Right triangle △ABC has altitude BD to hypotenuse AC, splitting it into two similar right triangles (△ABD ~ △BCD). If AD = 4 and CD = 9, find altitude BD (x).",
+            ad: 4, cd: 9,
+            target: "bd",
+            answer: 6,
+            hint: "By Geometric Mean Theorem: BD² = AD × CD => x² = 4 × 9 = 36."
+        },
+        {
+            type: "bowtie",
+            difficulty: "medium",
+            text: "Lines AB and CD intersect at point E, where AB ∥ CD forming similar triangles △ABE ~ △CDE. If AE = 6, EC = 9, and BE = 8, find length ED (x).",
+            ae: 6, ec: 9, be: 8,
+            target: "ed",
+            answer: 12,
+            hint: "Corresponding sides are proportional: AE / EC = BE / ED => 6 / 9 = 8 / x."
+        },
+        {
+            type: "right_altitude",
+            difficulty: "medium",
+            text: "Altitude BD is drawn to hypotenuse AC in right triangle △ABC. If AD = 3 and altitude BD = 6, find length CD (x).",
+            ad: 3, cd: "x",
+            target: "cd",
+            answer: 12,
+            hint: "Use BD² = AD × CD => 6² = 3 × x => 36 = 3x."
+        },
+        {
+            type: "nested",
+            difficulty: "medium",
+            text: "Line DE ∥ BC. Given AD = 8, DB = 4, and AC = 18, find length AE (x).",
+            ad: 8, db: 4,
+            target: "ae",
+            answer: 12,
+            hint: "AB = AD + DB = 12. Ratio AD / AB = 8 / 12 = 2/3. Set AE = (2/3) × AC = (2/3) × 18."
+        },
+
+        // Level 3: Algebraic Equations on Shared Sides (Hard)
+        {
+            type: "nested_algebra",
+            difficulty: "hard",
+            text: "Line DE ∥ BC (△ADE ~ △ABC). If AD = x, DB = 3, AE = 8, and EC = 6, solve for x.",
+            db: 3, ae: 8, ec: 6,
+            target: "x_side",
+            answer: 4,
+            hint: "By Side-Splitter Theorem: AD / DB = AE / EC => x / 3 = 8 / 6."
+        },
+        {
+            type: "nested_algebra",
+            difficulty: "hard",
+            text: "Line DE ∥ BC. If AD = 6, DB = x - 2, AE = 9, and EC = 6, solve for x.",
+            ad: 6, ae: 9, ec: 6,
+            target: "x_algebra",
+            answer: 6,
+            hint: "Set up proportion: AD / DB = AE / EC => 6 / (x - 2) = 9 / 6. Solve for x."
+        },
+        {
+            type: "right_altitude",
+            difficulty: "hard",
+            text: "In right triangle △ABC with altitude BD, AD = x, CD = x + 5, and altitude BD = 6. Solve for x.",
+            bd: 6,
+            target: "x_quadratic",
+            answer: 4,
+            hint: "BD² = AD × CD => 6² = x(x + 5) => x² + 5x - 36 = 0. Factor to find positive root x."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let currentCorrectAnswer = 0;
+
+    function initQuestion() {
+        const q = questions[currentIdx];
+        
+        document.getElementById('question-count').innerText = `Q: ${currentIdx + 1}/${questions.length}`;
+        const badge = document.getElementById('difficulty-badge');
+        badge.innerText = q.difficulty.toUpperCase();
+        badge.className = `badge ${q.difficulty}`;
+        
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('user-answer').value = '';
+        document.getElementById('feedback').className = 'feedback';
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('hint-box').innerText = q.hint;
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('submit-btn').disabled = false;
+
+        currentCorrectAnswer = q.answer;
+        renderSVG(q);
+    }
+
+    function renderSVG(q) {
+        const svg = document.getElementById('svg-canvas');
+        svg.innerHTML = '';
+
+        if (q.type === "nested" || q.type === "nested_algebra") {
+            let label_ad = q.ad !== undefined ? q.ad : "x";
+            let label_db = q.db !== undefined ? q.db : (q.target === "x_algebra" ? "x - 2" : "DB");
+            let label_ae = q.ae !== undefined ? q.ae : "AE";
+            let label_ec = q.ec !== undefined ? q.ec : "EC";
+            let label_de = q.de !== undefined ? q.de : "DE";
+            let label_bc = q.target === "bc" ? "x" : "BC";
+
+            if (q.target === "de") label_de = "x";
+            if (q.target === "ac") label_ec = "EC";
+            if (q.target === "ae") label_ae = "x";
+
+            svg.innerHTML = `
+                <g transform="translate(100, 20)">
+                    <polygon points="150,10 30,190 270,190" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="70" y1="130" x2="230" y2="130" stroke="#d97706" stroke-width="2.5" stroke-dasharray="4"/>
+
+                    <text x="145" y="0" font-weight="bold" font-size="14">A</text>
+                    <text x="15" y="205" font-weight="bold" font-size="14">B</text>
+                    <text x="275" y="205" font-weight="bold" font-size="14">C</text>
+                    <text x="50" y="130" font-weight="bold" font-size="14">D</text>
+                    <text x="240" y="130" font-weight="bold" font-size="14">E</text>
+
+                    <text x="95" y="70" font-size="13" fill="#1e40af" font-weight="bold">${label_ad}</text>
+                    <text x="35" y="165" font-size="13" fill="#1e40af" font-weight="bold">${label_db}</text>
+                    <text x="195" y="70" font-size="13" fill="#1e40af" font-weight="bold">${label_ae}</text>
+                    <text x="250" y="165" font-size="13" fill="#1e40af" font-weight="bold">${label_ec}</text>
+                    <text x="145" y="123" font-size="13" fill="#b45309" font-weight="bold">${label_de}</text>
+                    <text x="145" y="210" font-size="13" fill="#1e40af" font-weight="bold">${label_bc}</text>
+                </g>
+            `;
+        } else if (q.type === "right_altitude") {
+            let label_ad = q.ad !== undefined ? q.ad : (q.target === "x_quadratic" ? "x" : "AD");
+            let label_cd = q.cd !== undefined ? q.cd : (q.target === "x_quadratic" ? "x + 5" : "CD");
+            let label_bd = q.bd !== undefined ? q.bd : (q.target === "bd" ? "x" : "BD");
+
+            svg.innerHTML = `
+                <g transform="translate(80, 20)">
+                    <polygon points="20,180 300,180 120,40" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="120" y1="40" x2="120" y2="180" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="4"/>
+
+                    <text x="5" y="195" font-weight="bold" font-size="14">A</text>
+                    <text x="115" y="25" font-weight="bold" font-size="14">B</text>
+                    <text x="305" y="195" font-weight="bold" font-size="14">C</text>
+                    <text x="115" y="200" font-weight="bold" font-size="14">D</text>
+
+                    <rect x="120" y="165" width="15" height="15" fill="none" stroke="#333" stroke-width="1.5"/>
+
+                    <text x="65" y="198" font-size="13" fill="#1e40af" font-weight="bold">${label_ad}</text>
+                    <text x="200" y="198" font-size="13" fill="#1e40af" font-weight="bold">${label_cd}</text>
+                    <text x="128" y="110" font-size="13" fill="#b91c1c" font-weight="bold">${label_bd}</text>
+                </g>
+            `;
+        } else if (q.type === "bowtie") {
+            svg.innerHTML = `
+                <g transform="translate(100, 20)">
+                    <polygon points="30,30 270,30 30,170 270,170" fill="none" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="30" y1="30" x2="270" y2="30" stroke="#2563eb" stroke-width="2.5"/>
+                    <line x1="30" y1="170" x2="270" y2="170" stroke="#2563eb" stroke-width="2.5"/>
+
+                    <text x="15" y="30" font-weight="bold" font-size="14">A</text>
+                    <text x="275" y="30" font-weight="bold" font-size="14">B</text>
+                    <text x="15" y="180" font-weight="bold" font-size="14">C</text>
+                    <text x="275" y="180" font-weight="bold" font-size="14">D</text>
+                    <text x="145" y="90" font-weight="bold" font-size="14">E</text>
+
+                    <text x="75" y="60" font-size="13" fill="#1e40af" font-weight="bold">${q.ae}</text>
+                    <text x="210" y="60" font-size="13" fill="#1e40af" font-weight="bold">${q.be}</text>
+                    <text x="75" y="150" font-size="13" fill="#1e40af" font-weight="bold">${q.ec}</text>
+                    <text x="210" y="150" font-size="13" fill="#b91c1c" font-weight="bold">x</text>
+                </g>
+            `;
+        }
+    }
+
+    function checkAnswer() {
+        const userVal = parseFloat(document.getElementById('user-answer').value);
+        const feedback = document.getElementById('feedback');
+        
+        if (isNaN(userVal)) {
+            feedback.className = 'feedback incorrect';
+            feedback.innerText = 'Please enter a valid numeric value.';
+            return;
+        }
+
+        const isCorrect = Math.abs(userVal - currentCorrectAnswer) < 0.05;
+
+        if (isCorrect) {
+            feedback.className = 'feedback correct';
+            feedback.innerText = 'Correct! Great problem solving.';
+            score++;
+            document.getElementById('score').innerText = `Score: ${score}`;
+        } else {
+            feedback.className = 'feedback incorrect';
+            feedback.innerText = `Incorrect. The correct answer was ${currentCorrectAnswer}.`;
+        }
+
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function toggleHint() {
+        const hintBox = document.getElementById('hint-box');
+        hintBox.style.display = hintBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            initQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        document.getElementById('quiz-body').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `Your final score is ${score} out of ${questions.length}.`;
+    }
+
+    function restartQuiz() {
+        currentIdx = 0;
+        score = 0;
+        document.getElementById('score').innerText = `Score: 0`;
+        document.getElementById('end-screen').classList.add('hidden');
+        document.getElementById('quiz-body').classList.remove('hidden');
+        initQuestion();
+    }
+
+    // Initialize first question
+    initQuestion();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sig Fig Practice: Type 1 & Type 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .type-badge {
+            display: inline-block;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .question-box {
+            font-size: 1.2em;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-left: 4px solid #0284c7;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        .correct { color: #15803d; }
+        .incorrect { color: #b91c1c; }
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #4b5563;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sig Fig Practice</h1>
+    
+    <div id="type-badge" class="type-badge">Type 1: Counting</div>
+    <div id="question" class="question-box">Question loads here...</div>
+
+    <div class="input-group">
+        <input type="text" id="user-answer" placeholder="Type your answer...">
+        <button onclick="checkAnswer()">Submit</button>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+    <div id="explanation" class="explanation"></div>
+
+    <div class="controls">
+        <button onclick="generateQuestion()" style="background-color: #4b5563;">Next Question</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // Type 1: Counting
+        { type: "Type 1: Counting Sig Figs", q: "How many significant figures are in 0.004050?", a: "4", exp: "Leading zeros are placeholders. Sandwich zero and trailing zero after decimal count (4, 0, 5, 0)." },
+        { type: "Type 1: Counting Sig Figs", q: "How many significant figures are in 100.0?", a: "4", exp: "A decimal point makes trailing zeros significant, including sandwich zeros." },
+        { type: "Type 1: Counting Sig Figs", q: "How many significant figures are in 50,200?", a: "3", exp: "Without a decimal point, trailing zeros are non-significant placeholders." },
+        { type: "Type 1: Counting Sig Figs", q: "How many significant figures are in 0.0702?", a: "3", exp: "Leading zeros do not count. The digits 7, 0, and 2 are significant." },
+
+        // Type 2: Rounding
+        { type: "Type 2: Rounding Sig Figs", q: "Round 0.08264 to 2 significant figures.", a: "0.083", exp: "First non-zero is 8. Round up 2 to 3 because the next digit is 6." },
+        { type: "Type 2: Rounding Sig Figs", q: "Round 48,720 to 2 significant figures.", a: "49000", exp: "Round 48 up to 49 because the next digit is 7. Add placeholder zeros to keep the value." },
+        { type: "Type 2: Rounding Sig Figs", q: "Round 305.15 to 3 significant figures.", a: "305", exp: "The first 3 significant figures are 3, 0, 5. The next digit is 1, so do not round up." },
+        { type: "Type 2: Rounding Sig Figs", q: "Round 0.004928 to 1 significant figure.", a: "0.005", exp: "First non-zero digit is 4. The next digit is 9, so round 4 up to 5." }
+    ];
+
+    let currentQ = {};
+
+    function generateQuestion() {
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('explanation').innerText = '';
+        document.getElementById('user-answer').value = '';
+        
+        const randomIndex = Math.floor(Math.random() * questions.length);
+        currentQ = questions[randomIndex];
+
+        document.getElementById('type-badge').innerText = currentQ.type;
+        document.getElementById('question').innerText = currentQ.q;
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById('user-answer').value.trim();
+        const feedback = document.getElementById('feedback');
+        const explanation = document.getElementById('explanation');
+
+        if (!input) return;
+
+        if (input === currentQ.a) {
+            feedback.innerText = "Correct!";
+            feedback.className = "feedback correct";
+        } else {
+            feedback.innerText = `Incorrect. Correct answer: ${currentQ.a}`;
+            feedback.className = "feedback incorrect";
+        }
+        explanation.innerText = `Explanation: ${currentQ.exp}`;
+    }
+
+    window.onload = generateQuestion;
+</script>
+
+</body>
+</html>
