@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Heat Conduction Simulation - High Density & Cascade</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="text-center max-w-3xl mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-amber-400 mb-2 flex items-center justify-center gap-3">
+            <i class="fa-solid fa-fire text-orange-500"></i> Thermal Conduction Simulation
+        </h1>
+        <p class="text-slate-300 text-sm md:text-base">
+            Detailed visualization with higher particle/electron density. Watch how electrons strike distant atoms and trigger a cascading ripple effect to neighboring particles!
+        </p>
+    </header>
+
+    <!-- Main Interactive Dashboard -->
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!------------------------------------------------------------------------>
+        <!-- SCENARIO 1: Non-Metal / Lattice Vibration (Fig 1.22)               -->
+        <!------------------------------------------------------------------------>
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 flex flex-col shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-semibold px-2.5 py-1 bg-slate-700 text-slate-300 rounded-full">Fig 1.22</span>
+                    <h2 class="text-xl font-bold text-slate-100 mt-2">Non-Metals (Lattice Vibration)</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Transfer Rate</span>
+                    <span class="text-sm font-bold text-blue-400">Very Slow 🐢</span>
+                </div>
+            </div>
+            
+            <p class="text-slate-300 text-xs md:text-sm mb-4 min-h-[40px]">
+                Vibrations pass step-by-step slowly via direct collisions between neighbouring molecules only.
+            </p>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full h-72 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <canvas id="canvasNonMetal" class="w-full h-full cursor-pointer"></canvas>
+                <div class="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded text-[10px] text-slate-400 pointer-events-none">
+                    Click bottom-left to apply heat
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="mt-6 flex items-center justify-between gap-4">
+                <button onclick="applyHeat('nonmetal')" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30">
+                    <i class="fa-solid fa-fire-flame-curved"></i> Apply Heat Pulse
+                </button>
+                <button onclick="resetSimulation('nonmetal')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2.5 px-4 rounded-xl transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!------------------------------------------------------------------------>
+        <!-- SCENARIO 2: Metals / Dual Conduction Mechanism (Fig 1.23)          -->
+        <!------------------------------------------------------------------------>
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 flex flex-col shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-semibold px-2.5 py-1 bg-amber-900/50 text-amber-300 rounded-full border border-amber-700/50">Fig 1.23</span>
+                    <h2 class="text-xl font-bold text-slate-100 mt-2">Metals (Electrons + Cascade)</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Transfer Rate</span>
+                    <span class="text-sm font-bold text-emerald-400">Fast ⚡</span>
+                </div>
+            </div>
+            
+            <p class="text-slate-300 text-xs md:text-sm mb-4 min-h-[40px]">
+                Free electrons travel long distances, strike distant atoms, and <b>cascade energy to neighbors</b>.
+            </p>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full h-72 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <canvas id="canvasMetal" class="w-full h-full cursor-pointer"></canvas>
+                <div class="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded text-[10px] text-slate-400 pointer-events-none">
+                    Click bottom-left to apply heat
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="mt-6 flex items-center justify-between gap-4">
+                <button onclick="applyHeat('metal')" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-900/30">
+                    <i class="fa-solid fa-bolt"></i> Apply Heat Pulse
+                </button>
+                <button onclick="resetSimulation('metal')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2.5 px-4 rounded-xl transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Global Controls -->
+    <footer class="mt-8 w-full max-w-6xl bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 text-sm text-slate-300">
+        <div class="flex items-center gap-3">
+            <span class="font-semibold text-slate-200"><i class="fa-solid fa-sliders text-amber-400 mr-1"></i> Global Controls:</span>
+            <button onclick="triggerBoth()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">Simultaneous Test</button>
+        </div>
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <span>Simulation Speed:</span>
+                <input type="range" id="speedRange" min="0.2" max="1.2" step="0.1" value="0.4" class="accent-amber-500 cursor-pointer">
+            </label>
+        </div>
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        class ConductionSim {
+            constructor(canvasId, isMetal) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.isMetal = isMetal;
+
+                // Increased grid resolution (More particles)
+                this.cols = 10;
+                this.rows = 5;
+                this.atoms = [];
+                this.electrons = [];
+                
+                this.initDimensions();
+                this.reset();
+
+                // Mouse interaction to inject heat
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    let closest = this.atoms[0];
+                    let minDist = Infinity;
+                    this.atoms.forEach(atom => {
+                        let dist = Math.hypot(atom.x - x, atom.y - y);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            closest = atom;
+                        }
+                    });
+                    if (minDist < 40) {
+                        closest.energy = Math.min(100, closest.energy + 90);
+                        if (this.isMetal) {
+                            this.electrons.forEach(el => {
+                                if (Math.hypot(el.x - closest.x, el.y - closest.y) < 40) {
+                                    el.energy = 100;
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+            initDimensions() {
+                this.width = this.canvas.clientWidth;
+                this.height = this.canvas.clientHeight;
+                this.canvas.width = this.width * window.devicePixelRatio;
+                this.canvas.height = this.height * window.devicePixelRatio;
+                this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            }
+
+            reset() {
+                this.atoms = [];
+                this.electrons = [];
+
+                const paddingX = 40;
+                const paddingY = 30;
+                const usableWidth = (this.width - paddingX * 2);
+                const usableHeight = (this.height - paddingY * 2);
+
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        let x = paddingX + (c / (this.cols - 1)) * usableWidth;
+                        let y = paddingY + (r / (this.rows - 1)) * usableHeight;
+                        let isInitialHeat = (c === 0 && r === this.rows - 1);
+                        this.atoms.push({
+                            baseX: x,
+                            baseY: y,
+                            x: x,
+                            y: y,
+                            energy: isInitialHeat ? 100 : 0,
+                            row: r,
+                            col: c
+                        });
+                    }
+                }
+
+                // Add MORE free electrons for the metal scenario (increased density)
+                if (this.isMetal) {
+                    for (let i = 0; i < 100; i++) {
+                        this.electrons.push({
+                            x: Math.random() * this.width,
+                            y: Math.random() * this.height,
+                            vx: (Math.random() - 0.5) * 20,
+                            vy: (Math.random() - 0.5) * 20,
+                            energy: 0
+                        });
+                    }
+                }
+            }
+
+            heatSource() {
+                let target = this.atoms.find(a => a.col === 0 && a.row === this.rows - 1);
+                if (target) target.energy = 100;
+
+                if (this.isMetal) {
+                    this.electrons.forEach(el => {
+                        if (el.x < this.width * 0.25 && el.y > this.height * 0.5) {
+                            el.energy = 100;
+                        }
+                    });
+                }
+            }
+
+            update(speedMultiplier) {
+                let energies = this.atoms.map(a => a.energy);
+
+                // --- 1. SLOW NEIGHBOR CONDUCTION (Cascade / Chain reaction) ---
+                for (let i = 0; i < this.atoms.length; i++) {
+                    let atom = this.atoms[i];
+                    
+                    // Gradual cooling
+                    if (energies[i] > 0) {
+                        energies[i] -= 0.05 * speedMultiplier; 
+                        if (energies[i] < 0) energies[i] = 0;
+                    }
+
+                    // Spread energy smoothly to immediate neighboring atoms
+                    let neighbors = this.atoms.filter(other => {
+                        let dc = Math.abs(other.col - atom.col);
+                        let dr = Math.abs(other.row - atom.row);
+                        return (dc + dr === 1);
+                    });
+
+                    neighbors.forEach(n => {
+                        let nIdx = this.atoms.indexOf(n);
+                        if (atom.energy > n.energy) {
+                            // Slow, controlled transfer rate for clear visualization
+                            let rate = 0.015; 
+                            let diff = (atom.energy - n.energy) * rate * speedMultiplier;
+                            energies[nIdx] += diff;
+                        }
+                    });
+                }
+
+                for (let i = 0; i < this.atoms.length; i++) {
+                    this.atoms[i].energy = Math.max(0, Math.min(100, energies[i]));
+                    if (this.atoms[i].col === 0 && this.atoms[i].row === this.rows - 1) {
+                        this.atoms[i].energy = Math.max(this.atoms[i].energy, 95);
+                    }
+                }
+
+                // --- 2. FREE ELECTRON & FAR PARTICLE COLLISIONS (Metals only) ---
+                if (this.isMetal) {
+                    this.electrons.forEach(el => {
+                        el.x += el.vx * speedMultiplier;
+                        el.y += el.vy * speedMultiplier;
+
+                        // Wall boundaries bounce
+                        if (el.x < 10 || el.x > this.width - 10) el.vx *= -1;
+                        if (el.y < 10 || el.y > this.height - 10) el.vy *= -1;
+
+                        // Check collisions with atoms across the grid
+                        this.atoms.forEach(atom => {
+                            let dist = Math.hypot(atom.x - el.x, atom.y - el.y);
+                            
+                            // A) Charge up near bottom-left heat source
+                            if (atom.col === 0 && atom.row === this.rows - 1 && dist < 25) {
+                                el.energy = 100;
+                            }
+
+                            // B) Hit a distant atom: Transfer energy, which then cascades to neighbors via step 1!
+                            if (dist < 12 && el.energy > 30) {
+                                atom.energy = Math.min(100, atom.energy + el.energy * 0.7);
+                                el.energy *= 0.15; // Electron discharges energy payload
+                            }
+                        });
+                    });
+                }
+
+                // Update physical vibration visual offsets (smaller particles)
+                this.atoms.forEach(atom => {
+                    if (atom.energy > 5) {
+                        let intensity = atom.energy / 100;
+                        let angle = Math.random() * Math.PI * 2;
+                        let offset = intensity * 3.5;
+                        atom.x = atom.baseX + Math.cos(angle) * offset;
+                        atom.y = atom.baseY + Math.sin(angle) * offset;
+                    } else {
+                        atom.x = atom.baseX;
+                        atom.y = atom.baseY;
+                    }
+                });
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                // Heat source indicator
+                this.ctx.save();
+                this.ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+                this.ctx.beginPath();
+                this.ctx.arc(40, this.height - 30, 30, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.fillStyle = '#ef4444';
+                this.ctx.font = '10px sans-serif';
+                this.ctx.fillText('▲ HEAT', 20, this.height - 10);
+                this.ctx.restore();
+
+                // Draw structural grid bonds (faint lines)
+                this.ctx.strokeStyle = 'rgba(100, 116, 139, 0.15)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i < this.atoms.length; i++) {
+                    for (let j = i + 1; j < this.atoms.length; j++) {
+                        let a1 = this.atoms[i];
+                        let a2 = this.atoms[j];
+                        if (Math.hypot(a1.baseX - a2.baseX, a1.baseY - a2.baseY) < 65) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(a1.x, a1.y);
+                            this.ctx.lineTo(a2.x, a2.y);
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+
+                // Draw free electrons for metal (high density, smaller dots)
+                if (this.isMetal) {
+                    this.electrons.forEach(el => {
+                        this.ctx.beginPath();
+                        let isHot = el.energy > 30;
+                        this.ctx.fillStyle = isHot ? '#f59e0b' : '#38bdf8';
+                        this.ctx.arc(el.x, el.y, isHot ? 2.5 : 1.8, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    });
+                }
+
+                // Draw Smaller Particles / Atoms
+                const radius = 6; // Smaller particle footprint
+                this.atoms.forEach(atom => {
+                    this.ctx.beginPath();
+                    let t = atom.energy / 100;
+                    let red = Math.floor(100 + 155 * t);
+                    let green = Math.floor(100 + (30 - 100) * t);
+                    let blue = Math.floor(110 + (20 - 110) * t);
+                    
+                    this.ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+                    this.ctx.arc(atom.x, atom.y, radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Vibration wave rings for hot atoms
+                    if (atom.energy > 25) {
+                        this.ctx.strokeStyle = `rgba(255, 150, 50, ${t})`;
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(atom.x, atom.y, radius + 2.5, Math.PI * 0.7, Math.PI * 1.3);
+                        this.ctx.stroke();
+                        this.ctx.beginPath();
+                        this.ctx.arc(atom.x, atom.y, radius + 2.5, -Math.PI * 0.3, Math.PI * 0.3);
+                        this.ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        const simNonMetal = new ConductionSim('canvasNonMetal', false);
+        const simMetal = new ConductionSim('canvasMetal', true);
+
+        function applyHeat(type) {
+            if (type === 'nonmetal' || type === 'both') simNonMetal.heatSource();
+            if (type === 'metal' || type === 'both') simMetal.heatSource();
+        }
+
+        function resetSimulation(type) {
+            if (type === 'nonmetal') simNonMetal.reset();
+            if (type === 'metal') simMetal.reset();
+        }
+
+        function triggerBoth() {
+            applyHeat('both');
+        }
+
+        window.addEventListener('resize', () => {
+            simNonMetal.initDimensions();
+            simMetal.initDimensions();
+        });
+
+        function animate() {
+            const speedMultiplier = parseFloat(document.getElementById('speedRange').value);
+            simNonMetal.update(speedMultiplier);
+            simNonMetal.draw();
+            simMetal.update(speedMultiplier);
+            simMetal.draw();
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

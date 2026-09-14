@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermometer Calibration & Linear Relations</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent-orange: #ea580c;
+      --accent-green: #16a34a;
+      --accent-red: #dc2626;
+      --accent-purple: #9333ea;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Simulation Layout */
+    .sim-panel {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      justify-content: space-around;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .thermometer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    canvas {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .slider-group {
+      margin: 16px 0;
+    }
+
+    .slider-group label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      accent-color: var(--primary);
+    }
+
+    /* Mathematical Typography & Fraction Engine */
+    .math-sym {
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-style: italic;
+    }
+
+    .math-block {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-size: 1.05rem;
+      color: #0f172a;
+    }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      line-height: 1.15;
+    }
+
+    .frac .num {
+      border-bottom: 1.5px solid #334155;
+      padding-bottom: 2px;
+    }
+
+    .frac .den {
+      padding-top: 2px;
+    }
+
+    .formula-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+    }
+
+    .highlight-red { color: var(--accent-red); font-weight: bold; }
+    .highlight-blue { color: var(--primary); font-weight: bold; }
+    .highlight-green { color: var(--accent-green); font-weight: bold; }
+    .highlight-orange { color: var(--accent-orange); font-weight: bold; }
+    .highlight-purple { color: var(--accent-purple); font-weight: bold; }
+
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background-color: var(--primary-dark); }
+    .btn-secondary { background: #64748b; }
+    .btn-secondary:hover { background: #475569; }
+
+    .step-box {
+      border: 1px dashed #cbd5e1;
+      padding: 14px;
+      border-radius: 6px;
+      margin-top: 10px;
+      background: #ffffff;
+    }
+
+    .input-field {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: 100px;
+    }
+
+    .quiz-result {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* Similar Triangles Comparison View */
+    .triangles-panel {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .triangle-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Interactive Physics: Calibrating a Thermometer</h1>
+      <p>Clear mathematical symbols, proportion calculations, and geometry (Example 1.1).</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('explore')">1. Visual Calibration Explorer</button>
+      <button class="tab-btn" onclick="switchTab('walkthrough')">2. Example 1.1 Walkthrough</button>
+      <button class="tab-btn" onclick="switchTab('non-linear')">3. Linear vs Non-Linear (Thermistor)</button>
+      <button class="tab-btn" onclick="switchTab('quiz')">4. Practice Generator</button>
+    </div>
+
+    <!-- TAB 1: VISUAL EXPLORER -->
+    <div id="explore" class="tab-content active">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Controls & Calculated Proportions</h2>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">
+            Liquid column length <span class="math-sym">ℓ</span> increases linearly with temperature <span class="math-sym">θ</span> between calibration points:
+            <strong>(5 °C, 4 cm)</strong> and <strong>(95 °C, 22 cm)</strong>.
+          </p>
+
+          <div class="slider-group">
+            <label>
+              <span>Temperature (<span class="math-sym">θ</span>):</span>
+              <span id="temp-val" class="highlight-red">15 °C</span>
+            </label>
+            <input type="range" id="temp-slider" min="5" max="95" value="15" step="1" oninput="updateSimFromTemp(this.value)">
+          </div>
+
+          <div class="formula-box">
+            <div><strong>Slope / Sensitivity (<span class="math-sym">k</span>):</strong></div>
+            <div class="math-block">
+              <span class="math-sym">k</span> = 
+              <span class="frac"><span class="num">Δ<span class="math-sym">ℓ</span></span><span class="den">Δ<span class="math-sym">θ</span></span></span>
+              =
+              <span class="frac"><span class="num">22 − 4</span><span class="den">95 − 5</span></span>
+              =
+              <span class="frac"><span class="num">18 cm</span><span class="den">90 °C</span></span>
+              =
+              <strong class="highlight-blue">0.20 cm/°C</strong>
+            </div>
+            <hr style="margin:8px 0; border:0; border-top:1px dashed #cbd5e1;">
+            <div><strong>Active Similar Triangle Dimensions:</strong></div>
+            Base (Δ<span class="math-sym">θ</span> = <span class="math-sym">θ</span> − 5 °C): <span id="delta-theta-val" class="highlight-blue">10.0 °C</span><br>
+            Height (Δ<span class="math-sym">ℓ</span> = <span class="math-sym">ℓ</span> − 4 cm): <span id="delta-len-val" class="highlight-orange">2.0 cm</span><br>
+            Total Length (<span class="math-sym">ℓ</span> = 4 + Δ<span class="math-sym">ℓ</span>): <strong id="total-len-val" class="highlight-red">6.0 cm</strong>
+          </div>
+
+          <div style="font-size:0.85rem; color:var(--text-muted);">
+            📐 <strong>Graph Legend:</strong><br>
+            • <span style="color:#94a3b8">Gray dashed line</span>: Full reference triangle (90 °C × 18 cm)<br>
+            • <span style="color:#ea580c">Orange shaded area</span>: Current dynamic triangle (Δ<span class="math-sym">θ</span> × Δ<span class="math-sym">ℓ</span>)
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Thermometer & Calibrated Grid Graph</h2>
+          <div class="sim-panel">
+            <!-- Thermometer Graphic -->
+            <div class="thermometer-container">
+              <div style="font-size:0.8rem; font-weight:bold; margin-bottom:4px;">Thermometer</div>
+              <svg width="75" height="290" viewBox="0 0 75 290">
+                <!-- Scale marks -->
+                <line x1="20" y1="240" x2="35" y2="240" stroke="#94a3b8" stroke-width="2" />
+                <text x="2" y="244" font-size="10" font-family="sans-serif" fill="#64748b">4 cm</text>
+                
+                <line x1="20" y1="40" x2="35" y2="40" stroke="#94a3b8" stroke-width="2" />
+                <text x="0" y="44" font-size="10" font-family="sans-serif" fill="#64748b">22 cm</text>
+
+                <!-- Glass stem -->
+                <rect x="35" y="25" width="14" height="225" rx="7" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+                <!-- Bulb -->
+                <circle cx="42" cy="258" r="14" fill="#ef4444" stroke="#64748b" stroke-width="1.5"/>
+                <!-- Liquid column -->
+                <rect id="liquid-col" x="38" y="220" width="8" height="20" rx="4" fill="#ef4444"/>
+                <text id="tube-reading-text" x="22" y="15" font-size="11" font-weight="bold" font-family="sans-serif" fill="#ef4444">6.0 cm</text>
+              </svg>
+            </div>
+
+            <!-- Coordinate Graph -->
+            <div>
+              <canvas id="graphCanvas" width="340" height="290"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: STEP-BY-STEP EXAMPLE 1.1 -->
+    <div id="walkthrough" class="tab-content">
+      <div class="grid-2">
+        
+        <!-- Part (a) -->
+        <div class="card">
+          <h2>Example 1.1 — Part (a)</h2>
+          <p><strong>Problem:</strong> Temperature rises from <strong>5 °C to 15 °C</strong>. Find the increase in length <strong>Δ<span class="math-sym">ℓ</span></strong>, and the total length <strong><span class="math-sym">ℓ</span></strong> at 15 °C.</p>
+          
+          <!-- Similar Triangles Diagram -->
+          <div class="triangles-panel">
+            <div class="triangle-card">
+              <svg width="95" height="90" viewBox="0 0 95 90">
+                <polygon points="15,70 80,70 80,35" fill="rgba(234,88,12,0.25)" stroke="#ea580c" stroke-width="1.8" />
+                <text x="25" y="85" font-size="11" font-weight="bold" fill="#2563eb">15 − 5</text>
+                <text x="82" y="52" font-size="11" font-weight="bold" fill="#ea580c">Δℓ</text>
+              </svg>
+              <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted)">Small Triangle</span>
+            </div>
+            
+            <div style="font-size:1.8rem; font-weight:bold; color:#2563eb; line-height:1; text-align:center;">
+              ∼
+              <div style="font-size:0.75rem; color:#64748b; font-weight:normal;">similar</div>
+            </div>
+
+            <div class="triangle-card">
+              <svg width="135" height="90" viewBox="0 0 135 90">
+                <polygon points="15,70 120,70 120,10" fill="rgba(37,99,235,0.12)" stroke="#2563eb" stroke-width="1.8" />
+                <text x="50" y="85" font-size="11" font-weight="bold" fill="#2563eb">95 − 5</text>
+                <text x="122" y="45" font-size="11" font-weight="bold" fill="#ea580c">18</text>
+              </svg>
+              <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted)">Reference Triangle</span>
+            </div>
+          </div>
+
+          <button class="btn" onclick="revealStep('step-a1')">Step 1: Set Up Proportion</button>
+          <div id="step-a1" class="step-box" style="display:none;">
+            <div class="math-block">
+              <span class="frac"><span class="num">Δ<span class="math-sym">ℓ</span></span><span class="den">15 − 5</span></span>
+              =
+              <span class="frac"><span class="num">22 − 4</span><span class="den">95 − 5</span></span>
+              &nbsp;⟹&nbsp;
+              <span class="frac"><span class="num">Δ<span class="math-sym">ℓ</span></span><span class="den">10</span></span>
+              =
+              <span class="frac"><span class="num">18</span><span class="den">90</span></span>
+            </div>
+            <button class="btn" style="margin-top:8px;" onclick="revealStep('step-a2')">Step 2: Solve for Δℓ</button>
+          </div>
+
+          <div id="step-a2" class="step-box" style="display:none;">
+            <div class="math-block">
+              Δ<span class="math-sym">ℓ</span> = 
+              <span class="frac"><span class="num">18</span><span class="den">90</span></span>
+              × 10 = 0.2 × 10 = <strong class="highlight-green">&nbsp;2 cm</strong>
+            </div>
+            <button class="btn" style="margin-top:8px;" onclick="revealStep('step-a3')">Step 3: Total Length at 15 °C</button>
+          </div>
+
+          <div id="step-a3" class="step-box" style="display:none;">
+            <div class="math-block">
+              <span class="math-sym">ℓ</span> = <span class="math-sym">ℓ</span><sub>0</sub> + Δ<span class="math-sym">ℓ</span> = 4 cm + 2 cm = <strong class="highlight-red">&nbsp;6 cm</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part (b) -->
+        <div class="card">
+          <h2>Example 1.1 — Part (b)</h2>
+          <p><strong>Problem:</strong> What is the temperature <strong><span class="math-sym">θ</span></strong> when the length is <strong>13 cm</strong>?</p>
+          
+          <!-- Similar Triangles Diagram -->
+          <div class="triangles-panel">
+            <div class="triangle-card">
+              <svg width="95" height="90" viewBox="0 0 95 90">
+                <polygon points="15,70 80,70 80,30" fill="rgba(147,51,234,0.25)" stroke="#9333ea" stroke-width="1.8" />
+                <text x="30" y="85" font-size="11" font-weight="bold" fill="#2563eb">θ − 5</text>
+                <text x="82" y="52" font-size="11" font-weight="bold" fill="#9333ea">9</text>
+              </svg>
+              <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted)">Small (Height = 13 − 4 = 9)</span>
+            </div>
+            
+            <div style="font-size:1.8rem; font-weight:bold; color:#2563eb; line-height:1; text-align:center;">
+              ∼
+              <div style="font-size:0.75rem; color:#64748b; font-weight:normal;">similar</div>
+            </div>
+
+            <div class="triangle-card">
+              <svg width="135" height="90" viewBox="0 0 135 90">
+                <polygon points="15,70 120,70 120,10" fill="rgba(37,99,235,0.12)" stroke="#2563eb" stroke-width="1.8" />
+                <text x="50" y="85" font-size="11" font-weight="bold" fill="#2563eb">95 − 5</text>
+                <text x="122" y="45" font-size="11" font-weight="bold" fill="#ea580c">18</text>
+              </svg>
+              <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted)">Reference Triangle</span>
+            </div>
+          </div>
+
+          <button class="btn" onclick="revealStep('step-b1')">Step 1: Find Length Increase Δℓ</button>
+          <div id="step-b1" class="step-box" style="display:none;">
+            <div class="math-block">
+              Δ<span class="math-sym">ℓ</span> = 13 − 4 = <strong class="highlight-purple">&nbsp;9 cm</strong>
+            </div>
+            <button class="btn" style="margin-top:8px;" onclick="revealStep('step-b2')">Step 2: Equate Ratios (Base / Height)</button>
+          </div>
+
+          <div id="step-b2" class="step-box" style="display:none;">
+            <div class="math-block">
+              <span class="frac"><span class="num"><span class="math-sym">θ</span> − 5</span><span class="den">9</span></span>
+              =
+              <span class="frac"><span class="num">95 − 5</span><span class="den">18</span></span>
+              &nbsp;⟹&nbsp;
+              <span class="frac"><span class="num"><span class="math-sym">θ</span> − 5</span><span class="den">9</span></span>
+              =
+              <span class="frac"><span class="num">90</span><span class="den">18</span></span>
+            </div>
+            <button class="btn" style="margin-top:8px;" onclick="revealStep('step-b3')">Step 3: Solve for θ</button>
+          </div>
+
+          <div id="step-b3" class="step-box" style="display:none;">
+            <div class="math-block">
+              <span class="math-sym">θ</span> − 5 =
+              <span class="frac"><span class="num">90</span><span class="den">18</span></span>
+              × 9 = 5 × 9 = 45
+              &nbsp;⟹&nbsp;
+              <span class="math-sym">θ</span> = 45 + 5 = <strong class="highlight-red">&nbsp;50 °C</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: LINEAR VS NON-LINEAR -->
+    <div id="non-linear" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Why Linearity Matters in Calibration</h2>
+          <p style="margin-bottom:12px;">
+            In a liquid-in-glass thermometer, the length <span class="math-sym">ℓ</span> varies <strong>linearly</strong> with temperature <span class="math-sym">θ</span>. Because the graph is a straight line, two fixed points are sufficient to construct the entire scale.
+          </p>
+          <p style="margin-bottom:12px;">
+            In contrast, many electronic components—such as a <strong>thermistor</strong> (Fig. 1.8 in textbook)—exhibit a <strong>non-linear</strong> relationship: resistance (<span class="math-sym">R</span>) drops rapidly at lower temperatures and flattens out at higher temperatures.
+          </p>
+          <div class="formula-box">
+            <strong>Key Principles:</strong><br>
+            • <em>Linear Sensor:</em> 2 calibration points determine the entire scale.<br>
+            • <em>Non-Linear Sensor:</em> 2 points are insufficient; a multi-point calibration curve is necessary.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Thermistor Curve (Fig. 1.8)</h2>
+          <canvas id="thermistorCanvas" width="320" height="230"></canvas>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">
+            Resistance <span class="math-sym">R</span> does not vary linearly with temperature <span class="math-sym">θ</span>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: PRACTICE GENERATOR -->
+    <div id="quiz" class="tab-content">
+      <div class="card">
+        <h2>Practice Problem Generator</h2>
+        <p style="font-size:0.95rem; margin-bottom:14px;">
+          Practice ratio and proportion calculations with randomised values.
+        </p>
+
+        <div id="quiz-question-box" class="formula-box">
+          Loading question...
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; margin-top:14px;">
+          <label>Your answer:</label>
+          <input type="number" id="quiz-user-input" class="input-field" placeholder="value" step="any">
+          <span id="quiz-unit" style="font-weight:600;">cm</span>
+          <button class="btn" onclick="checkQuizAnswer()">Submit</button>
+          <button class="btn btn-secondary" onclick="generateQuizProblem()">New Question</button>
+        </div>
+
+        <div id="quiz-feedback" class="quiz-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- TAB NAVIGATION ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+
+      if (tabId === 'explore') drawGraph(currentTemp);
+      if (tabId === 'non-linear') drawThermistorGraph();
+    }
+
+    function revealStep(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+
+    // --- TAB 1: CALIBRATION SIMULATION ---
+    const T1 = 5, L1 = 4;
+    const T2 = 95, L2 = 22;
+    const slope = (L2 - L1) / (T2 - T1); // 0.20 cm/°C
+
+    let currentTemp = 15;
+
+    function updateSimFromTemp(temp) {
+      currentTemp = parseFloat(temp);
+      const deltaT = currentTemp - T1;
+      const deltaL = deltaT * slope;
+      const totalL = L1 + deltaL;
+
+      document.getElementById('temp-val').innerText = currentTemp + " °C";
+      document.getElementById('delta-theta-val').innerText = deltaT.toFixed(1) + " °C";
+      document.getElementById('delta-len-val').innerText = deltaL.toFixed(1) + " cm";
+      document.getElementById('total-len-val').innerText = totalL.toFixed(1) + " cm";
+      document.getElementById('tube-reading-text').innerText = totalL.toFixed(1) + " cm";
+
+      // SVG column height mapping
+      const liquidHeight = (totalL / 25) * 230;
+      const liquidY = 250 - liquidHeight;
+      const rect = document.getElementById('liquid-col');
+      rect.setAttribute('y', liquidY);
+      rect.setAttribute('height', liquidHeight);
+
+      drawGraph(currentTemp);
+    }
+
+    function drawGraph(activeTemp) {
+      const canvas = document.getElementById('graphCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const mx = 45, my = 22;
+      const plotW = w - mx - 25;
+      const plotH = h - my - 45;
+
+      const xMax = 100, yMax = 25;
+      const mapX = (t) => mx + (t / xMax) * plotW;
+      const mapY = (l) => (h - 45) - (l / yMax) * plotH;
+
+      // 1. Grid Lines
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#f1f5f9';
+
+      for (let t = 0; t <= xMax; t += 10) {
+        ctx.beginPath();
+        ctx.moveTo(mapX(t), my);
+        ctx.lineTo(mapX(t), h - 45);
+        ctx.stroke();
+      }
+
+      for (let l = 0; l <= yMax; l += 5) {
+        ctx.beginPath();
+        ctx.moveTo(mx, mapY(l));
+        ctx.lineTo(mx + plotW, mapY(l));
+        ctx.stroke();
+      }
+
+      // 2. Axes
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(mx, my);
+      ctx.lineTo(mx, h - 45);
+      ctx.lineTo(mx + plotW + 15, h - 45);
+      ctx.stroke();
+
+      // Axis Ticks & Labels
+      ctx.fillStyle = '#475569';
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = 'center';
+
+      for (let t = 0; t <= xMax; t += 20) {
+        const x = mapX(t);
+        ctx.beginPath();
+        ctx.moveTo(x, h - 45);
+        ctx.lineTo(x, h - 40);
+        ctx.stroke();
+        ctx.fillText(t, x, h - 28);
+      }
+      ctx.font = 'bold 11px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('θ / °C', mx + plotW + 8, h - 28);
+
+      ctx.textAlign = 'right';
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
+      for (let l = 0; l <= yMax; l += 5) {
+        const y = mapY(l);
+        ctx.beginPath();
+        ctx.moveTo(mx, y);
+        ctx.lineTo(mx - 5, y);
+        ctx.stroke();
+        ctx.fillText(l, mx - 8, y + 3);
+      }
+      ctx.font = 'bold 11px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('ℓ / cm', mx - 6, my - 6);
+
+      // 3. Reference Triangle (Dashed Gray)
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(mapX(T1), mapY(L1));
+      ctx.lineTo(mapX(T2), mapY(L1));
+      ctx.lineTo(mapX(T2), mapY(L2));
+      ctx.closePath();
+      ctx.stroke();
+
+      // 4. Dynamic Similar Triangle (Orange Shaded)
+      const activeLen = L1 + (activeTemp - T1) * slope;
+
+      ctx.fillStyle = 'rgba(234, 88, 12, 0.2)';
+      ctx.beginPath();
+      ctx.moveTo(mapX(T1), mapY(L1));
+      ctx.lineTo(mapX(activeTemp), mapY(L1));
+      ctx.lineTo(mapX(activeTemp), mapY(activeLen));
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 2]);
+      ctx.beginPath();
+      ctx.moveTo(mapX(T1), mapY(L1));
+      ctx.lineTo(mapX(activeTemp), mapY(L1));
+      ctx.lineTo(mapX(activeTemp), mapY(activeLen));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 5. Calibration Line
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(mapX(T1), mapY(L1));
+      ctx.lineTo(mapX(T2), mapY(L2));
+      ctx.stroke();
+
+      function drawPoint(t, l, color, label, align='left') {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(mapX(t), mapY(l), 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = 'bold 10px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = color;
+        ctx.textAlign = align;
+        ctx.fillText(label, mapX(t) + (align === 'right' ? -8 : 8), mapY(l) - 6);
+      }
+
+      drawPoint(T1, L1, '#16a34a', `(5, 4)`);
+      drawPoint(T2, L2, '#16a34a', `(95, 22)`, 'right');
+      drawPoint(activeTemp, activeLen, '#dc2626', `(${activeTemp}, ${activeLen.toFixed(1)})`);
+    }
+
+    // --- TAB 3: THERMISTOR GRAPH ---
+    function drawThermistorGraph() {
+      const canvas = document.getElementById('thermistorCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(40, 20);
+      ctx.lineTo(40, h - 35);
+      ctx.lineTo(w - 15, h - 35);
+      ctx.stroke();
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '11px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('temperature / °C', w - 15, h - 15);
+      ctx.fillText('resistance / Ω', 105, 16);
+
+      // NTC Exponential Decay Curve
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let x = 40; x <= w - 20; x++) {
+        const normX = (x - 40) / (w - 60);
+        const normY = Math.exp(-3.5 * normX);
+        const y = (h - 35) - normY * (h - 60);
+        if (x === 40) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('0', 35, h - 30);
+    }
+
+    // --- TAB 4: PRACTICE GENERATOR ---
+    let currentQuiz = {};
+
+    function generateQuizProblem() {
+      const isFindingLength = Math.random() > 0.5;
+      const t1 = 0;
+      const t2 = 100;
+      const l1 = Math.floor(Math.random() * 4) + 2; // 2 to 5 cm
+      const rate = (Math.floor(Math.random() * 3) + 2) / 10; // 0.2 to 0.4 cm/°C
+      const l2 = l1 + rate * (t2 - t1);
+
+      if (isFindingLength) {
+        const targetT = Math.floor(Math.random() * 15) * 5 + 10;
+        const ans = l1 + rate * (targetT - t1);
+        currentQuiz = {
+          ans: ans,
+          unit: 'cm',
+          text: `An unmarked thermometer measures liquid column length of <strong>${l1} cm</strong> at <strong>${t1} °C</strong> and <strong>${l2.toFixed(1)} cm</strong> at <strong>${t2} °C</strong>.<br><br>Find the length of the liquid column <span class="math-sym">ℓ</span> at <strong>${targetT} °C</strong>.`
+        };
+      } else {
+        const targetT = Math.floor(Math.random() * 15) * 5 + 10;
+        const targetL = l1 + rate * (targetT - t1);
+        currentQuiz = {
+          ans: targetT,
+          unit: '°C',
+          text: `An unmarked thermometer measures <strong>${l1} cm</strong> at <strong>${t1} °C</strong> and <strong>${l2.toFixed(1)} cm</strong> at <strong>${t2} °C</strong>.<br><br>Find the temperature <span class="math-sym">θ</span> when the column length is <strong>${targetL.toFixed(1)} cm</strong>.`
+        };
+      }
+
+      document.getElementById('quiz-question-box').innerHTML = currentQuiz.text;
+      document.getElementById('quiz-unit').innerText = currentQuiz.unit;
+      document.getElementById('quiz-user-input').value = '';
+      document.getElementById('quiz-feedback').innerText = '';
+    }
+
+    function checkQuizAnswer() {
+      const userVal = parseFloat(document.getElementById('quiz-user-input').value);
+      const fb = document.getElementById('quiz-feedback');
+      if (isNaN(userVal)) {
+        fb.style.color = 'var(--accent-red)';
+        fb.innerText = 'Please enter a valid numerical value.';
+        return;
+      }
+
+      if (Math.abs(userVal - currentQuiz.ans) < 0.15) {
+        fb.style.color = 'var(--accent-green)';
+        fb.innerText = `✓ Correct! The answer is ${currentQuiz.ans.toFixed(1)} ${currentQuiz.unit}.`;
+      } else {
+        fb.style.color = 'var(--accent-red)';
+        fb.innerText = `✗ Incorrect. The correct answer is ${currentQuiz.ans.toFixed(1)} ${currentQuiz.unit}.`;
+      }
+    }
+
+    window.onload = () => {
+      updateSimFromTemp(15);
+      generateQuizProblem();
+    };
+  </script>
+</body>
+</html>

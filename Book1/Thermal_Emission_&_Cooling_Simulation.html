@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Emission & Cooling Simulation</title>
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --panel-bg: #1e293b;
+            --accent-black: #f43f5e;
+            --accent-shiny: #38bdf8;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0b1120;
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { font-size: 1.45rem; margin: 0 0 6px; color: #38bdf8; text-align: center; }
+        p.subtitle {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin: 0 0 16px;
+            text-align: center;
+            max-width: 720px;
+            line-height: 1.4;
+        }
+
+        .sim-container {
+            background: var(--panel-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 860px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        @media (min-width: 760px) {
+            .canvas-grid {
+                grid-template-columns: 500px 1fr;
+            }
+        }
+
+        canvas {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            border: 1px solid #334155;
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            width: 100%;
+            margin-top: 14px;
+        }
+
+        .stat-card {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 10px 14px;
+            border-left: 4px solid #64748b;
+        }
+
+        .stat-card.black { border-color: var(--accent-black); }
+        .stat-card.shiny { border-color: var(--accent-shiny); }
+
+        .stat-title { font-size: 0.8rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-val { font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+        .stat-sub { font-size: 0.78rem; color: var(--text-sub); margin-top: 2px; }
+
+        .controls {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            padding: 9px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover { background: #475569; }
+        button.active-lamp {
+            background: #e11d48;
+            border-color: #f43f5e;
+            box-shadow: 0 0 14px rgba(244, 63, 94, 0.4);
+        }
+        button.reset { background: #475569; }
+
+        .legend {
+            display: flex;
+            gap: 18px;
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <h1>Thermal Absorption, Emission &amp; Cooling</h1>
+    <p class="subtitle">
+        Turn the lamp <b>ON</b> to radiate heat. The dull black surface absorbs radiation readily, while the shiny surface reflects it. Turn the lamp <b>OFF</b> to observe cooling: the dull black block rapidly radiates away heat (<i>&epsilon;</i> &asymp; 0.95), while the shiny block retains it (<i>&epsilon;</i> &asymp; 0.10).
+    </p>
+
+    <div class="sim-container">
+        <div class="canvas-grid">
+            <canvas id="simCanvas" width="500" height="340"></canvas>
+            <canvas id="graphCanvas" width="300" height="340"></canvas>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#fef08a;"></span> Incoming IR Radiation</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f43f5e;"></span> Emitted Radiation (Dull Black)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Emitted Radiation (Shiny)</div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card black">
+                <div class="stat-title">Dull Black Block</div>
+                <div class="stat-val" style="color: var(--accent-black);"><span id="blackTemp">25.0</span> &deg;C</div>
+                <div class="stat-sub">Emissivity (<i>&epsilon;</i>): 0.95 (Good Absorber / Good Emitter)</div>
+            </div>
+            <div class="stat-card shiny">
+                <div class="stat-title">Shiny Block</div>
+                <div class="stat-val" style="color: var(--accent-shiny);"><span id="shinyTemp">25.0</span> &deg;C</div>
+                <div class="stat-sub">Emissivity (<i>&epsilon;</i>): 0.10 (Poor Absorber / Poor Emitter)</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="btnLamp" onclick="toggleLamp()">Turn Heat Lamp ON</button>
+            <button class="reset" onclick="resetSimulation()">Reset Experiment</button>
+        </div>
+    </div>
+
+<script>
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+    const graphCanvas = document.getElementById('graphCanvas');
+    const graphCtx = graphCanvas.getContext('2d');
+
+    const AMBIENT_TEMP = 25.0;
+    const MAX_TEMP = 85.0;
+
+    let lampOn = false;
+    let blackTemp = AMBIENT_TEMP;
+    let shinyTemp = AMBIENT_TEMP;
+
+    let incomingParticles = [];
+    let emissionParticles = [];
+    let tempHistory = [];
+    let simTime = 0;
+
+    const leftBlock = { x: 50, y: 230, w: 150, h: 55 };
+    const rightBlock = { x: 300, y: 230, w: 150, h: 55 };
+    const lampPos = { x: 250, y: 35 };
+
+    class IncomingPhoton {
+        constructor() {
+            this.x = lampPos.x;
+            this.y = lampPos.y;
+            const targetX = 30 + Math.random() * 440;
+            const targetY = 230;
+            const angle = Math.atan2(targetY - this.y, targetX - this.x);
+            const speed = 4.5 + Math.random() * 1.5;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.active = true;
+        }
+        update() {
+            if (!this.active) return;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Dull Black block collision
+            if (this.x >= leftBlock.x && this.x <= leftBlock.x + leftBlock.w &&
+                this.y >= leftBlock.y && this.y <= leftBlock.y + 12) {
+                if (Math.random() < 0.95) {
+                    this.active = false;
+                } else {
+                    this.vy = -Math.abs(this.vy) * 0.6;
+                    this.vx += (Math.random() - 0.5) * 2;
+                }
+            }
+
+            // Shiny block collision
+            if (this.x >= rightBlock.x && this.x <= rightBlock.x + rightBlock.w &&
+                this.y >= rightBlock.y && this.y <= rightBlock.y + 12) {
+                if (Math.random() < 0.10) {
+                    this.active = false;
+                } else {
+                    this.vy = -Math.abs(this.vy);
+                    this.vx += (Math.random() - 0.5) * 1.5;
+                }
+            }
+
+            if (this.y > simCanvas.height || this.x < 0 || this.x > simCanvas.width || this.y < 0) {
+                this.active = false;
+            }
+        }
+        draw() {
+            if (!this.active) return;
+            simCtx.beginPath();
+            simCtx.arc(this.x, this.y, 2.2, 0, Math.PI * 2);
+            simCtx.fillStyle = '#fef08a';
+            simCtx.fill();
+        }
+    }
+
+    class EmissionPhoton {
+        constructor(startX, startY, isBlack) {
+            this.x = startX;
+            this.y = startY;
+            const angle = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
+            const speed = 1.2 + Math.random() * 1.5;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.alpha = 1.0;
+            this.color = isBlack ? '244, 63, 94' : '56, 189, 248';
+            this.decay = 0.015 + Math.random() * 0.01;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.alpha -= this.decay;
+        }
+        draw() {
+            if (this.alpha <= 0) return;
+            simCtx.beginPath();
+            simCtx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            simCtx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+            simCtx.fill();
+        }
+    }
+
+    function toggleLamp() {
+        lampOn = !lampOn;
+        const btn = document.getElementById('btnLamp');
+        btn.innerText = lampOn ? "Turn Heat Lamp OFF" : "Turn Heat Lamp ON";
+        btn.classList.toggle('active-lamp', lampOn);
+    }
+
+    function resetSimulation() {
+        lampOn = false;
+        blackTemp = AMBIENT_TEMP;
+        shinyTemp = AMBIENT_TEMP;
+        incomingParticles = [];
+        emissionParticles = [];
+        tempHistory = [];
+        simTime = 0;
+
+        const btn = document.getElementById('btnLamp');
+        btn.innerText = "Turn Heat Lamp ON";
+        btn.classList.remove('active-lamp');
+    }
+
+    function updatePhysics(dt) {
+        if (lampOn) {
+            const heatInput = 9.0 * dt;
+            blackTemp += (MAX_TEMP - blackTemp) * 0.05 * heatInput;
+            shinyTemp += (MAX_TEMP - shinyTemp) * 0.009 * heatInput;
+        }
+
+        // Newton's law of cooling
+        const coolRate = 0.06 * dt;
+        const blackCooling = (blackTemp - AMBIENT_TEMP) * 0.95 * coolRate;
+        const shinyCooling = (shinyTemp - AMBIENT_TEMP) * 0.10 * coolRate;
+
+        blackTemp = Math.max(AMBIENT_TEMP, blackTemp - blackCooling);
+        shinyTemp = Math.max(AMBIENT_TEMP, shinyTemp - shinyCooling);
+
+        // Spawn thermal rays based on excess temperature
+        const blackExcess = (blackTemp - AMBIENT_TEMP);
+        if (blackExcess > 0.5 && Math.random() < Math.min(0.85, blackExcess * 0.03)) {
+            const randX = leftBlock.x + Math.random() * leftBlock.w;
+            emissionParticles.push(new EmissionPhoton(randX, leftBlock.y, true));
+        }
+
+        const shinyExcess = (shinyTemp - AMBIENT_TEMP);
+        if (shinyExcess > 0.5 && Math.random() < Math.min(0.2, shinyExcess * 0.005)) {
+            const randX = rightBlock.x + Math.random() * rightBlock.w;
+            emissionParticles.push(new EmissionPhoton(randX, rightBlock.y, false));
+        }
+
+        simTime += dt;
+        if (tempHistory.length === 0 || simTime - tempHistory[tempHistory.length - 1].t >= 0.25) {
+            tempHistory.push({ t: simTime, b: blackTemp, s: shinyTemp });
+            if (tempHistory.length > 250) tempHistory.shift();
+        }
+
+        document.getElementById('blackTemp').innerText = blackTemp.toFixed(1);
+        document.getElementById('shinyTemp').innerText = shinyTemp.toFixed(1);
+    }
+
+    function drawScene() {
+        simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+
+        // Table / Countertop
+        simCtx.fillStyle = '#1e293b';
+        simCtx.fillRect(0, 285, simCanvas.width, 55);
+        simCtx.strokeStyle = '#334155';
+        simCtx.beginPath();
+        simCtx.moveTo(0, 285);
+        simCtx.lineTo(simCanvas.width, 285);
+        simCtx.stroke();
+
+        // Heat Lamp
+        simCtx.fillStyle = '#475569';
+        simCtx.beginPath();
+        simCtx.arc(lampPos.x, lampPos.y - 12, 38, Math.PI, 0, false);
+        simCtx.fill();
+
+        simCtx.fillStyle = lampOn ? '#fbbf24' : '#64748b';
+        simCtx.beginPath();
+        simCtx.arc(lampPos.x, lampPos.y - 2, 10, 0, Math.PI * 2);
+        simCtx.fill();
+
+        if (lampOn) {
+            const beamGrad = simCtx.createRadialGradient(lampPos.x, lampPos.y, 10, lampPos.x, lampPos.y, 280);
+            beamGrad.addColorStop(0, "rgba(251, 191, 36, 0.22)");
+            beamGrad.addColorStop(1, "rgba(251, 191, 36, 0.0)");
+            simCtx.fillStyle = beamGrad;
+            simCtx.beginPath();
+            simCtx.moveTo(lampPos.x, lampPos.y);
+            simCtx.lineTo(20, 285);
+            simCtx.lineTo(480, 285);
+            simCtx.closePath();
+            simCtx.fill();
+        }
+
+        // Dull Black Block
+        simCtx.fillStyle = '#18181b';
+        simCtx.fillRect(leftBlock.x, leftBlock.y, leftBlock.w, leftBlock.h);
+        simCtx.strokeStyle = '#3f3f46';
+        simCtx.lineWidth = 2;
+        simCtx.strokeRect(leftBlock.x, leftBlock.y, leftBlock.w, leftBlock.h);
+
+        // Shiny Block
+        const shinyGrad = simCtx.createLinearGradient(rightBlock.x, rightBlock.y, rightBlock.x + rightBlock.w, rightBlock.y);
+        shinyGrad.addColorStop(0, '#94a3b8');
+        shinyGrad.addColorStop(0.3, '#f1f5f9');
+        shinyGrad.addColorStop(0.6, '#cbd5e1');
+        shinyGrad.addColorStop(1, '#64748b');
+        simCtx.fillStyle = shinyGrad;
+        simCtx.fillRect(rightBlock.x, rightBlock.y, rightBlock.w, rightBlock.h);
+        simCtx.strokeStyle = '#94a3b8';
+        simCtx.strokeRect(rightBlock.x, rightBlock.y, rightBlock.w, rightBlock.h);
+
+        renderBlockUI(leftBlock, "Dull Black", blackTemp, '#f43f5e');
+        renderBlockUI(rightBlock, "Shiny Silver", shinyTemp, '#38bdf8');
+    }
+
+    function renderBlockUI(block, label, temp, color) {
+        simCtx.fillStyle = '#f8fafc';
+        simCtx.font = '600 11px system-ui, sans-serif';
+        simCtx.textAlign = 'center';
+        simCtx.fillText(label, block.x + block.w / 2, block.y + 22);
+
+        const barW = block.w - 30;
+        const barH = 7;
+        const barX = block.x + 15;
+        const barY = block.y + 32;
+
+        simCtx.fillStyle = '#0f172a';
+        simCtx.fillRect(barX, barY, barW, barH);
+
+        const frac = Math.min(1, Math.max(0, (temp - AMBIENT_TEMP) / (MAX_TEMP - AMBIENT_TEMP)));
+        simCtx.fillStyle = color;
+        simCtx.fillRect(barX, barY, barW * frac, barH);
+    }
+
+    function drawGraph() {
+        graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+        const padding = { top: 35, right: 20, bottom: 35, left: 40 };
+        const w = graphCanvas.width - padding.left - padding.right;
+        const h = graphCanvas.height - padding.top - padding.bottom;
+
+        // Title (using Unicode \u00B0 for degrees)
+        graphCtx.fillStyle = '#94a3b8';
+        graphCtx.font = '600 11px system-ui, sans-serif';
+        graphCtx.textAlign = 'left';
+        graphCtx.fillText("Temperature vs Time (\u00B0C)", padding.left, 20);
+
+        // Axes
+        graphCtx.strokeStyle = '#334155';
+        graphCtx.lineWidth = 1;
+        graphCtx.beginPath();
+        graphCtx.moveTo(padding.left, padding.top);
+        graphCtx.lineTo(padding.left, padding.top + h);
+        graphCtx.lineTo(padding.left + w, padding.top + h);
+        graphCtx.stroke();
+
+        // Y-Axis Markers
+        graphCtx.font = '10px monospace';
+        graphCtx.fillStyle = '#64748b';
+        graphCtx.textAlign = 'right';
+        const yMarks = [25, 45, 65, 85];
+        for (let mark of yMarks) {
+            const yPos = padding.top + h - ((mark - 20) / (MAX_TEMP + 5 - 20)) * h;
+            graphCtx.strokeStyle = '#1e293b';
+            graphCtx.beginPath();
+            graphCtx.moveTo(padding.left, yPos);
+            graphCtx.lineTo(padding.left + w, yPos);
+            graphCtx.stroke();
+            graphCtx.fillText(mark, padding.left - 6, yPos + 3);
+        }
+
+        if (tempHistory.length < 2) return;
+
+        const tMin = tempHistory[0].t;
+        const tMax = Math.max(simTime, tMin + 10);
+
+        const getX = (t) => padding.left + ((t - tMin) / (tMax - tMin)) * w;
+        const getY = (temp) => padding.top + h - ((temp - 20) / (MAX_TEMP + 5 - 20)) * h;
+
+        // Black Line
+        graphCtx.strokeStyle = '#f43f5e';
+        graphCtx.lineWidth = 2;
+        graphCtx.beginPath();
+        tempHistory.forEach((pt, idx) => {
+            const x = getX(pt.t);
+            const y = getY(pt.b);
+            if (idx === 0) graphCtx.moveTo(x, y);
+            else graphCtx.lineTo(x, y);
+        });
+        graphCtx.stroke();
+
+        // Shiny Line
+        graphCtx.strokeStyle = '#38bdf8';
+        graphCtx.lineWidth = 2;
+        graphCtx.beginPath();
+        tempHistory.forEach((pt, idx) => {
+            const x = getX(pt.t);
+            const y = getY(pt.s);
+            if (idx === 0) graphCtx.moveTo(x, y);
+            else graphCtx.lineTo(x, y);
+        });
+        graphCtx.stroke();
+    }
+
+    let lastTimestamp = performance.now();
+
+    function loop(now) {
+        const dt = Math.min((now - lastTimestamp) / 1000, 0.1);
+        lastTimestamp = now;
+
+        if (lampOn && Math.random() < 0.65) {
+            incomingParticles.push(new IncomingPhoton());
+        }
+
+        updatePhysics(dt);
+        drawScene();
+
+        for (let i = incomingParticles.length - 1; i >= 0; i--) {
+            incomingParticles[i].update();
+            incomingParticles[i].draw();
+            if (!incomingParticles[i].active) incomingParticles.splice(i, 1);
+        }
+
+        for (let i = emissionParticles.length - 1; i >= 0; i--) {
+            emissionParticles[i].update();
+            emissionParticles[i].draw();
+            if (emissionParticles[i].alpha <= 0) emissionParticles.splice(i, 1);
+        }
+
+        drawGraph();
+        requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>

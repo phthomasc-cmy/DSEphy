@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thermal Conduction — Realistic 20 cm Rod</title>
+<style>
+  :root {
+    --bg-color: #080c14;
+    --card-bg: #111827;
+    --border-color: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --accent: #38bdf8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 980px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Textbook Quote */
+  .quote-box {
+    background: #171c35;
+    border-left: 5px solid #818cf8;
+    padding: 16px 20px;
+    border-radius: 6px;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #e0e7ff;
+  }
+
+  .quote-box span.highlight {
+    color: #f87171;
+    font-weight: 700;
+    text-decoration: underline wavy #ef4444;
+  }
+
+  /* Scale Mode Bar */
+  .scale-selection-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .scale-buttons { display: flex; gap: 8px; align-items: center; }
+
+  .scale-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  button.scale-btn {
+    padding: 8px 14px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  button.scale-btn:hover { background: #1e293b; border-color: #475569; }
+
+  button.scale-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #080c14;
+  }
+
+  /* Main Card */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  }
+
+  .material-row { margin-bottom: 22px; }
+
+  .material-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .material-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+  }
+  .badge-good { background: #064e3b; color: #6ee7b7; }
+  .badge-poor { background: #7f1d1d; color: #fca5a5; }
+
+  .temp-readouts {
+    display: flex;
+    gap: 14px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .temp-val {
+    font-weight: 700;
+    font-family: ui-monospace, monospace;
+    font-size: 0.92rem;
+  }
+  .val-left { color: #f59e0b; }
+  .val-mid { color: #a78bfa; }
+  .val-right { color: #38bdf8; }
+  .val-rate { color: #ec4899; }
+
+  .bar-container {
+    display: flex;
+    align-items: center;
+    background: #030712;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid #374151;
+  }
+
+  .flame-indicator {
+    width: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    animation: flicker 0.3s infinite alternate;
+  }
+
+  .flame-icon {
+    font-size: 1.7rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 8px #f97316);
+  }
+
+  .flame-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fb923c;
+    text-transform: uppercase;
+  }
+
+  @keyframes flicker {
+    0% { transform: scale(0.95) translateY(1px); filter: drop-shadow(0 0 4px #ea580c); }
+    100% { transform: scale(1.05) translateY(-1px); filter: drop-shadow(0 0 14px #facc15); }
+  }
+
+  .canvas-wrapper {
+    flex-grow: 1;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 44px;
+    background: #030712;
+  }
+
+  canvas.bar-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  /* 20 cm Ruler */
+  .ruler {
+    margin-left: 54px;
+    display: flex;
+    justify-content: space-between;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 3px 2px 0 2px;
+    border-top: 1px dashed #334155;
+    margin-top: 4px;
+  }
+
+  .ruler-tick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ruler-tick::before {
+    content: "|";
+    color: #475569;
+    font-size: 0.65rem;
+    margin-bottom: -2px;
+  }
+
+  /* Vibrant Thermal Legend Bar */
+  .legend-container { margin: 18px 0 16px 0; }
+
+  .legend-bar {
+    height: 14px;
+    width: 100%;
+    border-radius: 7px;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.2);
+    transition: background 0.3s ease;
+  }
+
+  .legend-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    font-family: monospace;
+  }
+
+  /* Graph */
+  #graphCanvas {
+    width: 100%;
+    height: 175px;
+    border-radius: 8px;
+    background: #050914;
+    border: 1px solid var(--border-color);
+  }
+
+  .graph-legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.8rem;
+    margin-top: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+
+  .legend-line {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 14px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .slider-group { display: flex; align-items: center; gap: 16px; }
+
+  .slider-group label {
+    font-size: 0.95rem;
+    min-width: 190px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .slider-group label strong {
+    color: var(--text-primary);
+    font-family: monospace;
+    font-size: 1.05rem;
+  }
+
+  input[type="range"] {
+    flex-grow: 1;
+    height: 10px;
+    border-radius: 5px;
+    background: #1f2937;
+    outline: none;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  button.ctrl-btn {
+    padding: 8px 16px;
+    background: #1f2937;
+    color: #f9fafb;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  button.ctrl-btn:hover { background: #374151; }
+
+  button.ctrl-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #090d16;
+  }
+
+  .speed-label {
+    margin-left: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Textbook Quote -->
+  <div class="quote-box">
+    “If energy can spread out <span class="highlight">quickly</span>, the temperature rise of the heated region will be <span class="highlight">slow</span>. 
+    If energy spreads out <span class="highlight">slowly</span>, the temperature of the heated region will rise <span class="highlight">quickly</span>.”
+  </div>
+
+  <!-- Mode Selector -->
+  <div class="scale-selection-bar">
+    <div class="scale-buttons">
+      <span class="scale-label">Color Scale:</span>
+      <button class="scale-btn active" id="btnScaleTemp" onclick="setColorScaleMode('temp')">
+        🌡️ Scale 1: Temperature (°C) — [Shows Whole 20cm Heating]
+      </button>
+      <button class="scale-btn" id="btnScaleRate" onclick="setColorScaleMode('rate')">
+        ⚡ Scale 2: Rise Rate (°C/s) — [Proves Textbook Quote]
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- Copper Rod (20 cm) -->
+    <div class="material-row">
+      <div class="material-header">
+        <div class="material-title">
+          Copper Rod (20 cm)
+          <span class="badge badge-good">Good Conductor: Entire 20 cm rod becomes hot</span>
+        </div>
+        <div class="temp-readouts">
+          <span>0 cm (Flame): <span class="temp-val val-left" id="goodLeft">20.0°C</span></span>
+          <span>10 cm: <span class="temp-val val-mid" id="goodMid">20.0°C</span></span>
+          <span>20 cm (Tip): <span class="temp-val val-right" id="goodRight">20.0°C</span></span>
+          <span>Rise Rate (0cm): <span class="temp-val val-rate" id="goodRate">+0.0°C/s</span></span>
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="flame-indicator">
+          <span class="flame-icon">🔥</span>
+          <span class="flame-label">Flame</span>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="goodCanvas" class="bar-canvas"></canvas>
+        </div>
+      </div>
+      <div class="ruler">
+        <span class="ruler-tick">0 cm</span>
+        <span class="ruler-tick">4 cm</span>
+        <span class="ruler-tick">8 cm</span>
+        <span class="ruler-tick">12 cm</span>
+        <span class="ruler-tick">16 cm</span>
+        <span class="ruler-tick">20 cm</span>
+      </div>
+    </div>
+
+    <!-- Wood / Glass Rod (20 cm) -->
+    <div class="material-row">
+      <div class="material-header">
+        <div class="material-title">
+          Wood / Glass Rod (20 cm)
+          <span class="badge badge-poor">Poor Conductor: Heat trapped near flame only</span>
+        </div>
+        <div class="temp-readouts">
+          <span>0 cm (Flame): <span class="temp-val val-left" id="poorLeft">20.0°C</span></span>
+          <span>10 cm: <span class="temp-val val-mid" id="poorMid">20.0°C</span></span>
+          <span>20 cm (Tip): <span class="temp-val val-right" id="poorRight">20.0°C</span></span>
+          <span>Rise Rate (0cm): <span class="temp-val val-rate" id="poorRate">+0.0°C/s</span></span>
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="flame-indicator">
+          <span class="flame-icon">🔥</span>
+          <span class="flame-label">Flame</span>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="poorCanvas" class="bar-canvas"></canvas>
+        </div>
+      </div>
+      <div class="ruler">
+        <span class="ruler-tick">0 cm</span>
+        <span class="ruler-tick">4 cm</span>
+        <span class="ruler-tick">8 cm</span>
+        <span class="ruler-tick">12 cm</span>
+        <span class="ruler-tick">16 cm</span>
+        <span class="ruler-tick">20 cm</span>
+      </div>
+    </div>
+
+    <!-- Dynamic Legend Bar -->
+    <div class="legend-container">
+      <div class="legend-bar" id="legendBar"></div>
+      <div class="legend-labels" id="legendLabels"></div>
+    </div>
+
+    <!-- Graph -->
+    <canvas id="graphCanvas"></canvas>
+    <div class="graph-legend" id="graphLegend"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="slider-group">
+        <label for="timeSlider">Timeline: <strong id="timeLabel">0.0 s / 300.0 s</strong></label>
+        <input type="range" id="timeSlider" min="0" max="600" value="0" step="1">
+      </div>
+      <div class="btn-group">
+        <button id="playBtn" class="ctrl-btn active">Pause</button>
+        <button id="resetBtn" class="ctrl-btn">Reset</button>
+        <span class="speed-label">Speed:</span>
+        <button class="ctrl-btn speed-opt" data-speed="1">1x</button>
+        <button class="ctrl-btn speed-opt" data-speed="5">5x</button>
+        <button class="ctrl-btn speed-opt active" data-speed="10">10x</button>
+        <button class="ctrl-btn speed-opt" data-speed="25">25x</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const PIXELS = 100; // 100 cells across 20 cm (0.2 cm/cell)
+  const TOTAL_TIME = 300.0;
+  const FRAMES = 601;
+  const DT_FRAME = TOTAL_TIME / (FRAMES - 1); // 0.5s per frame
+  const AMBIENT = 20.0;
+  const FLAME_TEMP = 650.0; // 650°C flame reservoir
+  const HEATED_CELLS = 4;   // Flame touches first 0.8 cm
+
+  let activeColorScale = 'temp'; // 'temp' or 'rate'
+
+  const simData = {
+    good: [],
+    poor: [],
+    ratesGood: [],
+    ratesPoor: []
+  };
+
+  function precalculatePhysics() {
+    const subSteps = 60;
+    const dtSub = DT_FRAME / subSteps;
+
+    // Physical diffusivity
+    const alphaGood = 0.42;    // Copper
+    const alphaPoor = 0.0018;  // Wood / Glass
+    
+    // Flame heat transfer coefficient
+    const flameCoupling = 0.024;
+    // Air cooling coefficient
+    const coolingAir = 0.00008;
+
+    let gBar = new Float32Array(PIXELS).fill(AMBIENT);
+    let pBar = new Float32Array(PIXELS).fill(AMBIENT);
+
+    let prevGood = new Float32Array(PIXELS).fill(AMBIENT);
+    let prevPoor = new Float32Array(PIXELS).fill(AMBIENT);
+
+    for (let f = 0; f < FRAMES; f++) {
+      simData.good.push(new Float32Array(gBar));
+      simData.poor.push(new Float32Array(pBar));
+
+      // Calculate heating rate (dT/dt) at each cell
+      const gRate = new Float32Array(PIXELS);
+      const pRate = new Float32Array(PIXELS);
+      for (let i = 0; i < PIXELS; i++) {
+        gRate[i] = f === 0 ? 0 : Math.max(0, (gBar[i] - prevGood[i]) / DT_FRAME);
+        pRate[i] = f === 0 ? 0 : Math.max(0, (pBar[i] - prevPoor[i]) / DT_FRAME);
+        prevGood[i] = gBar[i];
+        prevPoor[i] = pBar[i];
+      }
+      simData.ratesGood.push(gRate);
+      simData.ratesPoor.push(pRate);
+
+      // Advance physics sub-steps
+      for (let s = 0; s < subSteps; s++) {
+        gBar = stepPhysics(gBar, alphaGood, flameCoupling, coolingAir, dtSub);
+        pBar = stepPhysics(pBar, alphaPoor, flameCoupling, coolingAir, dtSub);
+      }
+    }
+  }
+
+  function stepPhysics(u, alpha, hFlame, hAir, dt) {
+    const next = new Float32Array(PIXELS);
+    for (let i = 0; i < PIXELS; i++) {
+      const left = (i === 0) ? u[0] : u[i - 1];
+      const right = (i === PIXELS - 1) ? u[PIXELS - 1] : u[i + 1];
+
+      // Conduction
+      let dU = alpha * (left - 2 * u[i] + right);
+
+      // Flame heat input (Newton heating from 650°C flame)
+      if (i < HEATED_CELLS) {
+        dU += hFlame * (FLAME_TEMP - u[i]) * dt;
+      }
+
+      // Air cooling along the length
+      dU -= hAir * (u[i] - AMBIENT);
+
+      next[i] = u[i] + dU;
+    }
+    return next;
+  }
+
+  precalculatePhysics();
+
+  /* ================= HIGH-CONTRAST THERMAL PALETTE ================= */
+  // Maps values so 20°C is deep blue, 100°C is bright purple/red, 300°C is orange, 450°C+ is supernova white!
+  function valueToColor(val, mode) {
+    let norm = 0;
+    if (mode === 'temp') {
+      norm = Math.max(0, Math.min(1, (val - 20) / (500 - 20)));
+    } else {
+      norm = Math.max(0, Math.min(1, val / 35.0)); // Rate: 0 to 35 °C/s
+    }
+
+    let r, g, b;
+    if (norm < 0.12) {
+      // 20°C - 75°C: Deep Midnight Blue -> Royal Blue
+      const s = norm / 0.12;
+      r = Math.floor(10 + s * 25);
+      g = Math.floor(25 + s * 65);
+      b = Math.floor(100 + s * 140);
+    } else if (norm < 0.32) {
+      // 75°C - 175°C: Blue -> Violet -> Crimson Red (VISIBLY WARM!)
+      const s = (norm - 0.12) / 0.20;
+      r = Math.floor(35 + s * 185);
+      g = Math.floor(90 - s * 70);
+      b = Math.floor(240 - s * 190);
+    } else if (norm < 0.58) {
+      // 175°C - 300°C: Crimson Red -> Fiery Orange
+      const s = (norm - 0.32) / 0.26;
+      r = Math.floor(220 + s * 25);
+      g = Math.floor(20 + s * 110);
+      b = Math.floor(50 - s * 40);
+    } else if (norm < 0.82) {
+      // 300°C - 420°C: Fiery Orange -> Neon Yellow
+      const s = (norm - 0.58) / 0.24;
+      r = Math.floor(245 + s * 10);
+      g = Math.floor(130 + s * 105);
+      b = Math.floor(10 + s * 15);
+    } else {
+      // 420°C - 500°C+: Bright Yellow -> White-Hot
+      const s = (norm - 0.82) / 0.18;
+      r = 255;
+      g = Math.floor(235 + s * 20);
+      b = Math.floor(25 + s * 230);
+    }
+
+    return [r, g, b];
+  }
+
+  // DOM Elements
+  const goodCanvas = document.getElementById("goodCanvas");
+  const poorCanvas = document.getElementById("poorCanvas");
+  const graphCanvas = document.getElementById("graphCanvas");
+  const timeSlider = document.getElementById("timeSlider");
+  const timeLabel = document.getElementById("timeLabel");
+  const playBtn = document.getElementById("playBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const speedBtns = document.querySelectorAll(".speed-opt");
+
+  const btnScaleTemp = document.getElementById("btnScaleTemp");
+  const btnScaleRate = document.getElementById("btnScaleRate");
+  const legendBar = document.getElementById("legendBar");
+  const legendLabels = document.getElementById("legendLabels");
+  const graphLegend = document.getElementById("graphLegend");
+
+  const goodLeft = document.getElementById("goodLeft");
+  const goodMid = document.getElementById("goodMid");
+  const goodRight = document.getElementById("goodRight");
+  const goodRate = document.getElementById("goodRate");
+
+  const poorLeft = document.getElementById("poorLeft");
+  const poorMid = document.getElementById("poorMid");
+  const poorRight = document.getElementById("poorRight");
+  const poorRate = document.getElementById("poorRate");
+
+  const gCtx = goodCanvas.getContext("2d");
+  const pCtx = poorCanvas.getContext("2d");
+  const grCtx = graphCanvas.getContext("2d");
+
+  let currentFrame = 0;
+  let isPlaying = true;
+  let playSpeed = 10;
+  let fractionalFrame = 0;
+
+  function setColorScaleMode(mode) {
+    activeColorScale = mode;
+    btnScaleTemp.classList.toggle("active", mode === 'temp');
+    btnScaleRate.classList.toggle("active", mode === 'rate');
+    updateLegendUI();
+    updateView(currentFrame);
+  }
+
+  function updateLegendUI() {
+    if (activeColorScale === 'temp') {
+      legendBar.style.background = "linear-gradient(to right, #0a1964 0%, #235ae8 12%, #dc143c 32%, #ea580c 58%, #facc15 82%, #ffffff 100%)";
+      legendLabels.innerHTML = `
+        <span>20°C (Cold Blue)</span>
+        <span>100°C (Warm Violet)</span>
+        <span>200°C (Red)</span>
+        <span>300°C (Orange)</span>
+        <span>400°C (Yellow)</span>
+        <span>500°C+ (White-Hot)</span>
+      `;
+      graphLegend.innerHTML = `
+        <div class="legend-item"><span class="legend-line" style="background:#38bdf8;"></span><span>Copper 0 cm (Flame)</span></div>
+        <div class="legend-item"><span class="legend-line" style="background:#38bdf8; border-top: 2px dashed #0369a1;"></span><span>Copper 20 cm (Tip)</span></div>
+        <div class="legend-item"><span class="legend-line" style="background:#f87171;"></span><span>Wood 0 cm (Flame)</span></div>
+        <div class="legend-item"><span class="legend-line" style="background:#ef4444; border-top: 2px dashed #7f1d1d;"></span><span>Wood 20 cm (Tip)</span></div>
+      `;
+    } else {
+      legendBar.style.background = "linear-gradient(to right, #0a1964 0%, #235ae8 12%, #dc143c 32%, #ea580c 58%, #facc15 82%, #ffffff 100%)";
+      legendLabels.innerHTML = `
+        <span>0°C/s (No Rise)</span>
+        <span>+7°C/s</span>
+        <span>+14°C/s (Slow Rise - Copper)</span>
+        <span>+21°C/s</span>
+        <span>+28°C/s</span>
+        <span>+35°C/s+ (Fast Rise - Wood)</span>
+      `;
+      graphLegend.innerHTML = `
+        <div class="legend-item"><span class="legend-line" style="background:#38bdf8;"></span><span>Copper Rise Rate at 0 cm</span></div>
+        <div class="legend-item"><span class="legend-line" style="background:#f87171;"></span><span>Wood Rise Rate at 0 cm</span></div>
+      `;
+    }
+  }
+
+  function renderPixelBar(canvas, ctx, rowData) {
+    const w = canvas.width = PIXELS;
+    const h = canvas.height = 20;
+    const imgData = ctx.createImageData(w, h);
+    const data = imgData.data;
+
+    for (let x = 0; x < w; x++) {
+      const [r, g, b] = valueToColor(rowData[x], activeColorScale);
+      for (let y = 0; y < h; y++) {
+        const idx = (y * w + x) * 4;
+        data[idx] = r;
+        data[idx + 1] = g;
+        data[idx + 2] = b;
+        data[idx + 3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  function renderGraph(frameIdx) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = graphCanvas.width = graphCanvas.clientWidth * dpr;
+    const h = graphCanvas.height = graphCanvas.clientHeight * dpr;
+    grCtx.clearRect(0, 0, w, h);
+
+    const padLeft = 52 * dpr;
+    const padBottom = 26 * dpr;
+    const padTop = 18 * dpr;
+    const padRight = 20 * dpr;
+    const plotW = w - padLeft - padRight;
+    const plotH = h - padTop - padBottom;
+
+    // Grid axes
+    grCtx.strokeStyle = "#1f2937";
+    grCtx.lineWidth = 1;
+    grCtx.beginPath();
+    grCtx.moveTo(padLeft, padTop);
+    grCtx.lineTo(padLeft, h - padBottom);
+    grCtx.lineTo(w - padRight, h - padBottom);
+    grCtx.stroke();
+
+    const isTemp = activeColorScale === 'temp';
+    const maxY = isTemp ? 520 : 40;
+    const minY = isTemp ? 20 : 0;
+
+    // Guidelines & Y-labels
+    const marksY = isTemp ? [100, 200, 300, 400, 500] : [10, 20, 30];
+    marksY.forEach(val => {
+      const y = (h - padBottom) - ((val - minY) / (maxY - minY)) * plotH;
+      grCtx.strokeStyle = "#172033";
+      grCtx.beginPath();
+      grCtx.moveTo(padLeft, y);
+      grCtx.lineTo(w - padRight, y);
+      grCtx.stroke();
+
+      grCtx.fillStyle = "#6b7280";
+      grCtx.font = `${9 * dpr}px monospace`;
+      grCtx.fillText(isTemp ? `${val}°C` : `+${val}°/s`, 6 * dpr, y + 3 * dpr);
+    });
+
+    // Time Axis Marks
+    [0, 60, 120, 180, 240, 300].forEach(sec => {
+      const x = padLeft + (sec / TOTAL_TIME) * plotW;
+      grCtx.fillStyle = "#9ca3af";
+      grCtx.font = `${10 * dpr}px monospace`;
+      grCtx.fillText(`${sec}s`, x - 8 * dpr, h - 8 * dpr);
+    });
+
+    function getPlotY(val) {
+      const norm = (val - minY) / (maxY - minY);
+      return (h - padBottom) - norm * plotH;
+    }
+
+    function getPlotX(f) {
+      return padLeft + (f / (FRAMES - 1)) * plotW;
+    }
+
+    function drawLine(datasetArray, color, isDashed = false) {
+      grCtx.beginPath();
+      grCtx.strokeStyle = color;
+      grCtx.lineWidth = 2.4 * dpr;
+      if (isDashed) {
+        grCtx.setLineDash([5 * dpr, 4 * dpr]);
+      } else {
+        grCtx.setLineDash([]);
+      }
+      for (let f = 0; f <= frameIdx; f++) {
+        const x = getPlotX(f);
+        const y = getPlotY(datasetArray[f]);
+        if (f === 0) grCtx.moveTo(x, y);
+        else grCtx.lineTo(x, y);
+      }
+      grCtx.stroke();
+      grCtx.setLineDash([]);
+    }
+
+    if (isTemp) {
+      drawLine(simData.good.map(row => row[0]), "#38bdf8", false);          // Copper 0cm
+      drawLine(simData.good.map(row => row[PIXELS - 1]), "#38bdf8", true);  // Copper 20cm
+      drawLine(simData.poor.map(row => row[0]), "#f87171", false);          // Wood 0cm
+      drawLine(simData.poor.map(row => row[PIXELS - 1]), "#ef4444", true);  // Wood 20cm
+    } else {
+      drawLine(simData.ratesGood.map(row => row[0]), "#38bdf8", false);     // Copper Rate
+      drawLine(simData.ratesPoor.map(row => row[0]), "#f87171", false);     // Wood Rate
+    }
+
+    // Time Scrubber Indicator
+    const curX = getPlotX(frameIdx);
+    grCtx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+    grCtx.setLineDash([4 * dpr, 4 * dpr]);
+    grCtx.beginPath();
+    grCtx.moveTo(curX, padTop);
+    grCtx.lineTo(curX, h - padBottom);
+    grCtx.stroke();
+    grCtx.setLineDash([]);
+  }
+
+  function updateView(frameIdx) {
+    const activeGood = activeColorScale === 'temp' ? simData.good[frameIdx] : simData.ratesGood[frameIdx];
+    const activePoor = activeColorScale === 'temp' ? simData.poor[frameIdx] : simData.ratesPoor[frameIdx];
+
+    renderPixelBar(goodCanvas, gCtx, activeGood);
+    renderPixelBar(poorCanvas, pCtx, activePoor);
+
+    const midIdx = Math.floor(PIXELS / 2); // 10 cm mark
+    goodLeft.textContent = `${simData.good[frameIdx][0].toFixed(1)}°C`;
+    goodMid.textContent = `${simData.good[frameIdx][midIdx].toFixed(1)}°C`;
+    goodRight.textContent = `${simData.good[frameIdx][PIXELS - 1].toFixed(1)}°C`;
+    goodRate.textContent = `+${simData.ratesGood[frameIdx][0].toFixed(1)}°C/s`;
+
+    poorLeft.textContent = `${simData.poor[frameIdx][0].toFixed(1)}°C`;
+    poorMid.textContent = `${simData.poor[frameIdx][midIdx].toFixed(1)}°C`;
+    poorRight.textContent = `${simData.poor[frameIdx][PIXELS - 1].toFixed(1)}°C`;
+    poorRate.textContent = `+${simData.ratesPoor[frameIdx][0].toFixed(1)}°C/s`;
+
+    timeSlider.value = frameIdx;
+    const curSec = (frameIdx * DT_FRAME).toFixed(1);
+    timeLabel.textContent = `${curSec} s / ${TOTAL_TIME.toFixed(1)} s`;
+
+    renderGraph(frameIdx);
+  }
+
+  let lastTime = performance.now();
+  function tick(now) {
+    const dtReal = (now - lastTime) / 1000;
+    lastTime = now;
+
+    if (isPlaying) {
+      fractionalFrame += (dtReal * playSpeed) / DT_FRAME;
+      if (fractionalFrame >= 1) {
+        const step = Math.floor(fractionalFrame);
+        currentFrame += step;
+        fractionalFrame -= step;
+
+        if (currentFrame >= FRAMES) {
+          currentFrame = FRAMES - 1;
+          togglePlay(false);
+        }
+        updateView(currentFrame);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function togglePlay(state) {
+    isPlaying = state !== undefined ? state : !isPlaying;
+    playBtn.textContent = isPlaying ? "Pause" : "Play";
+    if (isPlaying) {
+      playBtn.classList.add("active");
+      if (currentFrame >= FRAMES - 1) {
+        currentFrame = 0;
+        fractionalFrame = 0;
+      }
+    } else {
+      playBtn.classList.remove("active");
+    }
+  }
+
+  timeSlider.addEventListener("input", (e) => {
+    currentFrame = parseInt(e.target.value, 10);
+    fractionalFrame = 0;
+    togglePlay(false);
+    updateView(currentFrame);
+  });
+
+  playBtn.addEventListener("click", () => togglePlay());
+
+  resetBtn.addEventListener("click", () => {
+    currentFrame = 0;
+    fractionalFrame = 0;
+    updateView(0);
+    togglePlay(false);
+  });
+
+  speedBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      speedBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      playSpeed = parseFloat(btn.getAttribute("data-speed"));
+    });
+  });
+
+  window.addEventListener("resize", () => renderGraph(currentFrame));
+
+  updateLegendUI();
+  updateView(0);
+  requestAnimationFrame(tick);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uneven Heating & Wind Formation: 2D & 3D Interactive Simulation</title>
+  <!-- Three.js and OrbitControls for 3D simulation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: rgba(15, 23, 42, 0.88);
+      --accent: #38bdf8;
+      --accent-warm: #f97316;
+      --accent-cool: #3b82f6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+
+    #viewport-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* UI Overlay */
+    .ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    .interactive {
+      pointer-events: auto;
+    }
+
+    /* Header Panel */
+    .header-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px 22px;
+      max-width: 520px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-card h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+
+    .header-card blockquote {
+      border-left: 3px solid var(--accent-warm);
+      padding-left: 10px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    /* Floating View Toggle & Controls */
+    .controls-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 18px 22px;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      margin-top: auto;
+    }
+
+    .view-switcher {
+      display: flex;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .btn-toggle {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle.active {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.4);
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .control-row label {
+      color: var(--text-muted);
+    }
+
+    input[type=range] {
+      flex-grow: 1;
+      accent-color: var(--accent-warm);
+      cursor: pointer;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .cycle-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+
+    .cycle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Scientific Legend Overlay */
+    .legend-box {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .legend-warm { background: #ff4757; }
+    .legend-cool { background: #2ed573; }
+    .legend-cold { background: #1e90ff; }
+  </style>
+</head>
+<body>
+
+  <div id="viewport-container">
+    <!-- 2D Canvas View -->
+    <canvas id="canvas2d"></canvas>
+    <!-- 3D WebGL Canvas View -->
+    <div id="canvas3d-wrap" style="width: 100%; height: 100%; display: none;"></div>
+  </div>
+
+  <div class="ui-layer">
+    <!-- Header Quote & Info -->
+    <div class="header-card interactive">
+      <h1>🌬️ Uneven Heating & Wind Production</h1>
+      <blockquote>
+        "Some parts of the earth's surface heats up more quickly than the other. The uneven temperature causes convection currents to occur in the atmosphere. In this way, wind is produced."
+      </blockquote>
+    </div>
+
+    <!-- Top Right Legend -->
+    <div class="legend-box interactive">
+      <div style="font-weight: 700; margin-bottom: 2px;">Key Mechanics</div>
+      <div class="legend-item"><span class="legend-dot legend-warm"></span> Warm, Low Density (Rising / Low Pressure)</div>
+      <div class="legend-item"><span class="legend-dot legend-cold"></span> Cool, High Density (Sinking / High Pressure)</div>
+      <div class="legend-item"><span class="legend-dot legend-cool"></span> Surface Wind = Movement from High to Low Pressure</div>
+    </div>
+
+    <!-- Interactive Dashboard Bottom Left -->
+    <div class="controls-panel interactive">
+      <div class="view-switcher">
+        <button id="view-2d-btn" class="btn-toggle active" onclick="switchView('2d')">2D Cross-Section View</button>
+        <button id="view-3d-btn" class="btn-toggle" onclick="switchView('3d')">3D Regional View</button>
+      </div>
+
+      <div class="control-row">
+        <label>Condition:</label>
+        <button id="regime-toggle" class="cycle-btn" onclick="toggleRegime()">☀️ Daytime (Sea Breeze)</button>
+      </div>
+
+      <div class="control-row">
+        <label>Heating Differential:</label>
+        <input type="range" id="temp-slider" min="0.2" max="2.5" step="0.1" value="1.2" oninput="updateHeating(this.value)">
+        <span id="temp-val" class="status-badge" style="color: var(--accent-warm);">1.2x</span>
+      </div>
+
+      <div class="control-row">
+        <label>Show Air Pressure Labels:</label>
+        <input type="checkbox" id="chk-labels" checked style="cursor: pointer;">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       GLOBAL STATE & PARAMETERS
+       ========================================================================== */
+    const state = {
+      view: '2d', // '2d' or '3d'
+      isDaytime: true, // true = Land heats faster (Sea breeze), false = Land cools faster (Land breeze)
+      heatFactor: 1.2,
+      showLabels: true,
+      particleCount: 160
+    };
+
+    function updateHeating(val) {
+      state.heatFactor = parseFloat(val);
+      document.getElementById('temp-val').innerText = val + 'x';
+    }
+
+    function toggleRegime() {
+      state.isDaytime = !state.isDaytime;
+      const btn = document.getElementById('regime-toggle');
+      if (state.isDaytime) {
+        btn.innerText = "☀️ Daytime (Sea Breeze)";
+      } else {
+        btn.innerText = "🌙 Nighttime (Land Breeze)";
+      }
+    }
+
+    document.getElementById('chk-labels').addEventListener('change', (e) => {
+      state.showLabels = e.target.checked;
+    });
+
+    function switchView(mode) {
+      state.view = mode;
+      document.getElementById('view-2d-btn').classList.toggle('active', mode === '2d');
+      document.getElementById('view-3d-btn').classList.toggle('active', mode === '3d');
+
+      const canvas2d = document.getElementById('canvas2d');
+      const canvas3d = document.getElementById('canvas3d-wrap');
+
+      if (mode === '2d') {
+        canvas2d.style.display = 'block';
+        canvas3d.style.display = 'none';
+      } else {
+        canvas2d.style.display = 'none';
+        canvas3d.style.display = 'block';
+        onWindowResize3D();
+      }
+    }
+
+    /* ==========================================================================
+       2D SIMULATION CANVAS
+       ========================================================================== */
+    const canvas2d = document.getElementById('canvas2d');
+    const ctx = canvas2d.getContext('2d');
+
+    let width = (canvas2d.width = window.innerWidth);
+    let height = (canvas2d.height = window.innerHeight);
+
+    // Initialize 2D air parcel particles along elliptical streamlines
+    class AirParticle2D {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        // Parametric path position 0 to 1
+        this.t = Math.random();
+        this.trackRadiusX = 0.2 + Math.random() * 0.22; 
+        this.trackRadiusY = 0.16 + Math.random() * 0.14;
+      }
+      update(speedMultiplier, clockwise) {
+        const dir = clockwise ? 1 : -1;
+        this.t += 0.003 * speedMultiplier * dir;
+        if (this.t > 1) this.t -= 1;
+        if (this.t < 0) this.t += 1;
+      }
+    }
+
+    const particles2D = Array.from({ length: 160 }, () => new AirParticle2D());
+
+    function draw2DScene() {
+      ctx.clearRect(0, 0, width, height);
+
+      const groundY = height * 0.72;
+      const midX = width * 0.5;
+
+      // 1. Draw Sky background gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+      if (state.isDaytime) {
+        skyGrad.addColorStop(0, '#0c4a6e');
+        skyGrad.addColorStop(1, '#7dd3fc');
+      } else {
+        skyGrad.addColorStop(0, '#020617');
+        skyGrad.addColorStop(1, '#1e293b');
+      }
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, width, groundY);
+
+      // 2. Draw Ground: Left = Land, Right = Sea / Water
+      // Daytime: Land is much HOTTER than water. Nighttime: Sea stays warmer.
+      const landColor = state.isDaytime ? '#d97706' : '#78350f';
+      const waterColor = state.isDaytime ? '#0284c7' : '#0369a1';
+
+      // Land
+      ctx.fillStyle = landColor;
+      ctx.fillRect(0, groundY, midX, height - groundY);
+
+      // Water
+      ctx.fillStyle = waterColor;
+      ctx.fillRect(midX, groundY, width - midX, height - groundY);
+
+      // Surface Dividers & Details
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(midX, groundY);
+      ctx.lineTo(midX, height);
+      ctx.stroke();
+
+      // Terrain labels
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'center';
+      
+      // Land text
+      ctx.fillStyle = '#fef3c7';
+      const landTempText = state.isDaytime ? 'LAND (Heats up fast → WARM)' : 'LAND (Cools quickly → COLD)';
+      ctx.fillText('🏝️ ' + landTempText, midX * 0.5, groundY + 45);
+
+      // Sea text
+      ctx.fillStyle = '#e0f2fe';
+      const seaTempText = state.isDaytime ? 'WATER (Heats slowly → COOL)' : 'WATER (Retains heat → WARM)';
+      ctx.fillText('🌊 ' + seaTempText, midX + midX * 0.5, groundY + 45);
+
+      // Convection Loop Center
+      const centerX = width * 0.5;
+      const centerY = groundY * 0.48;
+      const rx = width * 0.30;
+      const ry = groundY * 0.36;
+
+      // Clockwise (Sea Breeze in daytime) or Counter-Clockwise (Land Breeze at night)
+      const clockwise = state.isDaytime;
+
+      // 3. Draw Convection Loop Trajectory Track
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.setLineDash([8, 8]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 4. Update & Draw Atmospheric Particles
+      particles2D.forEach(p => {
+        p.update(state.heatFactor, clockwise);
+
+        const angle = p.t * Math.PI * 2;
+        const currentRx = width * p.trackRadiusX;
+        const currentRy = groundY * p.trackRadiusY;
+        const px = centerX + Math.cos(angle) * currentRx;
+        const py = centerY + Math.sin(angle) * currentRy;
+
+        // Determine particle color based on region:
+        // Over warm area -> Rising (Warm Color)
+        // High altitude -> Cooling
+        // Over cool area -> Sinking (Cool Blue)
+        let particleColor;
+        let warmSide = state.isDaytime ? (px < midX) : (px > midX);
+
+        if (warmSide && py > centerY * 0.6) {
+          particleColor = '#ff4d4d'; // Heated, rising
+        } else if (!warmSide && py > centerY * 0.6) {
+          particleColor = '#38bdf8'; // Chilled, sinking
+        } else {
+          particleColor = '#facc15'; // Transitioning aloft
+        }
+
+        ctx.fillStyle = particleColor;
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 5. Annotations: High/Low Pressure & Winds
+      if (state.showLabels) {
+        ctx.font = 'bold 15px sans-serif';
+
+        // Warm Side (Low Pressure at surface)
+        const warmX = state.isDaytime ? midX * 0.32 : midX * 1.68;
+        const coolX = state.isDaytime ? midX * 1.68 : midX * 0.32;
+
+        // Low Pressure Badge
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+        ctx.fillRect(warmX - 70, groundY - 50, 140, 32);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('LOW PRESSURE [L]', warmX, groundY - 28);
+
+        // High Pressure Badge
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.9)';
+        ctx.fillRect(coolX - 70, groundY - 50, 140, 32);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('HIGH PRESSURE [H]', coolX, groundY - 28);
+
+        // Rising Air Column Arrow
+        drawCurvedArrow(warmX, groundY - 70, warmX, centerY * 0.4, '#ef4444', 'Warm Air Rises (Low Density)');
+
+        // Sinking Air Column Arrow
+        drawCurvedArrow(coolX, centerY * 0.4, coolX, groundY - 70, '#3b82f6', 'Cool Air Sinks (High Density)');
+
+        // SURFACE WIND ARROW (High pressure to Low pressure)
+        const windStartX = coolX + (state.isDaytime ? -80 : 80);
+        const windEndX = warmX + (state.isDaytime ? 80 : -80);
+        drawCurvedArrow(windStartX, groundY - 20, windEndX, groundY - 20, '#22c55e', 'SURFACE WIND', true);
+      }
+
+      requestAnimationFrame(draw2DScene);
+    }
+
+    function drawCurvedArrow(fromX, fromY, toX, toY, color, text, isHorizontal = false) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.stroke();
+
+      // Arrowhead
+      const headlen = 12;
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+      ctx.fill();
+
+      // Text label
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      if (isHorizontal) {
+        ctx.fillText(text + '  ➔', (fromX + toX) / 2, fromY - 14);
+      } else {
+        ctx.fillText(text, fromX, (fromY + toY) / 2);
+      }
+      ctx.restore();
+    }
+
+    window.addEventListener('resize', () => {
+      width = canvas2d.width = window.innerWidth;
+      height = canvas2d.height = window.innerHeight;
+    });
+
+    draw2DScene();
+
+    /* ==========================================================================
+       3D SIMULATION (Three.js)
+       ========================================================================== */
+    const container3d = document.getElementById('canvas3d-wrap');
+    let scene, camera, renderer, controls;
+    let particles3D, particleGeom, particlePositions, particleColors;
+    let landMesh, seaMesh, sunLight;
+
+    const count3D = 400;
+    const p3dData = [];
+
+    function init3D() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a1128);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.set(0, 110, 200);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container3d.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 - 0.05; // Keep above surface
+
+      // Ambient & Directional Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      sunLight = new THREE.DirectionalLight(0xfff3b0, 1.2);
+      sunLight.position.set(-60, 120, 50);
+      scene.add(sunLight);
+
+      // Build 3D Terrains: Island (Land) & Ocean (Water)
+      const seaGeo = new THREE.PlaneGeometry(240, 240);
+      const seaMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        roughness: 0.2,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.88
+      });
+      seaMesh = new THREE.Mesh(seaGeo, seaMat);
+      seaMesh.rotation.x = -Math.PI / 2;
+      scene.add(seaMesh);
+
+      // Island Landmass (Left side)
+      const islandGeo = new THREE.CylinderGeometry(40, 48, 4, 32);
+      const islandMat = new THREE.MeshStandardMaterial({
+        color: 0xd97706,
+        roughness: 0.9
+      });
+      landMesh = new THREE.Mesh(islandGeo, islandMat);
+      landMesh.position.set(-45, 2, 0);
+      scene.add(landMesh);
+
+      // Island Center indicator
+      const mountainGeo = new THREE.ConeGeometry(20, 22, 16);
+      const mountainMat = new THREE.MeshStandardMaterial({ color: 0x92400e });
+      const mountain = new THREE.Mesh(mountainGeo, mountainMat);
+      mountain.position.set(-45, 12, 0);
+      scene.add(mountain);
+
+      // Convection Loop Particles in 3D
+      particleGeom = new THREE.BufferGeometry();
+      particlePositions = new Float32Array(count3D * 3);
+      particleColors = new Float32Array(count3D * 3);
+
+      for (let i = 0; i < count3D; i++) {
+        p3dData.push({
+          theta: Math.random() * Math.PI * 2,
+          radiusX: 38 + Math.random() * 24,
+          radiusY: 20 + Math.random() * 18,
+          zOffset: (Math.random() - 0.5) * 45
+        });
+      }
+
+      particleGeom.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+      particleGeom.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+      // Circular Point Texture for soft glowing air parcels
+      const canvasTex = document.createElement('canvas');
+      canvasTex.width = 16;
+      canvasTex.height = 16;
+      const tCtx = canvasTex.getContext('2d');
+      const grad = tCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      tCtx.fillStyle = grad;
+      tCtx.fillRect(0, 0, 16, 16);
+      const particleTexture = new THREE.CanvasTexture(canvasTex);
+
+      const pMat = new THREE.PointsMaterial({
+        size: 3.5,
+        vertexColors: true,
+        map: particleTexture,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      particles3D = new THREE.Points(particleGeom, pMat);
+      scene.add(particles3D);
+
+      animate3D();
+    }
+
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+
+      const isDay = state.isDaytime;
+      const speed = 0.015 * state.heatFactor;
+
+      // Update particle positions along elliptical convection paths
+      for (let i = 0; i < count3D; i++) {
+        const p = p3dData[i];
+        // Convection direction reverses at night
+        if (isDay) {
+          p.theta += speed;
+        } else {
+          p.theta -= speed;
+        }
+
+        const x = -10 + Math.cos(p.theta) * p.radiusX;
+        const y = 28 + Math.sin(p.theta) * p.radiusY;
+        const z = p.zOffset;
+
+        particlePositions[i * 3] = x;
+        particlePositions[i * 3 + 1] = Math.max(y, 3);
+        particlePositions[i * 3 + 2] = z;
+
+        // Dynamic Temperature Color
+        // If near warm ground -> Red/Orange. If high/near cool surface -> Cyan/Blue
+        const isOverLand = x < -10;
+        const isWarmZone = isDay ? isOverLand : !isOverLand;
+
+        if (isWarmZone && y < 32) {
+          // Warm
+          particleColors[i * 3] = 1.0;
+          particleColors[i * 3 + 1] = 0.3;
+          particleColors[i * 3 + 2] = 0.1;
+        } else if (!isWarmZone && y < 32) {
+          // Cool
+          particleColors[i * 3] = 0.1;
+          particleColors[i * 3 + 1] = 0.6;
+          particleColors[i * 3 + 2] = 1.0;
+        } else {
+          // Moderate (aloft)
+          particleColors[i * 3] = 0.9;
+          particleColors[i * 3 + 1] = 0.8;
+          particleColors[i * 3 + 2] = 0.2;
+        }
+      }
+
+      particleGeom.attributes.position.needsUpdate = true;
+      particleGeom.attributes.color.needsUpdate = true;
+
+      // Subtle dynamic land illumination based on day/night
+      if (isDay) {
+        landMesh.material.color.setHex(0xd97706);
+        sunLight.intensity = 1.2;
+      } else {
+        landMesh.material.color.setHex(0x451a03);
+        sunLight.intensity = 0.2;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize3D() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onWindowResize3D);
+    init3D();
+  </script>
+</body>
+</html>

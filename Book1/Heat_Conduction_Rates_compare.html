@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Conduction Rates: Solid, Liquid, and Gas</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="text-center max-w-4xl mb-6">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-amber-400 mb-2 flex items-center justify-center gap-3">
+            <i class="fa-solid fa-fire text-orange-500"></i> Heat Conduction Rates: Solid vs Liquid vs Gas
+        </h1>
+        <p class="text-slate-300 text-sm md:text-base">
+            Compare how efficiently thermal energy transfers through different states of matter. Stacked vertically to easily trace how fast heat travels across long distances.
+        </p>
+    </header>
+
+    <!-- Master Action Bar -->
+    <div class="w-full max-w-6xl bg-slate-800 border border-slate-700 rounded-2xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+        <div class="flex items-center gap-3">
+            <button onclick="triggerAllHeat()" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-lg shadow-orange-900/40 flex items-center gap-2">
+                <i class="fa-solid fa-fire-flame-curved"></i> Trigger Simultaneous Heat Pulse
+            </button>
+            <button onclick="resetAll()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2.5 px-4 rounded-xl transition text-sm">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Reset All
+            </button>
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                <span>Simulation Speed:</span>
+                <input type="range" id="speedRange" min="0.3" max="1.5" step="0.1" value="0.8" class="accent-amber-500 cursor-pointer">
+            </label>
+        </div>
+    </div>
+
+    <!-- Stacked Vertical Dashboard (Solid -> Liquid -> Gas) -->
+    <div class="w-full max-w-6xl flex flex-col gap-6">
+
+        <!------------------------------------------------------------------------>
+        <!-- 1. SOLID CONDUCTION                                                -->
+        <!------------------------------------------------------------------------>
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col shadow-xl">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-semibold px-2.5 py-1 bg-cyan-950 text-cyan-300 rounded-full border border-cyan-800">Solid</span>
+                    <h2 class="text-lg font-bold text-slate-100 mt-2">Rigid Lattice Structure</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Conduction Speed</span>
+                    <span class="text-sm font-bold text-cyan-400">FASTEST 🚀</span>
+                </div>
+            </div>
+            
+            <p class="text-slate-300 text-xs mb-3">
+                Particles are tightly packed in fixed positions. Vibrations pass instantly to immediate neighbors across the material.
+            </p>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full h-44 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <canvas id="canvasSolid" class="w-full h-full cursor-pointer"></canvas>
+                <div class="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded text-[10px] text-slate-400 pointer-events-none">
+                    Click left edge to heat
+                </div>
+            </div>
+
+            <!-- Individual Control -->
+            <div class="mt-3 flex justify-end gap-2">
+                <button onclick="applyHeat('solid')" class="bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-semibold py-1.5 px-4 rounded-xl transition">
+                    Heat Solid Left Edge
+                </button>
+                <button onclick="resetSim('solid')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-xl text-xs transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!------------------------------------------------------------------------>
+        <!-- 2. LIQUID CONDUCTION                                               -->
+        <!------------------------------------------------------------------------>
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col shadow-xl">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-semibold px-2.5 py-1 bg-blue-950 text-blue-300 rounded-full border border-blue-800">Liquid</span>
+                    <h2 class="text-lg font-bold text-slate-100 mt-2">Close, Unordered Fluid</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Conduction Speed</span>
+                    <span class="text-sm font-bold text-blue-400">MODERATE 🚶</span>
+                </div>
+            </div>
+            
+            <p class="text-slate-300 text-xs mb-3">
+                Particles are close, but loose movement disrupts direct vibrational passing, slowing transfer down.
+            </p>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full h-44 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <canvas id="canvasLiquid" class="w-full h-full cursor-pointer"></canvas>
+                <div class="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded text-[10px] text-slate-400 pointer-events-none">
+                    Click left edge to heat
+                </div>
+            </div>
+
+            <!-- Individual Control -->
+            <div class="mt-3 flex justify-end gap-2">
+                <button onclick="applyHeat('liquid')" class="bg-blue-700 hover:bg-blue-600 text-white text-xs font-semibold py-1.5 px-4 rounded-xl transition">
+                    Heat Liquid Left Edge
+                </button>
+                <button onclick="resetSim('liquid')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-xl text-xs transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!------------------------------------------------------------------------>
+        <!-- 3. GAS CONDUCTION                                                  -->
+        <!------------------------------------------------------------------------>
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col shadow-xl">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-semibold px-2.5 py-1 bg-amber-950 text-amber-300 rounded-full border border-amber-800">Gas</span>
+                    <h2 class="text-lg font-bold text-slate-100 mt-2">Widely Spaced Molecules</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Conduction Speed</span>
+                    <span class="text-sm font-bold text-amber-400">SLOWEST 🐢 (Insulator)</span>
+                </div>
+            </div>
+            
+            <p class="text-slate-300 text-xs mb-3">
+                Particles are far apart. Collisions happen rarely, making thermal energy transfer highly inefficient.
+            </p>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full h-44 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <canvas id="canvasGas" class="w-full h-full cursor-pointer"></canvas>
+                <div class="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded text-[10px] text-slate-400 pointer-events-none">
+                    Click left edge to heat
+                </div>
+            </div>
+
+            <!-- Individual Control -->
+            <div class="mt-3 flex justify-end gap-2">
+                <button onclick="applyHeat('gas')" class="bg-amber-700 hover:bg-amber-600 text-white text-xs font-semibold py-1.5 px-4 rounded-xl transition">
+                    Heat Gas Left Edge
+                </button>
+                <button onclick="resetSim('gas')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-xl text-xs transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Educational Footer Notes -->
+    <footer class="mt-8 w-full max-w-6xl bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 text-xs md:text-sm text-slate-300 space-y-2">
+        <h3 class="font-bold text-slate-100"><i class="fa-solid fa-circle-info text-amber-400 mr-1"></i> Why do conduction rates differ so much?</h3>
+        <p>• <b>Solid:</b> Because atoms are locked tightly in a lattice structure, when one atom heats up and vibrates, it immediately knocks against its adjacent neighbors, propagating thermal energy rapidly across the material.</p>
+        <p>• <b>Liquid:</b> Particles are close together, but because they flow and lack fixed geometry, energy transfer via molecular collisions is somewhat disrupted and slower.</p>
+        <p>• <b>Gas:</b> Particles are widely separated by large empty spaces. A heated particle has to travel a long distance before hitting another particle, making gases extremely poor heat conductors (effectively thermal insulators).</p>
+    </footer>
+
+    <!-- Simulation Script -->
+    <script>
+        class ConductionRateSim {
+            constructor(canvasId, mode) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.mode = mode; // 'solid', 'liquid', 'gas'
+
+                // Higher column count to stretch nicely across wide screens
+                this.cols = (mode === 'solid') ? 20 : (mode === 'liquid') ? 16 : 10;
+                this.rows = (mode === 'solid') ? 4 : (mode === 'liquid') ? 4 : 3;
+                this.particles = [];
+
+                this.initDimensions();
+                this.reset();
+
+                // Click left edge to inject heat
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    if (x < this.width * 0.15) {
+                        this.injectHeat();
+                    }
+                });
+            }
+
+            initDimensions() {
+                this.width = this.canvas.clientWidth;
+                this.height = this.canvas.clientHeight;
+                this.canvas.width = this.width * window.devicePixelRatio;
+                this.canvas.height = this.height * window.devicePixelRatio;
+                this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            }
+
+            reset() {
+                this.particles = [];
+                const paddingX = 40;
+                const paddingY = 25;
+                const usableWidth = this.width - paddingX * 2;
+                const usableHeight = this.height - paddingY * 2;
+
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        let x = paddingX + (c / (this.cols - 1 || 1)) * usableWidth;
+                        let y = paddingY + (r / (this.rows - 1 || 1)) * usableHeight;
+                        
+                        let isSource = (c === 0);
+                        this.particles.push({
+                            baseX: x,
+                            baseY: y,
+                            x: x,
+                            y: y,
+                            vx: (Math.random() - 0.5) * (this.mode === 'gas' ? 3.5 : 0.4),
+                            vy: (Math.random() - 0.5) * (this.mode === 'gas' ? 3.5 : 0.4),
+                            energy: isSource ? 100 : 0,
+                            row: r,
+                            col: c,
+                            radius: this.mode === 'gas' ? 7 : 6
+                        });
+                    }
+                }
+            }
+
+            injectHeat() {
+                this.particles.forEach(p => {
+                    if (p.col === 0) p.energy = 100;
+                });
+            }
+
+            update(speedMultiplier) {
+                let energies = this.particles.map(p => p.energy);
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    let p = this.particles[i];
+
+                    // Cooling factor
+                    if (energies[i] > 0) {
+                        energies[i] -= 0.06 * speedMultiplier;
+                        if (energies[i] < 0) energies[i] = 0;
+                    }
+
+                    if (this.mode === 'solid') {
+                        // SOLID: Fast neighbor-to-neighbor transfer across the wide bar
+                        let neighbors = this.particles.filter(other => Math.abs(other.col - p.col) + Math.abs(other.row - p.row) === 1);
+                        neighbors.forEach(n => {
+                            let nIdx = this.particles.indexOf(n);
+                            if (p.energy > n.energy) {
+                                let diff = (p.energy - n.energy) * 0.07 * speedMultiplier;
+                                energies[nIdx] += diff;
+                            }
+                        });
+                    } 
+                    else if (this.mode === 'liquid') {
+                        // LIQUID: Moderate transfer rate
+                        let neighbors = this.particles.filter(other => Math.hypot(other.baseX - p.baseX, other.baseY - p.baseY) < 40);
+                        neighbors.forEach(n => {
+                            let nIdx = this.particles.indexOf(n);
+                            if (p.energy > n.energy) {
+                                let diff = (p.energy - n.energy) * 0.02 * speedMultiplier;
+                                energies[nIdx] += diff;
+                            }
+                        });
+                    } 
+                    else if (this.mode === 'gas') {
+                        // GAS: Slow transfer rate due to sparse spacing
+                        let neighbors = this.particles.filter(other => Math.hypot(other.x - p.x, other.y - p.y) < 30);
+                        neighbors.forEach(n => {
+                            let nIdx = this.particles.indexOf(n);
+                            if (p.energy > n.energy) {
+                                let diff = (p.energy - n.energy) * 0.003 * speedMultiplier;
+                                energies[nIdx] += diff;
+                            }
+                        });
+                    }
+                }
+
+                // Apply energy updates, lock left-most source column hot
+                for (let i = 0; i < this.particles.length; i++) {
+                    this.particles[i].energy = Math.max(0, Math.min(100, energies[i]));
+                    if (this.particles[i].col === 0) {
+                        this.particles[i].energy = Math.max(this.particles[i].energy, 95);
+                    }
+                }
+
+                // Motion physics
+                this.particles.forEach(p => {
+                    if (this.mode === 'solid') {
+                        if (p.energy > 5) {
+                            let intensity = p.energy / 100;
+                            let angle = Math.random() * Math.PI * 2;
+                            p.x = p.baseX + Math.cos(angle) * intensity * 3.5;
+                            p.y = p.baseY + Math.sin(angle) * intensity * 3.5;
+                        } else {
+                            p.x = p.baseX;
+                            p.y = p.baseY;
+                        }
+                    } 
+                    else if (this.mode === 'liquid') {
+                        p.x += p.vx * speedMultiplier;
+                        p.y += p.vy * speedMultiplier;
+                        p.vx += (Math.random() - 0.5) * 0.2;
+                        p.vy += (Math.random() - 0.5) * 0.2;
+                        p.x += (p.baseX - p.x) * 0.04;
+                        p.y += (p.baseY - p.y) * 0.04;
+                    } 
+                    else if (this.mode === 'gas') {
+                        p.x += p.vx * speedMultiplier * 1.5;
+                        p.y += p.vy * speedMultiplier * 1.5;
+                        if (p.x < 15 || p.x > this.width - 15) p.vx *= -1;
+                        if (p.y < 15 || p.y > this.height - 15) p.vy *= -1;
+                        p.vx += (Math.random() - 0.5) * 0.6;
+                        p.vy += (Math.random() - 0.5) * 0.6;
+                    }
+                });
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                // Draw Heat Source indicator bar on the left
+                this.ctx.save();
+                this.ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+                this.ctx.fillRect(0, 0, 30, this.height);
+                this.ctx.fillStyle = '#ef4444';
+                this.ctx.font = 'bold 9px sans-serif';
+                this.ctx.fillText('HEAT', 3, 20);
+                this.ctx.restore();
+
+                // Draw structural grid lattice for solid
+                if (this.mode === 'solid') {
+                    this.ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                    this.ctx.lineWidth = 1;
+                    for (let i = 0; i < this.particles.length; i++) {
+                        for (let j = i + 1; j < this.particles.length; j++) {
+                            let p1 = this.particles[i];
+                            let p2 = this.particles[j];
+                            if (Math.abs(p1.col - p2.col) + Math.abs(p1.row - p2.row) === 1) {
+                                this.ctx.beginPath();
+                                this.ctx.moveTo(p1.x, p1.y);
+                                this.ctx.lineTo(p2.x, p2.y);
+                                this.ctx.stroke();
+                            }
+                        }
+                    }
+                }
+
+                // Draw Particles
+                this.particles.forEach(p => {
+                    this.ctx.beginPath();
+                    let t = p.energy / 100;
+                    let red = Math.floor(100 + 155 * t);
+                    let green = Math.floor(100 + (30 - 100) * t);
+                    let blue = Math.floor(110 + (20 - 110) * t);
+
+                    this.ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Vibration waves on hot particles
+                    if (p.energy > 30) {
+                        this.ctx.strokeStyle = `rgba(255, 140, 0, ${t})`;
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.radius + 2.5, Math.PI * 0.7, Math.PI * 1.3);
+                        this.ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        const simSolid = new ConductionRateSim('canvasSolid', 'solid');
+        const simLiquid = new ConductionRateSim('canvasLiquid', 'liquid');
+        const simGas = new ConductionRateSim('canvasGas', 'gas');
+
+        function applyHeat(type) {
+            if (type === 'solid') simSolid.injectHeat();
+            if (type === 'liquid') simLiquid.injectHeat();
+            if (type === 'gas') simGas.injectHeat();
+        }
+
+        function triggerAllHeat() {
+            simSolid.injectHeat();
+            simLiquid.injectHeat();
+            simGas.injectHeat();
+        }
+
+        function resetSim(type) {
+            if (type === 'solid') simSolid.reset();
+            if (type === 'liquid') simLiquid.reset();
+            if (type === 'gas') simGas.reset();
+        }
+
+        function resetAll() {
+            simSolid.reset();
+            simLiquid.reset();
+            simGas.reset();
+        }
+
+        window.addEventListener('resize', () => {
+            simSolid.initDimensions();
+            simLiquid.initDimensions();
+            simGas.initDimensions();
+        });
+
+        function animate() {
+            const speedMultiplier = parseFloat(document.getElementById('speedRange').value);
+
+            simSolid.update(speedMultiplier);
+            simSolid.draw();
+
+            simLiquid.update(speedMultiplier);
+            simLiquid.draw();
+
+            simGas.update(speedMultiplier);
+            simGas.draw();
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
