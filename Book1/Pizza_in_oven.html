@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Heat Radiation - Drag Pizza In & Out of Oven</title>
+  <style>
+    :root {
+      --oven-color: #f97316;
+      --room-color: #38bdf8;
+      --absorb-col: #0284c7;
+      --emit-col: #ef4444;
+      --panel-bg: #0f172a;
+      --card-bg: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: #090d16;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app-container {
+      max-width: 950px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    /* Simulation Canvas Wrapper */
+    .viewport {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      border: 2px solid #334155;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    /* Floating drag hint */
+    .drag-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #475569;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    /* Status and comparison card */
+    .dashboard {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .net-absorber {
+      background: rgba(2, 132, 199, 0.2);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+    }
+
+    .net-emitter {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      color: #f87171;
+    }
+
+    .net-equilibrium {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #34d399;
+    }
+
+    /* Meters grid */
+    .meters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .meter-card {
+      background: #0f172a;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    .meter-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: #1e293b;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 6px;
+      transition: width 0.1s linear;
+    }
+
+    .fill-absorb { background: #0284c7; }
+    .fill-emit { background: #ef4444; }
+
+    /* Quick jump buttons */
+    .quick-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: #334155;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #475569;
+    }
+
+    .btn-active {
+      background: #0284c7;
+      border-color: #38bdf8;
+    }
+
+    /* Explanation Note */
+    .rule-box {
+      background: #0f172a;
+      border-left: 4px solid #f97316;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <h1>Thermal Radiation Lab</h1>
+    <p>Grab and drag the pizza between the <strong>Hot Oven</strong> and the <strong>Counter</strong>.</p>
+  </header>
+
+  <!-- Interactive Drag Canvas -->
+  <div class="viewport">
+    <canvas id="simCanvas"></canvas>
+    <div class="drag-hint">✋ Click and drag the pizza across rooms</div>
+  </div>
+
+  <!-- Real-time Status -->
+  <div class="dashboard">
+    <div class="status-bar net-absorber" id="statusBar">
+      <span id="statusIcon">📥</span>
+      <span id="statusText">Inside Oven: Net Absorber (Pizza heats up)</span>
+    </div>
+
+    <div class="meters">
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>Incoming Radiation (Absorbed)</span>
+          <strong id="valAbsorb">0 W</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-absorb" id="fillAbsorb"></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-header">
+          <span>Outgoing Radiation (Emitted)</span>
+          <strong id="valEmit">0 W</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-emit" id="fillEmit"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="quick-actions">
+      <div class="btn-group">
+        <button class="btn" id="btnSnapOven">Put in Oven (Left)</button>
+        <button class="btn" id="btnSnapCounter">Put on Counter (Right)</button>
+      </div>
+
+      <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 10px;">
+        <span>Pizza Speed of Temp Change:</span>
+        <button class="btn" id="btnResetPizza">Reset Pizza to 20°C</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Concept Summary -->
+  <div class="rule-box">
+    <strong>What you are observing:</strong><br>
+    • In the <strong>Hot Oven (230°C)</strong>: Oven radiation is intense (large blue incoming waves). The pizza absorbs more than it emits &rarr; <strong>Net Absorber</strong> &rarr; Temperature rises.<br>
+    • On the <strong>Counter (20°C)</strong>: Room radiation is weak. A hot pizza emits far more radiation than it receives (large red outgoing waves) &rarr; <strong>Net Emitter</strong> &rarr; Temperature drops.<br>
+    • At <strong>Thermal Equilibrium</strong>: Incoming = Outgoing radiation &rarr; Temperature stabilizes.
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('simCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // DOM references
+  const statusBar = document.getElementById('statusBar');
+  const statusIcon = document.getElementById('statusIcon');
+  const statusText = document.getElementById('statusText');
+  const fillAbsorb = document.getElementById('fillAbsorb');
+  const fillEmit = document.getElementById('fillEmit');
+  const valAbsorb = document.getElementById('valAbsorb');
+  const valEmit = document.getElementById('valEmit');
+  const btnSnapOven = document.getElementById('btnSnapOven');
+  const btnSnapCounter = document.getElementById('btnSnapCounter');
+  const btnResetPizza = document.getElementById('btnResetPizza');
+
+  // High DPI canvas setup
+  let width, height;
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  window.addEventListener('resize', resize);
+
+  // Temperatures & State
+  const T_OVEN = 240;  // °C
+  const T_ROOM = 22;   // °C
+  let pizzaTemp = 20;  // Initial Pizza Temp °C
+  let currentEnvTemp = T_OVEN;
+
+  // Pizza Object Position & Physics
+  const pizza = {
+    x: 0,
+    y: 0,
+    radius: 48,
+    isDragging: false,
+    dragOffsetX: 0,
+    dragOffsetY: 0
+  };
+
+  // Particles for radiation simulation
+  const particles = [];
+  const PARTICLE_COUNT = 60;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      angle: Math.random() * Math.PI * 2,
+      distRatio: Math.random(),
+      speed: 0.007 + Math.random() * 0.006
+    });
+  }
+
+  // Stefan-Boltzmann scaled approximation
+  function calcRadiation(tempC) {
+    const kelvin = Math.max(0, tempC + 273.15);
+    return Math.pow(kelvin / 513, 4); // Normalized scale
+  }
+
+  // Mouse / Touch handlers for dragging
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function startDrag(e) {
+    const pos = getPos(e);
+    const dist = Math.hypot(pos.x - pizza.x, pos.y - pizza.y);
+    if (dist <= pizza.radius + 15) {
+      pizza.isDragging = true;
+      pizza.dragOffsetX = pizza.x - pos.x;
+      pizza.dragOffsetY = pizza.y - pos.y;
+    }
+  }
+
+  function doDrag(e) {
+    if (!pizza.isDragging) return;
+    const pos = getPos(e);
+    pizza.x = Math.max(pizza.radius + 10, Math.min(width - pizza.radius - 10, pos.x + pizza.dragOffsetX));
+    pizza.y = Math.max(pizza.radius + 20, Math.min(height - pizza.radius - 20, pos.y + pizza.dragOffsetY));
+  }
+
+  function stopDrag() {
+    pizza.isDragging = false;
+  }
+
+  canvas.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', doDrag);
+  window.addEventListener('mouseup', stopDrag);
+
+  canvas.addEventListener('touchstart', startDrag, { passive: true });
+  window.addEventListener('touchmove', doDrag, { passive: true });
+  window.addEventListener('touchend', stopDrag);
+
+  // Snap buttons
+  btnSnapOven.addEventListener('click', () => {
+    pizza.x = width * 0.22;
+    pizza.y = height * 0.5;
+  });
+
+  btnSnapCounter.addEventListener('click', () => {
+    pizza.x = width * 0.78;
+    pizza.y = height * 0.5;
+  });
+
+  btnResetPizza.addEventListener('click', () => {
+    pizzaTemp = 20;
+  });
+
+  // Wavy arrow drawing function
+  function drawWavyArrow(ctx, x1, y1, x2, y2, color, alpha) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = Math.max(0.12, Math.min(0.95, alpha));
+    ctx.lineWidth = 2.4;
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const dist = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+
+    ctx.translate(x1, y1);
+    ctx.rotate(angle);
+
+    ctx.beginPath();
+    const waveFreq = 0.22;
+    const waveAmp = 3.5;
+    for (let i = 0; i < dist; i += 2) {
+      const y = Math.sin(i * waveFreq) * waveAmp;
+      if (i === 0) ctx.moveTo(i, y);
+      else ctx.lineTo(i, y);
+    }
+    ctx.stroke();
+
+    // Arrowhead
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.moveTo(dist, 0);
+    ctx.lineTo(dist - 7, -4);
+    ctx.lineTo(dist - 7, 4);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // Draw background environment
+  function drawEnvironment() {
+    const ovenWidth = width * 0.45;
+    const roomWidth = width * 0.55;
+
+    // 1. Oven Chamber (Left)
+    const ovenGrad = ctx.createLinearGradient(0, 0, ovenWidth, 0);
+    ovenGrad.addColorStop(0, '#431407');
+    ovenGrad.addColorStop(1, '#7c2d12');
+    ctx.fillStyle = ovenGrad;
+    ctx.fillRect(0, 0, ovenWidth, height);
+
+    // Oven Glow & Elements
+    ctx.fillStyle = 'rgba(249, 115, 22, 0.15)';
+    ctx.fillRect(0, 0, ovenWidth, height);
+
+    // Oven heating coils at top/bottom
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(20, 20); ctx.lineTo(ovenWidth - 20, 20);
+    ctx.moveTo(20, height - 20); ctx.lineTo(ovenWidth - 20, height - 20);
+    ctx.stroke();
+
+    // Oven Door boundary border
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(ovenWidth, 0);
+    ctx.lineTo(ovenWidth, height);
+    ctx.stroke();
+
+    // 2. Kitchen Counter (Right)
+    const roomGrad = ctx.createLinearGradient(ovenWidth, 0, width, 0);
+    roomGrad.addColorStop(0, '#0f172a');
+    roomGrad.addColorStop(1, '#020617');
+    ctx.fillStyle = roomGrad;
+    ctx.fillRect(ovenWidth, 0, roomWidth, height);
+
+    // Kitchen Counter tabletop surface
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(ovenWidth + 30, height - 70, roomWidth - 50, 70);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(ovenWidth + 30, height - 70, roomWidth - 50, 70);
+
+    // Section Labels
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillStyle = '#fdba74';
+    ctx.textAlign = 'left';
+    ctx.fillText(`🔥 HOT OVEN (${T_OVEN}°C)`, 25, 45);
+
+    ctx.fillStyle = '#7dd3fc';
+    ctx.textAlign = 'right';
+    ctx.fillText(`❄️ KITCHEN ROOM (${T_ROOM}°C)`, width - 25, 45);
+  }
+
+  // Draw Pizza
+  function drawPizza(x, y, temp) {
+    const r = pizza.radius;
+
+    // Thermal glow halo
+    const glowRatio = Math.max(0, (temp - 20) / 220);
+    ctx.save();
+    if (glowRatio > 0.05) {
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 20 * glowRatio;
+    }
+
+    // Crust
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${Math.round(190 + glowRatio * 50)}, ${Math.round(130 - glowRatio * 40)}, 70)`;
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#9a3412';
+    ctx.stroke();
+
+    // Cheese
+    ctx.beginPath();
+    ctx.arc(x, y, r - 6, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${Math.round(234 + glowRatio * 20)}, ${Math.round(179 - glowRatio * 70)}, 50)`;
+    ctx.fill();
+
+    // Pepperoni slices
+    const toppings = [
+      [-16, -14], [14, -16], [-12, 16], [16, 12], [0, 0]
+    ];
+    toppings.forEach(([tx, ty]) => {
+      ctx.beginPath();
+      ctx.arc(x + tx, y + ty, 7.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#991b1b';
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // Temperature Badge on the pizza
+    ctx.save();
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    ctx.beginPath();
+    ctx.roundRect(x - 36, y - 13, 72, 26, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.font = 'bold 12.5px sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${Math.round(temp)} °C`, x, y);
+    ctx.restore();
+  }
+
+  // Animation and physics loop
+  let lastTime = performance.now();
+
+  function loop(now) {
+    const dt = Math.min(0.1, (now - lastTime) / 1000);
+    lastTime = now;
+
+    // Determine ambient environment temperature based on Pizza's X position
+    const ovenBoundary = width * 0.45;
+    const transitionZone = 70; // smooth transition at the oven door
+
+    if (pizza.x < ovenBoundary - transitionZone / 2) {
+      currentEnvTemp = T_OVEN;
+    } else if (pizza.x > ovenBoundary + transitionZone / 2) {
+      currentEnvTemp = T_ROOM;
+    } else {
+      // Linear blend between oven and room
+      const factor = (pizza.x - (ovenBoundary - transitionZone / 2)) / transitionZone;
+      currentEnvTemp = T_OVEN + (T_ROOM - T_OVEN) * factor;
+    }
+
+    // Dynamic temperature exchange over time (Newton's cooling / Stefan-Boltzmann net transfer)
+    const rateConstant = 0.35;
+    pizzaTemp += (currentEnvTemp - pizzaTemp) * rateConstant * dt;
+
+    // Radiative rates
+    const pAbsorb = calcRadiation(currentEnvTemp);
+    const pEmit = calcRadiation(pizzaTemp);
+    const maxReference = calcRadiation(240);
+
+    // Update UI
+    const absorbPercent = Math.min(100, Math.max(4, (pAbsorb / maxReference) * 100));
+    const emitPercent = Math.min(100, Math.max(4, (pEmit / maxReference) * 100));
+    fillAbsorb.style.width = `${absorbPercent}%`;
+    fillEmit.style.width = `${emitPercent}%`;
+
+    valAbsorb.textContent = `${Math.round(pAbsorb * 120)} W`;
+    valEmit.textContent = `${Math.round(pEmit * 120)} W`;
+
+    // Status message
+    const tempDiff = currentEnvTemp - pizzaTemp;
+    if (Math.abs(tempDiff) <= 1.5) {
+      statusBar.className = 'status-bar net-equilibrium';
+      statusIcon.textContent = '⚖️';
+      statusText.textContent = `Thermal Equilibrium (Incoming = Outgoing radiation)`;
+    } else if (tempDiff > 0) {
+      statusBar.className = 'status-bar net-absorber';
+      statusIcon.textContent = '📥';
+      statusText.textContent = `Net Absorber: Absorbs more than it emits (Temp Rising ↑)`;
+    } else {
+      statusBar.className = 'status-bar net-emitter';
+      statusIcon.textContent = '📤';
+      statusText.textContent = `Net Emitter: Emits more than it absorbs (Temp Dropping ↓)`;
+    }
+
+    // Render Canvas
+    ctx.clearRect(0, 0, width, height);
+    drawEnvironment();
+
+    // Render radiation rays around the pizza
+    const rayMaxDist = 130;
+    particles.forEach((p, idx) => {
+      const isAbsorbRay = idx % 2 === 0;
+
+      if (isAbsorbRay) {
+        // Incoming wave (absorbed)
+        p.distRatio += p.speed * (0.6 + pAbsorb * 0.9);
+        if (p.distRatio > 1) {
+          p.distRatio = 0;
+          p.angle = Math.random() * Math.PI * 2;
+        }
+
+        const currentDist = rayMaxDist - (rayMaxDist - (pizza.radius + 6)) * p.distRatio;
+        const x1 = pizza.x + Math.cos(p.angle) * currentDist;
+        const y1 = pizza.y + Math.sin(p.angle) * currentDist;
+        const x2 = pizza.x + Math.cos(p.angle) * (currentDist - 22);
+        const y2 = pizza.y + Math.sin(p.angle) * (currentDist - 22);
+
+        drawWavyArrow(ctx, x1, y1, x2, y2, '#38bdf8', pAbsorb * 1.3);
+      } else {
+        // Outgoing wave (emitted)
+        p.distRatio += p.speed * (0.6 + pEmit * 0.9);
+        if (p.distRatio > 1) {
+          p.distRatio = 0;
+          p.angle = Math.random() * Math.PI * 2;
+        }
+
+        const currentDist = (pizza.radius + 6) + (rayMaxDist - (pizza.radius + 6)) * p.distRatio;
+        const x1 = pizza.x + Math.cos(p.angle) * currentDist;
+        const y1 = pizza.y + Math.sin(p.angle) * currentDist;
+        const x2 = pizza.x + Math.cos(p.angle) * (currentDist + 22);
+        const y2 = pizza.y + Math.sin(p.angle) * (currentDist + 22);
+
+        drawWavyArrow(ctx, x1, y1, x2, y2, '#f87171', pEmit * 1.3);
+      }
+    });
+
+    // Draw the Pizza itself
+    drawPizza(pizza.x, pizza.y, pizza.temp ?? pizzaTemp);
+
+    requestAnimationFrame(loop);
+  }
+
+  // Initialize
+  resize();
+  pizza.x = width * 0.22;
+  pizza.y = height * 0.5;
+  requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>
