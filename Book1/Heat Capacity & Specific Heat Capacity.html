@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heat Capacity: Real Values & Analogies</title>
+
+  <!-- MathJax Configuration & CDN for LaTeX rendering -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+  </script>
+
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --heat-orange: #f97316;
+      --water-blue: #38bdf8;
+      --lego-yellow: #facc15;
+      --lego-blue: #38bdf8;
+      --lego-red: #f87171;
+      --warning-bg: rgba(245, 158, 11, 0.12);
+      --warning-border: rgba(245, 158, 11, 0.35);
+      --warning-text: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-container {
+      max-width: 920px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      font-size: 1.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Approximation Banner */
+    .approx-banner {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 10px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: #fde68a;
+    }
+
+    .approx-banner strong {
+      color: var(--warning-text);
+    }
+
+    /* Math Formula Display (Works even offline without MathJax) */
+    .math-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-style: italic;
+      color: #e2e8f0;
+      font-size: 1.05rem;
+      vertical-align: middle;
+    }
+
+    .math-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 0.25rem;
+      font-size: 0.9em;
+    }
+
+    .math-frac .num {
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 1px;
+    }
+
+    .math-frac .den {
+      padding-top: 1px;
+    }
+
+    .math-upright {
+      font-style: normal;
+    }
+
+    /* Tabs Styling */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      background: #060913;
+      padding: 0.4rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .constants-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .constants-bar span {
+      color: var(--text-muted);
+    }
+
+    .constants-bar strong {
+      color: var(--water-blue);
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    button.action-btn {
+      color: white;
+      border: none;
+      padding: 0.75rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    button.action-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    button.reset-btn {
+      background: #475569;
+    }
+
+    /* Tab 1: Water containers */
+    .vessels-stage {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 290px;
+      border-bottom: 4px solid #64748b;
+      padding-bottom: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .vessel-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .vessel-glass {
+      position: relative;
+      background: rgba(255, 255, 255, 0.02);
+      border: 3px solid #cbd5e1;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .vessel-iron   { width: 35px;  height: 240px; }
+    .vessel-water  { width: 140px; height: 240px; }
+    .vessel-water2 { width: 280px; height: 240px; }
+
+    .water-fill {
+      width: 100%;
+      background: linear-gradient(180deg, #ef4444, #f97316);
+      height: 0%;
+      transition: height 0.4s ease;
+    }
+
+    .stat-label {
+      margin-top: 0.5rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--heat-orange);
+      text-align: center;
+    }
+
+    .sub-stat {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      display: block;
+    }
+
+    /* Tab 2: Lego simulation */
+    .lego-stage {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      min-height: 290px;
+      border-bottom: 4px solid #64748b;
+      padding-bottom: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .lego-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .lego-tower {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      min-height: 20px;
+    }
+
+    .lego-row {
+      display: flex;
+      gap: 2px;
+    }
+
+    .brick {
+      height: 14px;
+      border-radius: 2px;
+      position: relative;
+      box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .brick::after {
+      content: "";
+      position: absolute;
+      top: -2.5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 55%;
+      height: 2.5px;
+      background: inherit;
+      border-radius: 2px 2px 0 0;
+      filter: brightness(1.2);
+    }
+
+    .brick-iron   { width: 32px; background: var(--lego-yellow); }
+    .brick-water  { width: 14px; background: var(--lego-blue); }
+    .brick-water2 { width: 14px; background: var(--lego-red); }
+
+    .explain-box {
+      line-height: 1.6;
+      font-size: 0.92rem;
+      color: #cbd5e1;
+    }
+
+    .explain-box h3 {
+      color: #fff;
+      margin-bottom: 0.75rem;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: #334155;
+      font-family: monospace;
+      color: var(--water-blue);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <h1>Heat Capacity & Specific Heat Capacity</h1>
+      <p>Using real-world physical values with intuitive visual models</p>
+    </header>
+
+    <!-- Prominent Disclaimer -->
+    <div class="approx-banner">
+      <span style="font-size: 1.25rem;">⚠️</span>
+      <div>
+        <strong>Physics Note — Temperatures are Theoretical Approximations:</strong>
+        Calculations assume ideal conditions using standard constant specific heat values at room temperature. In reality, actual temperature rises vary because specific heat shifts slightly with temperature, heat is lost to ambient surroundings, and phase changes (melting/boiling) are not modeled.
+      </div>
+    </div>
+
+    <!-- Tab Buttons -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('tab-water', this)">
+        🫗 Analogy 1: Water in a Container
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-lego', this)">
+        🧱 Analogy 2: Building Lego Towers
+      </button>
+    </nav>
+
+    <!-- ===================================================
+         TAB 1: WATER CONTAINER ANALOGY
+    =================================================== -->
+    <div id="tab-water" class="tab-panel active">
+      <div class="card">
+        <div class="constants-bar">
+          <div><span>Water specific heat (c):</span> <strong>4,184 J/(kg·°C)</strong></div>
+          <div><span>Iron specific heat (c):</span> <strong>450 J/(kg·°C)</strong></div>
+          <div><span>Ratio (c_water / c_iron):</span> <strong>≈ 9.30× wider base</strong></div>
+        </div>
+
+        <div class="controls">
+          <button class="action-btn" style="background: var(--heat-orange);" onclick="addRealHeat(4184)">
+            🔥 Add 4,184 Joules of Heat
+          </button>
+          <button class="action-btn reset-btn" onclick="resetAll()">↺ Reset</button>
+        </div>
+
+        <div class="vessels-stage">
+          <!-- 1 kg Iron -->
+          <div class="vessel-col">
+            <small style="color:var(--text-muted); margin-bottom: 6px;">1 kg Iron (c = 450)</small>
+            <div class="vessel-glass vessel-iron">
+              <div id="ironLiquid" class="water-fill"></div>
+            </div>
+            <div id="ironTemp" class="stat-label">
+              20.0°C
+              <span class="sub-stat" id="ironDelta">+0.0°C (approx)</span>
+            </div>
+          </div>
+
+          <!-- 1 kg Water -->
+          <div class="vessel-col">
+            <small style="color:var(--text-muted); margin-bottom: 6px;">1 kg Water (c = 4,184)</small>
+            <div class="vessel-glass vessel-water">
+              <div id="waterLiquid" class="water-fill"></div>
+            </div>
+            <div id="waterTemp" class="stat-label">
+              20.0°C
+              <span class="sub-stat" id="waterDelta">+0.0°C (approx)</span>
+            </div>
+          </div>
+
+          <!-- 2 kg Water -->
+          <div class="vessel-col">
+            <small style="color:var(--text-muted); margin-bottom: 6px;">2 kg Water (C = 8,368)</small>
+            <div class="vessel-glass vessel-water2">
+              <div id="water2Liquid" class="water-fill"></div>
+            </div>
+            <div id="water2Temp" class="stat-label">
+              20.0°C
+              <span class="sub-stat" id="water2Delta">+0.0°C (approx)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="explain-box">
+          <!-- Clear Rendered Equation Header -->
+          <h3>
+            Governing Equation: 
+            <span class="math-block">
+              &Delta;<i>T</i> = 
+              <span class="math-frac">
+                <span class="num"><i>Q</i></span>
+                <span class="den"><i>m</i> &middot; <i>c</i></span>
+              </span>
+            </span>
+          </h3>
+
+          <p>Each click injects <strong>4,184 Joules</strong> of heat into each substance:</p>
+          <ul style="margin-left: 1.5rem; margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem;">
+            <li>
+              <strong>1 kg Water:</strong>
+              <span class="math-block">
+                &Delta;<i>T</i> = 
+                <span class="math-frac">
+                  <span class="num">4184 <span class="math-upright">J</span></span>
+                  <span class="den">1 <span class="math-upright">kg</span> &times; 4184 <span class="math-upright">J/(kg·°C)</span></span>
+                </span>
+                &approx; <strong>+1.00°C</strong>
+              </span>
+            </li>
+            <li>
+              <strong>1 kg Iron:</strong>
+              <span class="math-block">
+                &Delta;<i>T</i> = 
+                <span class="math-frac">
+                  <span class="num">4184 <span class="math-upright">J</span></span>
+                  <span class="den">1 <span class="math-upright">kg</span> &times; 450 <span class="math-upright">J/(kg·°C)</span></span>
+                </span>
+                &approx; <strong>+9.30°C</strong>
+              </span>
+              (Iron's container base is ~9.3× narrower, so the liquid level shoots up ~9.3× faster!)
+            </li>
+            <li>
+              <strong>2 kg Water:</strong>
+              <span class="math-block">
+                &Delta;<i>T</i> = 
+                <span class="math-frac">
+                  <span class="num">4184 <span class="math-upright">J</span></span>
+                  <span class="den">2 <span class="math-upright">kg</span> &times; 4184 <span class="math-upright">J/(kg·°C)</span></span>
+                </span>
+                &approx; <strong>+0.50°C</strong>
+              </span>
+              (Double the mass means double the total heat capacity <span class="badge">C = mc</span>, doubling the width).
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================
+         TAB 2: LEGO ANALOGY
+    =================================================== -->
+    <div id="tab-lego" class="tab-panel">
+      <div class="card">
+        <div class="constants-bar">
+          <div><span>1 Brick Value:</span> <strong>≈ 465 Joules</strong></div>
+          <div><span>1 kg Iron Footprint:</span> <strong>1 brick wide</strong></div>
+          <div><span>1 kg Water Footprint:</span> <strong>9 bricks wide</strong> (≈ 9.3×)</div>
+          <div><span>2 kg Water Footprint:</span> <strong>18 bricks wide</strong> (≈ 18.6×)</div>
+        </div>
+
+        <div class="controls">
+          <button class="action-btn" style="background: var(--lego-yellow); color:#000;" onclick="addRealBricks()">
+            🧱 Add 9 Bricks (≈ 4,184 J of Heat)
+          </button>
+          <button class="action-btn reset-btn" onclick="resetAll()">↺ Reset</button>
+        </div>
+
+        <div class="lego-stage">
+          <!-- Iron 1kg -->
+          <div class="lego-col">
+            <small style="color:var(--text-muted); margin-bottom: 6px;">1 kg Iron (Base = 1)</small>
+            <div id="ironTower" class="lego-tower"></div>
+            <div id="ironLegoTemp" class="stat-label" style="color:var(--lego-yellow);">
+              20.0°C
+              <span class="sub-stat" id="ironLegoLayers">0 layers (+0.0°C approx)</span>
+            </div>
+          </div>
+
+          <!-- Water 1kg -->
+          <div class="lego-col">
+            <small style="color:var(--text-muted); margin-bottom: 6px;">1 kg Water (Base = 9)</small>
+            <div id="waterTower" class="lego-tower"></div>
+            <div id="waterLegoTemp" class="stat-label" style="color:var(--lego-blue);">
+              20.0°C
+              <span class="sub-stat" id="waterLegoLayers">0 layers (+0.0°C approx)</span>
+            </div>
+          </div>
+
+          <!-- Water 2kg -->
+          <div class="lego-col">
+            <small style="color:var(--text-muted); margin-bottom: 6px;">2 kg Water (Base = 18)</small>
+            <div id="water2Tower" class="lego-tower"></div>
+            <div id="water2LegoTemp" class="stat-label" style="color:var(--lego-red);">
+              20.0°C
+              <span class="sub-stat" id="water2LegoLayers">0 layers (+0.0°C approx)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="explain-box">
+          <h3>
+            Tower Height Rule: 
+            <span class="math-block">
+              &Delta;Height = 
+              <span class="math-frac">
+                <span class="num">Total Bricks Added (<i>Q</i>)</span>
+                <span class="den">Base Footprint (<i>C</i>)</span>
+              </span>
+            </span>
+          </h3>
+
+          <p>
+            Because Water stores <strong>~9.3 times more heat</strong> than Iron per kilogram, a single layer of temperature rise requires a foundation that is <strong>9 bricks wide</strong>, while Iron needs only <strong>1 brick</strong>.
+          </p>
+          <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+            <li>Adding <strong>9 bricks</strong> to <strong>Iron</strong> adds <strong>9 vertical layers</strong> (≈ +9.3°C rise).</li>
+            <li>Adding <strong>9 bricks</strong> to <strong>1 kg Water</strong> completes just <strong>1 layer</strong> (≈ +1.0°C rise).</li>
+            <li>Adding <strong>9 bricks</strong> to <strong>2 kg Water</strong> completes only <strong>half a layer</strong> (≈ +0.5°C rise).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+
+      // Re-trigger MathJax typesetting if loaded
+      if (window.MathJax && window.MathJax.typeset) {
+        window.MathJax.typeset();
+      }
+    }
+
+    // Physical Constants
+    const C_IRON = 450;       // J / (kg * °C)
+    const C_WATER = 4184;     // J / (kg * °C)
+    const BASE_TEMP = 20.0;   // °C
+
+    let totalHeatAdded = 0;
+
+    function addRealHeat(joules) {
+      totalHeatAdded += joules;
+
+      const dTIron   = totalHeatAdded / (1 * C_IRON);
+      const dTWater  = totalHeatAdded / (1 * C_WATER);
+      const dTWater2 = totalHeatAdded / (2 * C_WATER);
+
+      const maxDisplayTempRise = 90;
+      document.getElementById('ironLiquid').style.height   = Math.min((dTIron / maxDisplayTempRise) * 100, 100) + '%';
+      document.getElementById('waterLiquid').style.height  = Math.min((dTWater / maxDisplayTempRise) * 100, 100) + '%';
+      document.getElementById('water2Liquid').style.height = Math.min((dTWater2 / maxDisplayTempRise) * 100, 100) + '%';
+
+      document.getElementById('ironTemp').childNodes[0].nodeValue = (BASE_TEMP + dTIron).toFixed(1) + '°C ';
+      document.getElementById('waterTemp').childNodes[0].nodeValue = (BASE_TEMP + dTWater).toFixed(1) + '°C ';
+      document.getElementById('water2Temp').childNodes[0].nodeValue = (BASE_TEMP + dTWater2).toFixed(1) + '°C ';
+
+      document.getElementById('ironDelta').innerText = `+${dTIron.toFixed(1)}°C (approx)`;
+      document.getElementById('waterDelta').innerText = `+${dTWater.toFixed(1)}°C (approx)`;
+      document.getElementById('water2Delta').innerText = `+${dTWater2.toFixed(1)}°C (approx)`;
+    }
+
+    let legoClickCount = 0;
+
+    function addRealBricks() {
+      if (legoClickCount >= 8) return;
+      legoClickCount++;
+
+      // 1. Iron: 9 bricks on 1-brick column -> 9 layers
+      const ironTower = document.getElementById('ironTower');
+      for (let i = 0; i < 9; i++) {
+        const row = document.createElement('div');
+        row.className = 'lego-row';
+        row.innerHTML = `<div class="brick brick-iron"></div>`;
+        ironTower.appendChild(row);
+      }
+
+      // 2. Water 1kg: 9 bricks on 9-brick row -> 1 layer
+      const waterTower = document.getElementById('waterTower');
+      const wRow = document.createElement('div');
+      wRow.className = 'lego-row';
+      let wHtml = '';
+      for (let i = 0; i < 9; i++) wHtml += `<div class="brick brick-water"></div>`;
+      wRow.innerHTML = wHtml;
+      waterTower.appendChild(wRow);
+
+      // 3. Water 2kg: 18-brick base -> 9 bricks complete half a row
+      const water2Tower = document.getElementById('water2Tower');
+      if (legoClickCount % 2 === 1) {
+        const w2Row = document.createElement('div');
+        w2Row.className = 'lego-row';
+        w2Row.id = `water2Row_${legoClickCount}`;
+        let w2Html = '';
+        for (let i = 0; i < 9; i++) w2Html += `<div class="brick brick-water2"></div>`;
+        w2Row.innerHTML = w2Html;
+        water2Tower.appendChild(w2Row);
+      } else {
+        const prevRow = document.getElementById(`water2Row_${legoClickCount - 1}`);
+        if (prevRow) {
+          for (let i = 0; i < 9; i++) {
+            const b = document.createElement('div');
+            b.className = 'brick brick-water2';
+            prevRow.appendChild(b);
+          }
+        }
+      }
+
+      const ironT = BASE_TEMP + (legoClickCount * 9.3);
+      const waterT = BASE_TEMP + (legoClickCount * 1.0);
+      const water2T = BASE_TEMP + (legoClickCount * 0.5);
+
+      document.getElementById('ironLegoTemp').childNodes[0].nodeValue = ironT.toFixed(1) + '°C ';
+      document.getElementById('waterLegoTemp').childNodes[0].nodeValue = waterT.toFixed(1) + '°C ';
+      document.getElementById('water2LegoTemp').childNodes[0].nodeValue = water2T.toFixed(1) + '°C ';
+
+      document.getElementById('ironLegoLayers').innerText = `${legoClickCount * 9} layers (+${(legoClickCount * 9.3).toFixed(1)}°C approx)`;
+      document.getElementById('waterLegoLayers').innerText = `${legoClickCount} layer (+${(legoClickCount * 1.0).toFixed(1)}°C approx)`;
+      document.getElementById('water2LegoLayers').innerText = `${(legoClickCount * 0.5).toFixed(1)} layers (+${(legoClickCount * 0.5).toFixed(1)}°C approx)`;
+    }
+
+    function resetAll() {
+      totalHeatAdded = 0;
+      legoClickCount = 0;
+
+      // Reset Tab 1
+      document.getElementById('ironLiquid').style.height = '0%';
+      document.getElementById('waterLiquid').style.height = '0%';
+      document.getElementById('water2Liquid').style.height = '0%';
+
+      document.getElementById('ironTemp').childNodes[0].nodeValue = BASE_TEMP.toFixed(1) + '°C ';
+      document.getElementById('waterTemp').childNodes[0].nodeValue = BASE_TEMP.toFixed(1) + '°C ';
+      document.getElementById('water2Temp').childNodes[0].nodeValue = BASE_TEMP.toFixed(1) + '°C ';
+
+      document.getElementById('ironDelta').innerText = '+0.0°C (approx)';
+      document.getElementById('waterDelta').innerText = '+0.0°C (approx)';
+      document.getElementById('water2Delta').innerText = '+0.0°C (approx)';
+
+      // Reset Tab 2
+      document.getElementById('ironTower').innerHTML = '';
+      document.getElementById('waterTower').innerHTML = '';
+      document.getElementById('water2Tower').innerHTML = '';
+
+      document.getElementById('ironLegoTemp').childNodes[0].nodeValue = BASE_TEMP.toFixed(1) + '°C ';
+      document.getElementById('waterLegoTemp').childNodes[0].nodeValue = BASE_TEMP.toFixed(1) + '°C ';
+      document.getElementById('water2LegoTemp').childNodes[0].nodeValue = BASE_TEMP.toFixed(1) + '°C ';
+
+      document.getElementById('ironLegoLayers').innerText = '0 layers (+0.0°C approx)';
+      document.getElementById('waterLegoLayers').innerText = '0 layers (+0.0°C approx)';
+      document.getElementById('water2LegoLayers').innerText = '0 layers (+0.0°C approx)';
+    }
+  </script>
+</body>
+</html>

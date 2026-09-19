@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physics Tutorial: P-t & E-t Graphs | 功率與能量圖形教學</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent: #d97706;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --correct-bg: #ecfdf5;
+      --correct-border: #a7f3d0;
+      --correct-text: #065f46;
+      --wrong-bg: #fef2f2;
+      --wrong-border: #fecaca;
+      --wrong-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    /* Math typography styles */
+    .var {
+      font-family: "Cambria Math", "Times New Roman", Times, Georgia, serif;
+      font-style: italic;
+      padding: 0 1px;
+    }
+    .formula-display {
+      font-family: "Cambria Math", "Times New Roman", Times, Georgia, serif;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.95em;
+      line-height: 1.1;
+      padding: 0 4px;
+    }
+    .frac-top {
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 2px;
+    }
+    .frac-bottom {
+      padding-top: 2px;
+    }
+
+    /* Header */
+    header {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .lang-toggle {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .lang-btn {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+    }
+
+    /* Standard Card Title */
+    .card-title {
+      font-size: 1.18rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Extra Prominent Title for Interactive Section */
+    .card-title-lg {
+      font-size: 1.48rem;
+      font-weight: 800;
+      color: #1d4ed8;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid #eff6ff;
+      padding-bottom: 10px;
+    }
+
+    .formula-banner {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 12px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0 18px 0;
+    }
+
+    /* 3-Column Concept Grid */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .concept-item {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .concept-head {
+      margin-bottom: 8px;
+    }
+
+    .concept-title-en {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: #0f172a;
+    }
+
+    .concept-title-zh {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #475569;
+      margin-top: 2px;
+    }
+
+    .concept-bullets {
+      font-size: 0.88rem;
+      margin: 8px 0;
+      padding-left: 18px;
+    }
+
+    .concept-bullets li {
+      margin-bottom: 4px;
+    }
+
+    /* Mini Graph Display in Principle Cards */
+    .mini-graph-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px;
+      margin-top: 10px;
+    }
+
+    .mini-graph-box svg {
+      width: 100%;
+      height: 95px;
+      display: block;
+    }
+
+    /* Simulation Section */
+    .sim-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-case {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-align: center;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .btn-case:hover {
+      background: #f1f5f9;
+      border-color: var(--primary);
+    }
+
+    .btn-case.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .btn-case.active .btn-sub {
+      color: #dbeafe;
+    }
+
+    .btn-sub {
+      font-size: 0.78rem;
+      font-weight: normal;
+      color: var(--muted);
+    }
+
+    .graph-dual-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .graph-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .graph-box h4 {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .main-svg {
+      width: 100%;
+      height: 210px;
+    }
+
+    .slider-container {
+      margin-top: 16px;
+      background: #f8fafc;
+      padding: 14px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* Textbook Matching Section */
+    .problem-showcase {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      background: #fff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 16px 0;
+    }
+
+    .matching-box {
+      background: #fcfcfc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .match-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .match-tag {
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      min-width: 160px;
+      font-size: 0.9rem;
+    }
+
+    .match-select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-grow: 1;
+      max-width: 320px;
+    }
+
+    .result-badge {
+      font-size: 1.2rem;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.98rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-dark);
+    }
+
+    .feedback-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .feedback-box.show {
+      display: block;
+    }
+
+    .feedback-box.correct {
+      background: var(--correct-bg);
+      border: 1px solid var(--correct-border);
+      color: var(--correct-text);
+    }
+
+    .feedback-box.incorrect {
+      background: var(--wrong-bg);
+      border: 1px solid var(--wrong-border);
+      color: var(--wrong-text);
+    }
+
+    .zh-text {
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header & Language Switcher -->
+  <header>
+    <div>
+      <h1>Graphs of Power (<span class="var">P</span>) &amp; Energy (<span class="var">E</span>)</h1>
+      <p class="subtitle">物理圖形關係：功率 (<span class="var">P</span>) 與 能量 (<span class="var">E</span>)</p>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLanguage('both')">Dual / 雙語</button>
+      <button class="lang-btn" onclick="setLanguage('en')">English</button>
+      <button class="lang-btn" onclick="setLanguage('zh')">繁體中文</button>
+    </div>
+  </header>
+
+  <!-- Section 1: Core Physical Principle with 3 Cases + Mini Graphs -->
+  <div class="card">
+    <div class="card-title">
+      <span>💡</span>
+      <span class="text-en">Core Physical Principle</span>
+      <span class="text-sep"> / </span>
+      <span class="text-zh">核心物理概念</span>
+    </div>
+
+    <!-- Main Formula Box -->
+    <div class="formula-banner">
+      <div class="formula-display">
+        <span>Power <span class="var">P</span> = </span>
+        <div class="frac">
+          <span class="frac-top">&Delta;<span class="var">E</span></span>
+          <span class="frac-bottom">&Delta;<span class="var">t</span></span>
+        </div>
+        <span> = Slope of <span class="var">E</span>–<span class="var">t</span> Graph</span>
+      </div>
+      <div style="font-size: 0.88rem; text-align: center; color: #1e40af; margin-top: 4px;">
+        <span class="text-en">Rate of energy transfer = Tangent slope of energy–time graph</span>
+        <span class="text-sep"> | </span>
+        <span class="text-zh">能量傳遞率 = 能量–時間圖線之切線斜率</span>
+      </div>
+    </div>
+
+    <!-- 3 Cases Grid: Constant, Decreasing, Increasing -->
+    <div class="concept-grid">
+      
+      <!-- Case 1: Constant Power -->
+      <div class="concept-item">
+        <div class="concept-head">
+          <div class="concept-title-en text-en">1. Constant Power (<span class="var">P</span> = const)</div>
+          <div class="concept-title-zh text-zh">1. 恆定功率（<span class="var">P</span> = 常數）</div>
+        </div>
+        <ul class="concept-bullets">
+          <li class="text-en">• <span class="var">E</span>–<span class="var">t</span> is a <strong>straight line</strong> through origin (0, 0).</li>
+          <li class="text-en">• <strong>Higher Power &rarr; Steeper slope</strong>.</li>
+          <li class="text-zh zh-text">• <span class="var">E</span>–<span class="var">t</span> 圖為通過原點 (0, 0) 之<strong>直線</strong>。</li>
+          <li class="text-zh zh-text">• <strong>功率愈大 &rarr; 斜率愈大（圖線愈陡峭）</strong>。</li>
+        </ul>
+        <!-- Mini SVG Illustration -->
+        <div class="mini-graph-box">
+          <svg viewBox="0 0 240 85">
+            <!-- P-t mini -->
+            <line x1="20" y1="70" x2="105" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="20" y1="70" x2="20" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="108" y="73" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">t</text>
+            <text x="10" y="14" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">P</text>
+            <line x1="20" y1="30" x2="100" y2="30" stroke="#d97706" stroke-width="2"/>
+            <line x1="20" y1="50" x2="100" y2="50" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="50" y="24" font-size="8" fill="#b45309">P₁ > P₂</text>
+
+            <!-- E-t mini -->
+            <line x1="140" y1="70" x2="225" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="140" y1="70" x2="140" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="228" y="73" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">t</text>
+            <text x="130" y="14" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">E</text>
+            <line x1="140" y1="70" x2="220" y2="20" stroke="#2563eb" stroke-width="2"/>
+            <line x1="140" y1="70" x2="220" y2="45" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="175" y="18" font-size="8" fill="#1d4ed8">Straight lines</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Case 2: Decreasing Power -->
+      <div class="concept-item">
+        <div class="concept-head">
+          <div class="concept-title-en text-en">2. Decreasing Power (<span class="var">P</span> decreases)</div>
+          <div class="concept-title-zh text-zh">2. 漸減功率（<span class="var">P</span> 隨時間下降）</div>
+        </div>
+        <ul class="concept-bullets">
+          <li class="text-en">• Tangent slope gets <strong>flatter and flatter</strong>.</li>
+          <li class="text-en">• As <span class="var">P</span> &rarr; 0, curve becomes <strong>horizontal</strong>.</li>
+          <li class="text-zh zh-text">• <span class="var">E</span>–<span class="var">t</span> 切線斜率<strong>愈變愈平緩</strong>。</li>
+          <li class="text-zh zh-text">• 當 <span class="var">P</span> &rarr; 0，圖線趨於<strong>水平線</strong>。</li>
+        </ul>
+        <!-- Mini SVG Illustration -->
+        <div class="mini-graph-box">
+          <svg viewBox="0 0 240 85">
+            <!-- P-t mini -->
+            <line x1="20" y1="70" x2="105" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="20" y1="70" x2="20" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="108" y="73" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">t</text>
+            <text x="10" y="14" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">P</text>
+            <path d="M 20 20 Q 45 60 100 68" fill="none" stroke="#d97706" stroke-width="2"/>
+
+            <!-- E-t mini -->
+            <line x1="140" y1="70" x2="225" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="140" y1="70" x2="140" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="228" y="73" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">t</text>
+            <text x="130" y="14" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">E</text>
+            <path d="M 140 70 Q 175 25 220 25" fill="none" stroke="#2563eb" stroke-width="2"/>
+            <text x="165" y="18" font-size="8" fill="#1d4ed8">Becomes flat</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Case 3: Increasing Power (NEW) -->
+      <div class="concept-item">
+        <div class="concept-head">
+          <div class="concept-title-en text-en">3. Increasing Power (<span class="var">P</span> increases)</div>
+          <div class="concept-title-zh text-zh">3. 漸增功率（<span class="var">P</span> 隨時間上升）</div>
+        </div>
+        <ul class="concept-bullets">
+          <li class="text-en">• Tangent slope gets <strong>steeper and steeper</strong>.</li>
+          <li class="text-en">• <span class="var">E</span>–<span class="var">t</span> curves upwards (<strong>concave up</strong>).</li>
+          <li class="text-zh zh-text">• <span class="var">E</span>–<span class="var">t</span> 切線斜率<strong>愈變愈陡峭</strong>。</li>
+          <li class="text-zh zh-text">• <span class="var">E</span>–<span class="var">t</span> 圖線<strong>向上彎曲（凹向上）</strong>。</li>
+        </ul>
+        <!-- Mini SVG Illustration -->
+        <div class="mini-graph-box">
+          <svg viewBox="0 0 240 85">
+            <!-- P-t mini -->
+            <line x1="20" y1="70" x2="105" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="20" y1="70" x2="20" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="108" y="73" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">t</text>
+            <text x="10" y="14" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">P</text>
+            <path d="M 20 62 Q 60 55 100 18" fill="none" stroke="#d97706" stroke-width="2"/>
+
+            <!-- E-t mini -->
+            <line x1="140" y1="70" x2="225" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="140" y1="70" x2="140" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="228" y="73" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">t</text>
+            <text x="130" y="14" font-family="Cambria Math, serif" font-style="italic" font-size="10" fill="#64748b">E</text>
+            <path d="M 140 70 Q 185 68 220 18" fill="none" stroke="#2563eb" stroke-width="2"/>
+            <text x="160" y="16" font-size="8" fill="#1d4ed8">Curves steeper</text>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 2: Interactive Visualizer (with BIGGER TITLE) -->
+  <div class="card">
+    <!-- Big, bold, eye-catching title -->
+    <div class="card-title-lg">
+      <span>🔬</span>
+      <span class="text-en">Interactive Visualizer: Drag <span class="var">t</span> and Inspect Slope</span>
+      <span class="text-sep" style="font-weight:300; opacity:0.6;"> | </span>
+      <span class="text-zh">互動實驗室：拖曳時間軸 <span class="var">t</span>，觀察切線斜率</span>
+    </div>
+
+    <!-- Case Selection Buttons (Includes Increasing Power!) -->
+    <div class="sim-controls">
+      <button class="btn-case active" onclick="switchCase(1)">
+        <span class="text-en">Case 1: Decreasing <span class="var">P</span></span>
+        <span class="btn-sub text-zh">情況 1：功率漸降</span>
+      </button>
+      <button class="btn-case" onclick="switchCase(2)">
+        <span class="text-en">Case 2: High Const. <span class="var">P</span></span>
+        <span class="btn-sub text-zh">情況 2：恆定大功率</span>
+      </button>
+      <button class="btn-case" onclick="switchCase(3)">
+        <span class="text-en">Case 3: Low Const. <span class="var">P</span></span>
+        <span class="btn-sub text-zh">情況 3：恆定小功率</span>
+      </button>
+      <button class="btn-case" onclick="switchCase(4)">
+        <span class="text-en">Case 4: Increasing <span class="var">P</span></span>
+        <span class="btn-sub text-zh">情況 4：功率漸增</span>
+      </button>
+    </div>
+
+    <!-- Graphs Area -->
+    <div class="graph-dual-container">
+      <div class="graph-box">
+        <h4><span class="var">P</span>–<span class="var">t</span> GRAPH (Power / 功率)</h4>
+        <svg id="svgPt" class="main-svg" viewBox="0 0 300 190"></svg>
+        <div style="font-size:0.88rem; color: #475569; margin-top: 6px;">
+          <span class="text-en">Instantaneous Power <span class="var">P</span>: </span>
+          <span class="text-sep">/ </span>
+          <span class="text-zh">瞬間功率 <span class="var">P</span>：</span>
+          <strong id="valP" style="color:var(--accent); font-size:1rem;">-</strong>
+        </div>
+      </div>
+
+      <div class="graph-box">
+        <h4><span class="var">E</span>–<span class="var">t</span> GRAPH (Energy / 能量)</h4>
+        <svg id="svgEt" class="main-svg" viewBox="0 0 300 190"></svg>
+        <div style="font-size:0.88rem; color: #475569; margin-top: 6px;">
+          <span class="text-en">Slope of Tangent (&Delta;<span class="var">E</span>/&Delta;<span class="var">t</span>): </span>
+          <span class="text-sep">/ </span>
+          <span class="text-zh">切線斜率 (&Delta;<span class="var">E</span>/&Delta;<span class="var">t</span>)：</span>
+          <strong id="valSlope" style="color:var(--primary); font-size:1rem;">-</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Slider -->
+    <div class="slider-container">
+      <div class="slider-header">
+        <span>
+          <span class="text-en">Time <span class="var">t</span> = </span>
+          <span class="text-zh">時間 <span class="var">t</span> = </span>
+          <strong id="timeDisplay" style="color:var(--primary); font-size: 1.05rem;">2.5</strong> s
+        </span>
+        <span style="font-weight: normal; color: var(--muted); font-size: 0.84rem;">
+          <span class="text-en">Red tangent slope on right = orange height on left</span>
+          <span class="text-sep"> | </span>
+          <span class="text-zh">右圖紅色切線斜率 = 左圖橙色點之高度</span>
+        </span>
+      </div>
+      <input type="range" id="timeSlider" min="0.2" max="5.8" step="0.1" value="2.5" oninput="updateTime(this.value)">
+    </div>
+  </div>
+
+  <!-- Section 3: Textbook Matching Quiz -->
+  <div class="card">
+    <div class="card-title">
+      <span>📝</span>
+      <span class="text-en">Problem Solver: Match the Pairs</span>
+      <span class="text-sep"> / </span>
+      <span class="text-zh">題目實戰：配對題解題</span>
+    </div>
+
+    <!-- Textbook Graph Reproduction -->
+    <div class="problem-showcase">
+      <div style="text-align: center;">
+        <strong style="font-size:0.88rem; color:#475569;"><span class="var">P</span>–<span class="var">t</span> Graph (Given 1, 2, 3)</strong>
+        <svg viewBox="0 0 280 180">
+          <line x1="35" y1="150" x2="260" y2="150" stroke="#64748b" stroke-width="2"/>
+          <line x1="35" y1="150" x2="35" y2="15" stroke="#64748b" stroke-width="2"/>
+          <text x="265" y="154" font-family="Cambria Math, serif" font-style="italic" font-size="14" fill="#334155">t</text>
+          <text x="22" y="20" font-family="Cambria Math, serif" font-style="italic" font-size="14" fill="#334155">P</text>
+          <text x="22" y="162" font-size="12" fill="#94a3b8">0</text>
+
+          <path d="M 35 30 Q 80 120 180 148 L 240 148" fill="none" stroke="#f59e0b" stroke-width="3"/>
+          <text x="65" y="65" font-size="14" font-weight="bold" fill="#b45309">1</text>
+
+          <line x1="35" y1="85" x2="240" y2="85" stroke="#eab308" stroke-width="3"/>
+          <text x="175" y="78" font-size="14" font-weight="bold" fill="#854d0e">2</text>
+
+          <line x1="35" y1="125" x2="240" y2="125" stroke="#fde047" stroke-width="3"/>
+          <text x="225" y="118" font-size="14" font-weight="bold" fill="#a16207">3</text>
+        </svg>
+      </div>
+
+      <div style="text-align: center;">
+        <strong style="font-size:0.88rem; color:#475569;"><span class="var">E</span>–<span class="var">t</span> Graph (Given a, b, c)</strong>
+        <svg viewBox="0 0 280 180">
+          <line x1="35" y1="150" x2="260" y2="150" stroke="#64748b" stroke-width="2"/>
+          <line x1="35" y1="150" x2="35" y2="15" stroke="#64748b" stroke-width="2"/>
+          <text x="265" y="154" font-family="Cambria Math, serif" font-style="italic" font-size="14" fill="#334155">t</text>
+          <text x="22" y="20" font-family="Cambria Math, serif" font-style="italic" font-size="14" fill="#334155">E</text>
+          <text x="22" y="162" font-size="12" fill="#94a3b8">0</text>
+
+          <line x1="35" y1="150" x2="235" y2="25" stroke="#6366f1" stroke-width="3"/>
+          <text x="240" y="30" font-family="Cambria Math, serif" font-style="italic" font-size="15" font-weight="bold" fill="#4338ca">a</text>
+
+          <path d="M 35 150 Q 110 50 235 60" fill="none" stroke="#a5b4fc" stroke-width="3"/>
+          <text x="240" y="65" font-family="Cambria Math, serif" font-style="italic" font-size="15" font-weight="bold" fill="#4338ca">b</text>
+
+          <line x1="35" y1="150" x2="235" y2="95" stroke="#c7d2fe" stroke-width="3"/>
+          <text x="240" y="98" font-family="Cambria Math, serif" font-style="italic" font-size="15" font-weight="bold" fill="#4338ca">c</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Matcher Selectors -->
+    <div class="matching-box">
+      <div class="match-row">
+        <div class="match-tag" style="background:#fef3c7; color:#92400e;">
+          Curve 1 <span style="font-weight:normal; font-size:0.8rem;">(Curve decreasing to 0)</span>
+        </div>
+        <span style="font-weight: bold; color: var(--muted);">&rarr;</span>
+        <select id="select1" class="match-select">
+          <option value="">-- Choose matching E–t curve --</option>
+          <option value="a">Curve a (Steeper straight line)</option>
+          <option value="b">Curve b (Curve becoming flatter)</option>
+          <option value="c">Curve c (Gentler straight line)</option>
+        </select>
+        <span id="badge1" class="result-badge"></span>
+      </div>
+
+      <div class="match-row">
+        <div class="match-tag" style="background:#fef9c3; color:#854d0e;">
+          Line 2 <span style="font-weight:normal; font-size:0.8rem;">(Higher constant P)</span>
+        </div>
+        <span style="font-weight: bold; color: var(--muted);">&rarr;</span>
+        <select id="select2" class="match-select">
+          <option value="">-- Choose matching E–t curve --</option>
+          <option value="a">Curve a (Steeper straight line)</option>
+          <option value="b">Curve b (Curve becoming flatter)</option>
+          <option value="c">Curve c (Gentler straight line)</option>
+        </select>
+        <span id="badge2" class="result-badge"></span>
+      </div>
+
+      <div class="match-row">
+        <div class="match-tag" style="background:#f1f5f9; color:#334155;">
+          Line 3 <span style="font-weight:normal; font-size:0.8rem;">(Lower constant P)</span>
+        </div>
+        <span style="font-weight: bold; color: var(--muted);">&rarr;</span>
+        <select id="select3" class="match-select">
+          <option value="">-- Choose matching E–t curve --</option>
+          <option value="a">Curve a (Steeper straight line)</option>
+          <option value="b">Curve b (Curve becoming flatter)</option>
+          <option value="c">Curve c (Gentler straight line)</option>
+        </select>
+        <span id="badge3" class="result-badge"></span>
+      </div>
+
+      <button class="btn-submit" onclick="checkAnswers()">
+        <span class="text-en">Check Answers &amp; View Step-by-Step Logic</span>
+        <span class="text-sep"> / </span>
+        <span class="text-zh">核對答案並檢視逐步解說</span>
+      </button>
+
+      <div id="feedback" class="feedback-box"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentCase = 1;
+  let currentTime = 2.5;
+
+  function setLanguage(mode) {
+    const enTexts = document.querySelectorAll('.text-en');
+    const zhTexts = document.querySelectorAll('.text-zh');
+    const seps = document.querySelectorAll('.text-sep');
+    const btns = document.querySelectorAll('.lang-btn');
+    btns.forEach(b => b.classList.remove('active'));
+
+    if (mode === 'en') {
+      event.target.classList.add('active');
+      enTexts.forEach(el => el.style.display = 'inline');
+      zhTexts.forEach(el => el.style.display = 'none');
+      seps.forEach(el => el.style.display = 'none');
+    } else if (mode === 'zh') {
+      event.target.classList.add('active');
+      enTexts.forEach(el => el.style.display = 'none');
+      zhTexts.forEach(el => el.style.display = 'inline');
+      seps.forEach(el => el.style.display = 'none');
+    } else {
+      event.target.classList.add('active');
+      enTexts.forEach(el => el.style.display = 'inline');
+      zhTexts.forEach(el => el.style.display = 'inline');
+      seps.forEach(el => el.style.display = 'inline');
+    }
+  }
+
+  function switchCase(c) {
+    currentCase = c;
+    document.querySelectorAll('.btn-case').forEach((b, idx) => {
+      b.classList.toggle('active', idx + 1 === c);
+    });
+    render();
+  }
+
+  function updateTime(t) {
+    currentTime = parseFloat(t);
+    document.getElementById('timeDisplay').innerText = currentTime.toFixed(1);
+    render();
+  }
+
+  // Physics Functions for 4 cases
+  function getP(t, caseNum) {
+    if (caseNum === 1) return 80 * Math.exp(-0.6 * t);       // Decreasing
+    if (caseNum === 2) return 55;                            // High const
+    if (caseNum === 3) return 25;                            // Low const
+    return 12 + 10 * t;                                      // Case 4: Increasing
+  }
+
+  function getE(t, caseNum) {
+    if (caseNum === 1) return (80 / 0.6) * (1 - Math.exp(-0.6 * t));
+    if (caseNum === 2) return 55 * t;
+    if (caseNum === 3) return 25 * t;
+    return 12 * t + 5 * t * t;                               // Integral of (12 + 10t)
+  }
+
+  function render() {
+    const svgPt = document.getElementById('svgPt');
+    const svgEt = document.getElementById('svgEt');
+
+    const pVal = getP(currentTime, currentCase);
+    const eVal = getE(currentTime, currentCase);
+
+    document.getElementById('valP').innerText = pVal.toFixed(1) + ' W';
+    document.getElementById('valSlope').innerText = pVal.toFixed(1) + ' J/s';
+
+    const originX = 40, originY = 160, plotW = 230, plotH = 130;
+    const toX = (t) => originX + (t / 6) * plotW;
+    const toY_P = (p) => originY - (p / 90) * plotH;
+    const toY_E = (e) => originY - (e / 260) * plotH;
+
+    let dPt = `M ${toX(0)} ${toY_P(getP(0, currentCase))}`;
+    for (let t = 0.1; t <= 6; t += 0.1) {
+      dPt += ` L ${toX(t)} ${toY_P(getP(t, currentCase))}`;
+    }
+
+    let dEt = `M ${toX(0)} ${toY_E(0)}`;
+    for (let t = 0.1; t <= 6; t += 0.1) {
+      dEt += ` L ${toX(t)} ${toY_E(getE(t, currentCase))}`;
+    }
+
+    const t0 = Math.max(0, currentTime - 0.8);
+    const t1 = Math.min(6, currentTime + 0.8);
+    const e0 = eVal - pVal * (currentTime - t0);
+    const e1 = eVal + pVal * (t1 - currentTime);
+
+    // Render P-t
+    svgPt.innerHTML = `
+      <line x1="${originX}" y1="${originY}" x2="${originX + plotW + 10}" y2="${originY}" stroke="#64748b" stroke-width="2"/>
+      <line x1="${originX}" y1="${originY}" x2="${originX}" y2="${originY - plotH - 10}" stroke="#64748b" stroke-width="2"/>
+      <text x="${originX + plotW + 5}" y="${originY + 16}" font-family="Cambria Math, serif" font-style="italic" font-size="13" fill="#334155">t</text>
+      <text x="${originX - 25}" y="${originY - plotH}" font-family="Cambria Math, serif" font-style="italic" font-size="13" fill="#334155">P</text>
+      <text x="${originX - 15}" y="${originY + 15}" font-size="11" fill="#94a3b8">0</text>
+      <path d="${dPt}" fill="none" stroke="#d97706" stroke-width="3"/>
+      <circle cx="${toX(currentTime)}" cy="${toY_P(pVal)}" r="5" fill="#d97706"/>
+      <line x1="${toX(currentTime)}" y1="${toY_P(pVal)}" x2="${toX(currentTime)}" y2="${originY}" stroke="#d97706" stroke-dasharray="3,3"/>
+      <line x1="${toX(currentTime)}" y1="${toY_P(pVal)}" x2="${originX}" y2="${toY_P(pVal)}" stroke="#d97706" stroke-dasharray="3,3"/>
+    `;
+
+    // Render E-t
+    svgEt.innerHTML = `
+      <line x1="${originX}" y1="${originY}" x2="${originX + plotW + 10}" y2="${originY}" stroke="#64748b" stroke-width="2"/>
+      <line x1="${originX}" y1="${originY}" x2="${originX}" y2="${originY - plotH - 10}" stroke="#64748b" stroke-width="2"/>
+      <text x="${originX + plotW + 5}" y="${originY + 16}" font-family="Cambria Math, serif" font-style="italic" font-size="13" fill="#334155">t</text>
+      <text x="${originX - 25}" y="${originY - plotH}" font-family="Cambria Math, serif" font-style="italic" font-size="13" fill="#334155">E</text>
+      <text x="${originX - 15}" y="${originY + 15}" font-size="11" fill="#94a3b8">0</text>
+      <path d="${dEt}" fill="none" stroke="#2563eb" stroke-width="3"/>
+      <line x1="${toX(t0)}" y1="${toY_E(e0)}" x2="${toX(t1)}" y2="${toY_E(e1)}" stroke="#ef4444" stroke-width="2.5"/>
+      <circle cx="${toX(currentTime)}" cy="${toY_E(eVal)}" r="5" fill="#2563eb"/>
+      <line x1="${toX(currentTime)}" y1="${toY_E(eVal)}" x2="${toX(currentTime)}" y2="${originY}" stroke="#94a3b8" stroke-dasharray="3,3"/>
+    `;
+  }
+
+  function checkAnswers() {
+    const a1 = document.getElementById('select1').value;
+    const a2 = document.getElementById('select2').value;
+    const a3 = document.getElementById('select3').value;
+
+    const ok1 = (a1 === 'b');
+    const ok2 = (a2 === 'a');
+    const ok3 = (a3 === 'c');
+
+    document.getElementById('badge1').innerHTML = ok1 ? '✅' : '❌';
+    document.getElementById('badge2').innerHTML = ok2 ? '✅' : '❌';
+    document.getElementById('badge3').innerHTML = ok3 ? '✅' : '❌';
+
+    const fb = document.getElementById('feedback');
+    const isAllCorrect = ok1 && ok2 && ok3;
+    fb.className = 'feedback-box show ' + (isAllCorrect ? 'correct' : 'incorrect');
+
+    if (isAllCorrect) {
+      fb.innerHTML = `
+        <strong>🎉 Perfect! All 3 pairs are matched correctly. (完全正確！)</strong>
+        <div style="margin-top: 10px;">
+          <strong>Step-by-Step Logic / 原理解析:</strong>
+          <ul style="margin: 8px 0 0 18px;">
+            <li>
+              <strong>1 &rarr; b:</strong> Power <em>P</em> decreases towards 0. Because <code>Slope = P</code>, the tangent slope of <em>E</em>–<em>t</em> must start steep and gradually flatten out to horizontal &rarr; <strong>b</strong>.<br>
+              <span class="zh-text">圖線 1 的功率 <em>P</em> 隨時間遞減。因為 <code>斜率 = 功率</code>，<em>E</em>–<em>t</em> 的切線斜率必須由陡峭逐漸變為水平 &rarr; <strong>b</strong>。</span>
+            </li>
+            <li style="margin-top: 6px;">
+              <strong>2 &rarr; a:</strong> Line 2 represents a <em>high constant power</em>. Constant power gives a straight line through the origin, and higher power gives a steeper slope &rarr; <strong>a</strong>.<br>
+              <span class="zh-text">圖線 2 代表「恆定較大功率」。恆定功率對應直線，功率較大對應較陡峭的直線 &rarr; <strong>a</strong>。</span>
+            </li>
+            <li style="margin-top: 6px;">
+              <strong>3 &rarr; c:</strong> Line 3 represents a <em>lower constant power</em>. This gives a straight line with a gentler (flatter) slope than line 2 &rarr; <strong>c</strong>.<br>
+              <span class="zh-text">圖線 3 代表「恆定較小功率」。同樣為直線，但斜率比 2 更平緩 &rarr; <strong>c</strong>。</span>
+            </li>
+          </ul>
+        </div>
+      `;
+    } else {
+      fb.innerHTML = `
+        <strong>⚠️ Some pairs are incorrect. Try again! (仍有配對錯誤，請再試一次！)</strong><br>
+        <span style="font-size: 0.9em; margin-top: 4px; display: inline-block;">
+          💡 <strong>Key Clues / 解題提示:</strong><br>
+          • <em>P</em> is constant (horizontal line) &rArr; <em>E</em>–<em>t</em> is a straight line.<br>
+          • Higher horizontal <em>P</em> &rArr; Steeper straight line.<br>
+          • <em>P</em> decreases with time &rArr; Slope of <em>E</em>–<em>t</em> becomes flatter and flatter.
+        </span>
+      `;
+    }
+  }
+
+  // Initial draw
+  render();
+</script>
+</body>
+</html>
