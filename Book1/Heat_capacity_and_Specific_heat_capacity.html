@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physics: Heat Capacity vs. Specific Heat Capacity</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --accent: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --highlight: #fef08a;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    header {
+      text-align: center;
+      background: linear-gradient(135deg, #0284c7, #0f766e);
+      color: white;
+      padding: 28px 20px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    .lang-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .lang-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .lang-btn.active {
+      background: white;
+      color: #0369a1;
+      font-weight: bold;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      color: var(--primary-dark);
+      margin-bottom: 14px;
+      border-bottom: 2px solid #e0f2fe;
+      padding-bottom: 6px;
+    }
+
+    /* Bilingual display rules */
+    body.lang-en .zh { display: none !important; }
+    body.lang-zh .en { display: none !important; }
+
+    body.lang-bi .en { display: block; }
+    body.lang-bi .zh {
+      display: block;
+      color: #0f766e;
+      font-size: 0.94em;
+      margin-top: 2px;
+    }
+    body.lang-bi span.zh {
+      display: inline;
+      margin-left: 4px;
+    }
+
+    /* Comparison Table */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .compare-box.highlight {
+      border-color: #38bdf8;
+      background: #f0f9ff;
+    }
+
+    .formula {
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 1.25rem;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin: 8px 0;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Thought Experiment interactive */
+    .interactive-panel {
+      background: #fdfbf7;
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .slider-group {
+      margin-bottom: 16px;
+    }
+
+    .slider-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    .sim-result {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--primary-dark);
+    }
+
+    .takeaway-box {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+
+    /* Calculation Example */
+    .calc-step {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border-left: 4px solid var(--primary);
+    }
+
+    /* Quiz */
+    .quiz-option {
+      display: block;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+
+    .quiz-option:hover {
+      background: #f1f5f9;
+    }
+
+    .quiz-option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #15803d;
+      font-weight: bold;
+    }
+
+    .quiz-option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+  </style>
+</head>
+<body class="lang-bi">
+
+  <div class="container">
+    <!-- Header & Language Switcher -->
+    <header>
+      <h1>
+        <span class="en">Heat Capacity & Specific Heat Capacity</span>
+        <span class="zh">熱容量與比熱容量</span>
+      </h1>
+      <p style="margin-top: 6px; opacity: 0.9;">
+        <span class="en">Understanding why we need "per unit mass" for fair comparisons</span>
+        <span class="zh">理解為何比較不同物質時必須以「單位質量」為基準</span>
+      </p>
+
+      <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLang('bi')">🌐 Bilingual / 雙語</button>
+        <button class="lang-btn" onclick="setLang('en')">English Only</button>
+        <button class="lang-btn" onclick="setLang('zh')">繁體中文</button>
+      </div>
+    </header>
+
+    <!-- Core Definition Comparison -->
+    <section class="card">
+      <h2>
+        <span class="en">1. Concept Comparison: C vs. c</span>
+        <span class="zh">1. 概念對比：熱容量 vs. 比熱容量</span>
+      </h2>
+
+      <div class="compare-grid">
+        <!-- Heat Capacity -->
+        <div class="compare-box">
+          <h3>
+            <span class="en">Heat Capacity (C)</span>
+            <span class="zh">熱容量 (C)</span>
+          </h3>
+          <p class="formula">C = E / ΔT</p>
+          <p>
+            <span class="en"><strong>Unit:</strong> J °C⁻¹ (or J K⁻¹)</span>
+            <span class="zh"><strong>單位：</strong> J °C⁻¹（或 J K⁻¹）</span>
+          </p>
+          <hr style="margin: 10px 0; border: none; border-top: 1px solid #e2e8f0;" />
+          <p>
+            <span class="en"><strong>Definition:</strong> The energy needed to raise the temperature of the <em>entire object</em> by 1 °C.</span>
+            <span class="zh"><strong>定義：</strong> 使<em>整個物體</em>升高 1 °C 所需吸收的能量。</span>
+          </p>
+          <p style="margin-top: 8px;">
+            <span class="en"><strong>Depends on:</strong> Both the <em>mass</em> and the <em>material</em>. (Extrinsic property)</span>
+            <span class="zh"><strong>取決於：</strong> 物體的<em>質量</em>與<em>材質</em>。（外延性質）</span>
+          </p>
+        </div>
+
+        <!-- Specific Heat Capacity -->
+        <div class="compare-box highlight">
+          <h3>
+            <span class="en">Specific Heat Capacity (c)</span>
+            <span class="zh">比熱容量 (c)</span>
+          </h3>
+          <p class="formula">c = C / m = E / (m · ΔT)</p>
+          <p>
+            <span class="en"><strong>Unit:</strong> J kg⁻¹ °C⁻¹</span>
+            <span class="zh"><strong>單位：</strong> J kg⁻¹ °C⁻¹</span>
+          </p>
+          <hr style="margin: 10px 0; border: none; border-top: 1px solid #e2e8f0;" />
+          <p>
+            <span class="en"><strong>Definition:</strong> The energy needed to raise the temperature of <em>1 kg of the material</em> by 1 °C.</span>
+            <span class="zh"><strong>定義：</strong> 使<em> 1 kg 該物質</em>升高 1 °C 所需吸收的能量。</span>
+          </p>
+          <p style="margin-top: 8px;">
+            <span class="en"><strong>Depends on:</strong> The <em>material only</em>. (Intrinsic property, independent of mass!)</span>
+            <span class="zh"><strong>取決於：</strong> 僅取決於<em>物質種類</em>。（內稟性質，與質量無關！）</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Per Unit Mass? Interactive Simulator -->
+    <section class="card interactive-panel">
+      <h2>
+        <span class="en">2. Why Measure "Per Unit Mass"? (Fair Comparison)</span>
+        <span class="zh">2. 為什麼比較不同材料時必須以「單位質量」計算？（公平比較）</span>
+      </h2>
+      <p>
+        <span class="en">
+          Imagine comparing a tiny spoonful of water with an enormous 100 kg block of aluminium. The huge aluminium block requires far more heat to warm up, so its <strong>Heat Capacity (C)</strong> is larger. Does that mean aluminium is better at storing heat than water? <strong>No! That is unfair because the masses are completely different.</strong>
+        </span>
+        <span class="zh">
+          想像一下：用一小茶匙的水與一整塊重達 100 kg 的鋁磚相比。這塊巨大的鋁磚需要極多能量才能升溫，因此它的<strong>熱容量 (C)</strong> 遠高於茶匙裡的水。這是否意味著「鋁比水更能儲存熱能」？<strong>並非如此！這是因為兩者質量懸殊，比較並不公平。</strong>
+        </span>
+      </p>
+
+      <div style="margin-top: 18px;">
+        <div class="slider-group">
+          <label>
+            <span class="en">Water Mass (c = 4200 J kg⁻¹ °C⁻¹): <strong id="waterMassVal">0.1</strong> kg</span>
+            <span class="zh">水的質量 (c = 4200 J kg⁻¹ °C⁻¹)： <strong id="waterMassVal-zh">0.1</strong> kg</span>
+          </label>
+          <input type="range" id="waterMass" min="0.05" max="5" step="0.05" value="0.1" oninput="updateSim()">
+        </div>
+
+        <div class="slider-group">
+          <label>
+            <span class="en">Aluminium Mass (c = 900 J kg⁻¹ °C⁻¹): <strong id="alMassVal">5.0</strong> kg</span>
+            <span class="zh">鋁的質量 (c = 900 J kg⁻¹ °C⁻¹)： <strong id="alMassVal-zh">5.0</strong> kg</span>
+          </label>
+          <input type="range" id="alMass" min="0.5" max="10" step="0.5" value="5.0" oninput="updateSim()">
+        </div>
+      </div>
+
+      <div class="sim-result">
+        <div class="stat-card">
+          <h4 style="color:#0284c7;">
+            <span class="en">Water (水)</span>
+            <span class="zh">水 (Water)</span>
+          </h4>
+          <div class="stat-val" id="waterC">420 J °C⁻¹</div>
+          <p style="font-size:0.85rem; color: var(--text-muted);">
+            <span class="en">Heat Capacity C = m · c</span>
+            <span class="zh">熱容量 C = m · c</span>
+          </p>
+        </div>
+
+        <div class="stat-card">
+          <h4 style="color:#64748b;">
+            <span class="en">Aluminium (鋁)</span>
+            <span class="zh">鋁 (Aluminium)</span>
+          </h4>
+          <div class="stat-val" id="alC">4500 J °C⁻¹</div>
+          <p style="font-size:0.85rem; color: var(--text-muted);">
+            <span class="en">Heat Capacity C = m · c</span>
+            <span class="zh">熱容量 C = m · c</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="takeaway-box" id="simTakeaway">
+        <!-- Dynamically injected takeaway text -->
+      </div>
+    </section>
+
+    <!-- Worked Example From the Image -->
+    <section class="card">
+      <h2>
+        <span class="en">3. Interactive Textbook Example (Aluminium Block)</span>
+        <span class="zh">3. 課本範例重現與計算機（鋁塊）</span>
+      </h2>
+      <p style="margin-bottom: 12px;">
+        <span class="en">From the image: We need <strong>45 kJ (45,000 J)</strong> to heat up a <strong>5 kg</strong> aluminium block from <strong>20 °C to 30 °C</strong>.</span>
+        <span class="zh">對應圖中範例：我們需要 <strong>45 kJ (45,000 J)</strong> 將一塊 <strong>5 kg</strong> 的鋁塊由 <strong>20 °C 加熱至 30 °C</strong>。</span>
+      </p>
+
+      <div class="calc-step">
+        <strong>
+          <span class="en">Step 1: Calculate Heat Capacity of the block (C)</span>
+          <span class="zh">步驟 1：計算該鋁塊的熱容量 (C)</span>
+        </strong>
+        <p style="margin-top: 4px;">
+          ΔT = 30 °C - 20 °C = 10 °C<br />
+          C = E / ΔT = 45 000 J / 10 °C = <strong>4500 J °C⁻¹</strong>
+        </p>
+      </div>
+
+      <div class="calc-step">
+        <strong>
+          <span class="en">Step 2: Eliminate mass dependence to find Specific Heat Capacity (c)</span>
+          <span class="zh">步驟 2：消除質量影響，得出鋁的比熱容量 (c)</span>
+        </strong>
+        <p style="margin-top: 4px;">
+          c = C / m = 4500 J °C⁻¹ / 5 kg = <strong>900 J kg⁻¹ °C⁻¹</strong>
+        </p>
+        <p style="font-size: 0.92rem; color: #0369a1; margin-top: 4px;">
+          <span class="en">👉 Meaning: Exactly <strong>900 J</strong> is required to heat up <strong>1 kg</strong> of aluminium by <strong>1 °C</strong>.</span>
+          <span class="zh">👉 物理意義：每將 <strong>1 kg</strong> 的鋁升高 <strong>1 °C</strong>，恰好需要吸收 <strong>900 J</strong> 的能量。</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Mini Quiz -->
+    <section class="card">
+      <h2>
+        <span class="en">4. Quick Concept Check</span>
+        <span class="zh">4. 概念自我檢測</span>
+      </h2>
+
+      <div style="margin-bottom: 16px;">
+        <p><strong>Q1: 
+          <span class="en">If you cut the 5 kg aluminium block into half (2.5 kg), what happens?</span>
+          <span class="zh">如果將 5 kg 的鋁塊切成兩半（各 2.5 kg），其熱學性質如何變化？</span>
+        </strong></p>
+        <div style="margin-top: 8px;">
+          <button class="quiz-option" onclick="checkAnswer(this, false)">
+            <span class="en">Both C and c become half.</span>
+            <span class="zh">C 與 c 都減半。</span>
+          </button>
+          <button class="quiz-option" onclick="checkAnswer(this, true)">
+            <span class="en">Heat capacity C is halved, but specific heat capacity c remains 900 J kg⁻¹ °C⁻¹.</span>
+            <span class="zh">熱容量 C 減半，但比熱容量 c 維持 900 J kg⁻¹ °C⁻¹ 不變。</span>
+          </button>
+          <button class="quiz-option" onclick="checkAnswer(this, false)">
+            <span class="en">Both C and c stay the same.</span>
+            <span class="zh">C 與 c 都保持不變。</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <p><strong>Q2: 
+          <span class="en">Why is specific heat capacity (c) used in physical tables rather than heat capacity (C)?</span>
+          <span class="zh">為什麼物理常數表中收錄的是「比熱容量 (c)」而非「熱容量 (C)」？</span>
+        </strong></p>
+        <div style="margin-top: 8px;">
+          <button class="quiz-option" onclick="checkAnswer(this, false)">
+            <span class="en">Because c is always a bigger number than C.</span>
+            <span class="zh">因為 c 的數值通常比 C 更大。</span>
+          </button>
+          <button class="quiz-option" onclick="checkAnswer(this, true)">
+            <span class="en">Because c is a characteristic property of the substance, independent of the sample's size or mass.</span>
+            <span class="zh">因為 c 是物質本身的特性常數，與樣本的大小或質量無關。</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Language toggle logic
+    function setLang(lang) {
+      document.body.className = 'lang-' + lang;
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      updateSim();
+    }
+
+    // Interactive simulator update
+    function updateSim() {
+      const mw = parseFloat(document.getElementById('waterMass').value);
+      const ma = parseFloat(document.getElementById('alMass').value);
+
+      document.getElementById('waterMassVal').innerText = mw.toFixed(2);
+      document.getElementById('waterMassVal-zh').innerText = mw.toFixed(2);
+      document.getElementById('alMassVal').innerText = ma.toFixed(1);
+      document.getElementById('alMassVal-zh').innerText = ma.toFixed(1);
+
+      const C_water = Math.round(mw * 4200);
+      const C_al = Math.round(ma * 900);
+
+      document.getElementById('waterC').innerText = C_water.toLocaleString() + ' J °C⁻¹';
+      document.getElementById('alC').innerText = C_al.toLocaleString() + ' J °C⁻¹';
+
+      const box = document.getElementById('simTakeaway');
+      let enMsg = "";
+      let zhMsg = "";
+
+      if (C_al > C_water) {
+        enMsg = `💡 Notice: The aluminium block currently has a larger total Heat Capacity (C = ${C_al} J °C⁻¹) than the water (C = ${C_water} J °C⁻¹) simply because it is much heavier (${ma} kg vs ${mw} kg). But gram for gram, water has a much higher specific heat capacity (4200 vs 900 J kg⁻¹ °C⁻¹)!`;
+        zhMsg = `💡 觀察：目前這塊鋁磚的總熱容量 (C = ${C_al} J °C⁻¹) 比水 (C = ${C_water} J °C⁻¹) 更大，純粹是因為它質量很大 (${ma} kg vs ${mw} kg)。但若在相同質量（1 kg）基準下比較，水的比熱容量（4200）其實遠高於鋁（900）！`;
+      } else {
+        enMsg = `💡 Notice: With enough water, water's Heat Capacity exceeds aluminium's by far, showing how mass directly shifts C while c remains an unchangeable fingerprint of each material.`;
+        zhMsg = `💡 觀察：當水的質量足夠時，其熱容量遠超鋁磚。這充分證明了熱容量 C 會受質量改變，而比熱容量 c 則是每種材質獨一無二的固定特徵。`;
+      }
+
+      box.innerHTML = `<span class="en">${enMsg}</span><span class="zh">${zhMsg}</span>`;
+    }
+
+    // Quiz logic
+    function checkAnswer(btn, isCorrect) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.quiz-option').forEach(b => {
+        b.classList.remove('correct', 'incorrect');
+      });
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('incorrect');
+      }
+    }
+
+    // Initialize
+    updateSim();
+  </script>
+</body>
+</html>
