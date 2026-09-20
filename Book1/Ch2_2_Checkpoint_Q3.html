@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Physics: Heat Capacity & Graphs</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-soft: #e0f2fe;
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --error: #dc2626;
+      --error-soft: #fee2e2;
+      --warn: #d97706;
+      --warn-soft: #fef3c7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .problem-prompt {
+      background: #ffffff;
+      border-left: 4px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      box-shadow: var(--shadow);
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 22px;
+    }
+
+    @media (max-width: 880px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+
+    /* Graph Styling */
+    .graph-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .graph-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .axis-line {
+      stroke: #1e293b;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+    }
+
+    .dashed-guide {
+      stroke: #94a3b8;
+      stroke-dasharray: 4 4;
+      stroke-width: 1.5;
+    }
+
+    .line-original {
+      stroke: #16a34a;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+    }
+
+    .line-new {
+      stroke: #2563eb;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 6 4;
+      transition: all 0.3s ease;
+    }
+
+    .point-dot {
+      fill: #ffffff;
+      stroke-width: 2.5;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .point-dot:hover {
+      transform: scale(1.3);
+    }
+
+    .legend-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .legend-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 18px;
+    }
+
+    .tab-trigger {
+      padding: 9px 16px;
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .tab-trigger.active {
+      color: var(--primary-dark);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Question & Scaffolded Inputs */
+    .q-box {
+      margin-bottom: 16px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+
+    .q-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 8px 0;
+    }
+
+    input[type="number"], select {
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      width: 140px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="number"]:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 8px 15px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-check {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-check:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+
+    /* Feedback message box */
+    .feedback-msg {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .feedback-msg.correct {
+      display: block;
+      background: var(--success-soft);
+      color: #14532d;
+      border-left: 4px solid var(--success);
+    }
+
+    .feedback-msg.wrong {
+      display: block;
+      background: var(--error-soft);
+      color: #7f1d1d;
+      border-left: 4px solid var(--error);
+    }
+
+    .feedback-msg.hint {
+      display: block;
+      background: var(--warn-soft);
+      color: #78350f;
+      border-left: 4px solid var(--warn);
+    }
+
+    /* Solution Details (Accordion) */
+    details {
+      margin-top: 14px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 10px 14px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      background: #f1f5f9;
+      user-select: none;
+    }
+
+    summary:hover {
+      background: #e2e8f0;
+    }
+
+    .details-body {
+      padding: 14px;
+      font-size: 0.92rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Math layout helpers */
+    .math-fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 0.95em;
+    }
+
+    .numerator {
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 1px;
+    }
+
+    .denominator {
+      padding-top: 1px;
+    }
+
+    .math-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Thermal Physics: Heat Capacity of Soup</h1>
+      <p>Solve the questions step-by-step. Enter your answers to check your thinking.</p>
+    </header>
+
+    <!-- Context / Question statement -->
+    <div class="problem-prompt">
+      <strong>Problem Statement:</strong> A pot of soup is heated on a gas stove. The graph shows how the temperature of the soup changes with the amount of energy supplied.
+    </div>
+
+    <div class="layout-grid">
+      <!-- GRAPH PANEL -->
+      <div class="card graph-card">
+        <h2 style="font-size: 1rem; color: #475569; margin-bottom: 12px; align-self: flex-start;">
+          Graph: Temperature against Energy Supplied
+        </h2>
+
+        <div class="graph-wrapper">
+          <svg viewBox="-50 -25 390 320">
+            <defs>
+              <marker id="arrowhead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b"/>
+              </marker>
+            </defs>
+
+            <!-- Guide lines for 80 °C and 44 kJ -->
+            <line x1="20" y1="50" x2="270" y2="50" class="dashed-guide" />
+            <line x1="270" y1="240" x2="270" y2="50" class="dashed-guide" />
+
+            <!-- Dynamic Guide for Part (c) -->
+            <line id="svg-new-guide" x1="20" y1="135" x2="270" y2="135" class="dashed-guide" stroke="#3b82f6" style="display:none;" />
+
+            <!-- Axes -->
+            <!-- Y-Axis (Temperature) -->
+            <line x1="20" y1="240" x2="20" y2="15" class="axis-line" marker-end="url(#arrowhead)" />
+            <!-- X-Axis (Energy) -->
+            <line x1="20" y1="240" x2="305" y2="240" class="axis-line" marker-end="url(#arrowhead)" />
+
+            <!-- Axis Titles -->
+            <text x="18" y="5" font-size="12" font-weight="bold" fill="#0f172a">temperature / °C</text>
+            <text x="240" y="270" font-size="11" font-weight="bold" fill="#0f172a">energy</text>
+            <text x="240" y="284" font-size="11" font-weight="bold" fill="#0f172a">supplied / kJ</text>
+
+            <!-- Ticks & Numbers -->
+            <!-- 80 °C -->
+            <line x1="14" y1="50" x2="20" y2="50" stroke="#1e293b" stroke-width="2" />
+            <text x="8" y="54" font-size="12" text-anchor="end" fill="#1e293b">80</text>
+
+            <!-- 25 °C -->
+            <line x1="14" y1="220" x2="20" y2="220" stroke="#1e293b" stroke-width="2" />
+            <text x="8" y="224" font-size="12" text-anchor="end" fill="#1e293b">25</text>
+
+            <!-- Origin 0 -->
+            <text x="8" y="244" font-size="12" text-anchor="end" fill="#1e293b">0</text>
+
+            <!-- 44 kJ -->
+            <line x1="270" y1="240" x2="270" y2="246" stroke="#1e293b" stroke-width="2" />
+            <text x="270" y="260" font-size="12" text-anchor="middle" fill="#1e293b">44</text>
+
+            <!-- New dynamic tick for 52.5 °C -->
+            <g id="svg-new-tick" style="display: none;">
+              <line x1="14" y1="135" x2="20" y2="135" stroke="#2563eb" stroke-width="2" />
+              <text x="8" y="139" font-size="11" font-weight="bold" fill="#2563eb" text-anchor="end">52.5</text>
+            </g>
+
+            <!-- ORIGINAL LINE (Soup 1) -->
+            <!-- Starts at (0 kJ, 25 °C) -> (20, 220). Ends at (44 kJ, 80 °C) -> (270, 50) -->
+            <line x1="20" y1="220" x2="270" y2="50" class="line-original" />
+            <circle cx="20" cy="220" r="4.5" class="point-dot" stroke="#16a34a" />
+            <circle cx="270" cy="50" r="4.5" class="point-dot" stroke="#16a34a" />
+
+            <!-- NEW LINE (Doubled capacity - Revealed in Part c) -->
+            <!-- Ends at (44 kJ, 52.5 °C) -> (270, 135) -->
+            <line id="svg-new-line" x1="20" y1="220" x2="270" y2="135" class="line-new" style="display:none;" />
+            <circle id="svg-new-dot" cx="270" cy="135" r="4.5" class="point-dot" stroke="#2563eb" style="display:none;" />
+          </svg>
+        </div>
+
+        <div class="legend-row">
+          <div class="legend-tag">
+            <span class="legend-color" style="background:#16a34a;"></span>
+            <span>Original Soup</span>
+          </div>
+          <div class="legend-tag" id="legend-doubled" style="display: none;">
+            <span class="legend-color" style="background:#2563eb; border-top:1px dashed #2563eb;"></span>
+            <span>Doubled Capacity (2C)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE QUESTIONS PANEL -->
+      <div class="card">
+        <nav class="tabs-nav">
+          <button class="tab-trigger active" onclick="showTab(0)">Part (a)</button>
+          <button class="tab-trigger" onclick="showTab(1)">Part (b)</button>
+          <button class="tab-trigger" onclick="showTab(2)">Part (c)</button>
+        </nav>
+
+        <!-- PART (a) -->
+        <div class="tab-panel active" id="tab-0">
+          <h3 style="font-size: 1.05rem; margin-bottom: 10px;">(a) Find the heat capacity of the pot of soup</h3>
+
+          <!-- Sub-step 1 -->
+          <div class="q-box">
+            <div class="q-title">Step 1: What is the temperature change (ΔT) of the soup?</div>
+            <div class="input-row">
+              <label for="input-dt">ΔT =</label>
+              <input type="number" id="input-dt" placeholder="e.g. 50" />
+              <span>°C</span>
+              <button class="btn btn-check" onclick="checkDeltaT()">Check</button>
+              <button class="btn btn-outline" onclick="hintDeltaT()">Hint</button>
+            </div>
+            <div id="fb-dt" class="feedback-msg"></div>
+          </div>
+
+          <!-- Sub-step 2 -->
+          <div class="q-box">
+            <div class="q-title">Step 2: Calculate the Heat Capacity (C)</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+              Recall: <em>Q = C × ΔT</em> &nbsp;⇒&nbsp; 
+              <em>C = <span class="math-fraction"><span class="numerator">Q</span><span class="denominator">ΔT</span></span></em>
+            </p>
+            <div class="input-row">
+              <label for="input-c">C =</label>
+              <input type="number" id="input-c" step="any" placeholder="value" />
+              <select id="unit-c">
+                <option value="kJ">kJ / °C</option>
+                <option value="J">J / °C</option>
+              </select>
+              <button class="btn btn-check" onclick="checkHeatCapacity()">Check</button>
+            </div>
+            <div id="fb-c" class="feedback-msg"></div>
+          </div>
+
+          <!-- Solution Accordion -->
+          <details>
+            <summary>View Full Working for Part (a)</summary>
+            <div class="details-body">
+              <p>1. <strong>Temperature change (ΔT):</strong><br>
+                ΔT = Final Temperature − Initial Temperature<br>
+                ΔT = 80 °C − 25 °C = <strong>55 °C</strong> (or 55 K)
+              </p>
+              <br>
+              <p>2. <strong>Energy supplied (Q):</strong><br>
+                Q = 44 kJ = 44,000 J
+              </p>
+              <br>
+              <p>3. <strong>Heat Capacity (C):</strong></p>
+              <div class="math-block">
+                C = <span class="math-fraction"><span class="numerator">Q</span><span class="denominator">ΔT</span></span>
+                = <span class="math-fraction"><span class="numerator">44 kJ</span><span class="denominator">55 °C</span></span>
+                = <strong>0.8 kJ / °C</strong> (or <strong>800 J / °C</strong>)
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- PART (b) -->
+        <div class="tab-panel" id="tab-1">
+          <h3 style="font-size: 1.05rem; margin-bottom: 8px;">(b) Doubled Heat Capacity</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
+            More water is added so that the heat capacity of the soup is <strong>doubled</strong>. Find the temperature when energy of <strong>44 kJ</strong> is supplied.
+          </p>
+
+          <div class="q-box">
+            <div class="q-title">Step 1: What is the new temperature rise (ΔT′)?</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+              Think: If heat capacity doubles, what happens to the temperature rise for the same amount of heat?
+            </p>
+            <div class="input-row">
+              <label for="input-dt-new">ΔT′ =</label>
+              <input type="number" id="input-dt-new" step="0.1" placeholder="e.g. 20" />
+              <span>°C</span>
+              <button class="btn btn-check" onclick="checkNewDeltaT()">Check</button>
+            </div>
+            <div id="fb-dt-new" class="feedback-msg"></div>
+          </div>
+
+          <div class="q-box">
+            <div class="q-title">Step 2: What is the final temperature?</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+              Remember to add the temperature rise to the initial temperature (25 °C).
+            </p>
+            <div class="input-row">
+              <label for="input-t-final">Final T =</label>
+              <input type="number" id="input-t-final" step="0.1" placeholder="e.g. 50" />
+              <span>°C</span>
+              <button class="btn btn-check" onclick="checkFinalTemp()">Check</button>
+            </div>
+            <div id="fb-t-final" class="feedback-msg"></div>
+          </div>
+
+          <details>
+            <summary>View Full Working for Part (b)</summary>
+            <div class="details-body">
+              <p>1. <strong>New Heat Capacity (C′):</strong><br>
+                C′ = 2 × 0.8 kJ/°C = <strong>1.6 kJ/°C</strong> (or 1600 J/°C)
+              </p>
+              <br>
+              <p>2. <strong>New temperature change (ΔT′):</strong></p>
+              <div class="math-block">
+                ΔT′ = <span class="math-fraction"><span class="numerator">Q</span><span class="denominator">C′</span></span>
+                = <span class="math-fraction"><span class="numerator">44 kJ</span><span class="denominator">1.6 kJ/°C</span></span>
+                = <strong>27.5 °C</strong>
+              </div>
+              <p style="font-size:0.85rem; color:var(--text-muted); text-align:center;">
+                (Notice: doubling C halves the temperature rise from 55 °C to 27.5 °C)
+              </p>
+              <br>
+              <p>3. <strong>Final temperature:</strong><br>
+                Final Temperature = Initial Temperature + ΔT′<br>
+                = 25 °C + 27.5 °C = <strong>52.5 °C</strong>
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- PART (c) -->
+        <div class="tab-panel" id="tab-2">
+          <h3 style="font-size: 1.05rem; margin-bottom: 8px;">(c) Sketch the new graph for (b)</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
+            Before revealing the graph, predict its visual features based on your answers:
+          </p>
+
+          <div class="q-box">
+            <div class="q-title">Prediction 1: What is the starting point on the y-axis?</div>
+            <div class="input-row">
+              <select id="pred-start" style="width: 220px;">
+                <option value="none">-- Select Start Point --</option>
+                <option value="0">0 °C</option>
+                <option value="25">25 °C (Same initial temperature)</option>
+                <option value="50">50 °C</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="q-box">
+            <div class="q-title">Prediction 2: How will the gradient (slope) change?</div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 6px;">
+              Gradient = <span class="math-fraction"><span class="numerator">ΔT</span><span class="denominator">Q</span></span> = <span class="math-fraction"><span class="numerator">1</span><span class="denominator">C</span></span>
+            </p>
+            <div class="input-row">
+              <select id="pred-slope" style="width: 220px;">
+                <option value="none">-- Select Gradient --</option>
+                <option value="steeper">Steeper slope</option>
+                <option value="gentler">Gentler / less steep slope (halved)</option>
+                <option value="same">Identical slope</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-check" style="width: 100%; padding: 10px; font-size: 0.95rem;" onclick="checkAndPlotSketch()">
+            Verify Predictions & Plot on Graph
+          </button>
+          <div id="fb-sketch" class="feedback-msg"></div>
+
+          <details id="details-sketch">
+            <summary>Key Graph Sketching Checklist</summary>
+            <div class="details-body">
+              <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                <li><strong>Same y-intercept:</strong> Starts exactly at (0 kJ, 25 °C).</li>
+                <li><strong>Gentler slope:</strong> Gradient is halved because heat capacity doubled.</li>
+                <li><strong>Correct endpoint:</strong> Ends at (44 kJ, 52.5 °C).</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function showTab(tabIndex) {
+      const triggers = document.querySelectorAll('.tab-trigger');
+      const panels = document.querySelectorAll('.tab-panel');
+
+      triggers.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === tabIndex);
+      });
+      panels.forEach((pane, idx) => {
+        pane.classList.toggle('active', idx === tabIndex);
+      });
+    }
+
+    // Part (a) - Sub-step 1: Delta T
+    function checkDeltaT() {
+      const val = parseFloat(document.getElementById('input-dt').value);
+      const fb = document.getElementById('fb-dt');
+
+      if (val === 55) {
+        fb.className = 'feedback-msg correct';
+        fb.textContent = '✓ Correct! ΔT = 80 °C − 25 °C = 55 °C.';
+      } else if (isNaN(val)) {
+        fb.className = 'feedback-msg hint';
+        fb.textContent = 'Please enter a number.';
+      } else {
+        fb.className = 'feedback-msg wrong';
+        fb.textContent = 'Not quite. Check the vertical axis: soup starts at 25 °C and reaches 80 °C.';
+      }
+    }
+
+    function hintDeltaT() {
+      const fb = document.getElementById('fb-dt');
+      fb.className = 'feedback-msg hint';
+      fb.textContent = 'Hint: Subtract initial temperature from final temperature (80 − 25).';
+    }
+
+    // Part (a) - Sub-step 2: Heat Capacity C
+    function checkHeatCapacity() {
+      const val = parseFloat(document.getElementById('input-c').value);
+      const unit = document.getElementById('unit-c').value;
+      const fb = document.getElementById('fb-c');
+
+      if (isNaN(val)) {
+        fb.className = 'feedback-msg hint';
+        fb.textContent = 'Please enter your calculated value.';
+        return;
+      }
+
+      if ((unit === 'kJ' && Math.abs(val - 0.8) < 0.01) || (unit === 'J' && Math.abs(val - 800) < 1)) {
+        fb.className = 'feedback-msg correct';
+        fb.textContent = `✓ Spot on! C = Q / ΔT = ${unit === 'kJ' ? '44 / 55 = 0.8 kJ/°C' : '44,000 / 55 = 800 J/°C'}.`;
+      } else {
+        fb.className = 'feedback-msg wrong';
+        fb.textContent = 'Incorrect. Use C = Q / ΔT. Energy supplied is 44 kJ (or 44,000 J) and ΔT is 55 °C.';
+      }
+    }
+
+    // Part (b) - Step 1: New Delta T
+    function checkNewDeltaT() {
+      const val = parseFloat(document.getElementById('input-dt-new').value);
+      const fb = document.getElementById('fb-dt-new');
+
+      if (Math.abs(val - 27.5) < 0.1) {
+        fb.className = 'feedback-msg correct';
+        fb.textContent = '✓ Exactly! Since C is doubled, ΔT′ = 55 / 2 = 27.5 °C (or 44 kJ / 1.6 kJ/°C).';
+      } else if (isNaN(val)) {
+        fb.className = 'feedback-msg hint';
+        fb.textContent = 'Please enter a value for the temperature rise.';
+      } else {
+        fb.className = 'feedback-msg wrong';
+        fb.textContent = 'Try again. If heat capacity doubles, it takes twice the energy per degree, so ΔT is halved.';
+      }
+    }
+
+    // Part (b) - Step 2: Final Temperature
+    function checkFinalTemp() {
+      const val = parseFloat(document.getElementById('input-t-final').value);
+      const fb = document.getElementById('fb-t-final');
+
+      if (Math.abs(val - 52.5) < 0.1) {
+        fb.className = 'feedback-msg correct';
+        fb.textContent = '✓ Correct! Final temperature = 25 °C + 27.5 °C = 52.5 °C.';
+      } else if (isNaN(val)) {
+        fb.className = 'feedback-msg hint';
+        fb.textContent = 'Please enter the final temperature.';
+      } else {
+        fb.className = 'feedback-msg wrong';
+        fb.textContent = 'Remember: The soup started at 25 °C. Add your 27.5 °C rise to 25 °C.';
+      }
+    }
+
+    // Part (c) - Prediction and plot sketch
+    function checkAndPlotSketch() {
+      const start = document.getElementById('pred-start').value;
+      const slope = document.getElementById('pred-slope').value;
+      const fb = document.getElementById('fb-sketch');
+
+      if (start === '25' && slope === 'gentler') {
+        fb.className = 'feedback-msg correct';
+        fb.textContent = '✓ Excellent! The line begins at 25 °C, rises with half the steepness, and reaches 52.5 °C at 44 kJ. Look at the graph on the left!';
+
+        // Reveal the dashed blue line on SVG
+        document.getElementById('svg-new-line').style.display = 'block';
+        document.getElementById('svg-new-dot').style.display = 'block';
+        document.getElementById('svg-new-guide').style.display = 'block';
+        document.getElementById('svg-new-tick').style.display = 'block';
+        document.getElementById('legend-doubled').style.display = 'flex';
+      } else {
+        fb.className = 'feedback-msg wrong';
+        fb.textContent = 'Check your choices. The initial temperature is still 25 °C, and larger heat capacity means a smaller (less steep) temperature rise.';
+      }
+    }
+  </script>
+</body>
+</html>
