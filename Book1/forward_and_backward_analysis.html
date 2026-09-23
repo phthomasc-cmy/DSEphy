@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heat Experiments: Error Analysis Tutorial (Active Physics 2)</title>
+
+  <!-- MathJax Configuration for Proper Mathematical Symbol Rendering -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-light: #eff6ff;
+      --secondary: #0f766e;
+      --success: #15803d;
+      --danger: #b91c1c;
+      --warning: #b45309;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 2.2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      opacity: 0.95;
+      font-size: 1.05rem;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .container {
+      max-width: 1020px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
+
+    /* Tab navigation */
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: #fff;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 160px;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card styling */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card h3 {
+      font-size: 1.15rem;
+      margin: 1rem 0 0.5rem;
+      color: #1e293b;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-forward { background: #e0e7ff; color: #3730a3; }
+    .badge-backward { background: #ccfbf1; color: #115e59; }
+
+    .math-callout {
+      background: #f1f5f9;
+      border-left: 4px solid var(--primary);
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 1.05rem;
+    }
+
+    /* Step-by-Step Interactive Workflow */
+    .step-container {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin: 1rem 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .step-header {
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .step-status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .status-locked { background: #e2e8f0; color: #64748b; }
+    .status-active { background: #dbeafe; color: #1e40af; }
+    .status-done { background: #dcfce7; color: #166534; }
+
+    .step-content {
+      padding: 1rem;
+    }
+
+    .step-container.locked .step-content {
+      display: none;
+    }
+
+    .question-prompt {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+    }
+
+    .options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .opt-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      background: #fff;
+      transition: all 0.15s;
+    }
+
+    .opt-label:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .opt-label input {
+      margin-top: 0.25rem;
+    }
+
+    .action-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .action-btn:hover {
+      background: #1e40af;
+    }
+
+    .reset-btn {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .feedback {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.92rem;
+      display: none;
+    }
+
+    .feedback.correct {
+      display: block;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: var(--success);
+    }
+
+    .feedback.wrong {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--danger);
+    }
+
+    /* Comparison Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .highlight {
+      background: #fef08a;
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+    }
+
+    .input-calc {
+      padding: 0.45rem 0.65rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      width: 140px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Backward &amp; Forward Error Analysis in Heat Experiments</h1>
+    <p>Physics Problem-Solving Tutorial (Active Physics 2, Chapter 2) • Interactive Step-by-Step Training</p>
+  </header>
+
+  <div class="container">
+
+    <!-- TAB NAVIGATION -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" onclick="showTab('tab-strategy')">📌 4-Step Strategy</button>
+      <button class="tab-btn" onclick="showTab('tab-forward')">⏩ Forward Error Analysis</button>
+      <button class="tab-btn" onclick="showTab('tab-backward')">⏪ Backward Error Analysis</button>
+      <button class="tab-btn" onclick="showTab('tab-summary')">📑 Summary Rules</button>
+    </nav>
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: 4-STEP STRATEGY OVERVIEW -->
+    <!-- ============================================================== -->
+    <section id="tab-strategy" class="tab-panel active">
+      <div class="card">
+        <h2>Concept: Forward vs. Backward Analysis</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>Starting Condition</th>
+              <th>Target Goal</th>
+              <th>Typical Framing</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Forward Analysis</strong></td>
+              <td>A <em>known experimental imperfection</em> (e.g., balance not tared, heat loss).</td>
+              <td>Determine how the calculated quantity will be shifted (overestimated vs. underestimated).</td>
+              <td><em>"The stopwatch ran too fast. How does this affect calculated $c$?"</em></td>
+            </tr>
+            <tr>
+              <td><strong>Backward Analysis</strong></td>
+              <td>An <em>unexpected calculated outcome</em> (e.g., calculated $c$ is higher than standard).</td>
+              <td>Identify which physical errors or omissions could produce this discrepancy.</td>
+              <td><em>"The calculated $c$ is $5000\text{ J kg}^{-1}\text{ }^\circ\text{C}^{-1}$ instead of $4200$. What caused this?"</em></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:1.5rem;">The Universal 4-Step Method</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <div style="background:#f8fafc; border:1px solid var(--border); padding:1rem; border-radius:8px;">
+            <strong style="color:var(--primary);">Step 1: Write Equations</strong>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.3rem;">Write the governing thermal relationships: $E = mc\Delta T$, $E = Pt$.</p>
+          </div>
+          <div style="background:#f8fafc; border:1px solid var(--border); padding:1rem; border-radius:8px;">
+            <strong style="color:var(--primary);">Step 2: Change Subject</strong>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.3rem;">Rearrange equation to isolate target variable ($c = \frac{Pt}{m\Delta T}$ or $t = \frac{mc\Delta T}{P}$).</p>
+          </div>
+          <div style="background:#f8fafc; border:1px solid var(--border); padding:1rem; border-radius:8px;">
+            <strong style="color:var(--primary);">Step 3: Relate Variables</strong>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.3rem;">Numerator $\propto$ target (direct); Denominator $\propto \frac{1}{\text{target}}$ (inverse).</p>
+          </div>
+          <div style="background:#f8fafc; border:1px solid var(--border); padding:1rem; border-radius:8px;">
+            <strong style="color:var(--primary);">Step 4: Factor Analysis</strong>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.3rem;">Determine whether each real-life mistake increases/decreases the variables and form the conclusion.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: FORWARD ERROR ANALYSIS -->
+    <!-- ============================================================== -->
+    <section id="tab-forward" class="tab-panel">
+
+      <!-- Worked Example: Amy -->
+      <div class="card">
+        <span class="badge badge-forward">Worked Example</span>
+        <h2>Amy: Faulty Stopwatch</h2>
+        <p>Amy has a liquid of mass $0.8\text{ kg}$. She uses an immersion heater of known rated power to heat up the liquid. The temperature rises by $10\text{ }^\circ\text{C}$ when $6000\text{ J}$ of energy is transferred to it. The specific heat capacity calculated is:</p>
+        <div class="math-callout">
+          $$c = \frac{E}{m \cdot \Delta T} = \frac{6000}{(0.8)(10)} = 750\text{ J kg}^{-1}\text{ }^\circ\text{C}^{-1}$$
+        </div>
+        <p>Suppose the stopwatch that Amy used is faulty, and the <span class="highlight">measured time is longer than the actual heating time</span>. How does this error affect the calculated specific heat capacity?</p>
+
+        <div style="margin-top:1rem; background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid var(--border);">
+          <strong>Model 4-Step Solution:</strong>
+          <p><strong>Step 1:</strong> $E = mc\Delta T$ and $E = Pt$</p>
+          <p><strong>Step 2:</strong> $c = \frac{Pt}{m \Delta T}$</p>
+          <p><strong>Step 3:</strong> The inaccurately measured quantity is the time $t$.</p>
+          <p><strong>Step 4:</strong> Since $t$ is in the numerator, $c \propto t$. As measured $t$ is larger than actual, the calculated $c$ is <strong>overestimated (higher)</strong>. Consequently, the <strong>actual</strong> specific heat capacity is smaller.</p>
+        </div>
+      </div>
+
+      <!-- Forward Guided Practice 1: Bob -->
+      <div class="card" id="card-f-gp1">
+        <span class="badge badge-forward">Guided Practice 1 (Interactive)</span>
+        <h2>Bob: Electronic Balance Zeroing Error</h2>
+        <p>Bob uses an immersion heater of rated power $200\text{ W}$ to heat up a liquid for $30\text{ s}$. The liquid temperature rises by $5\text{ }^\circ\text{C}$. The actual mass of the liquid should be $0.5\text{ kg}$, but Bob <span class="highlight">forgets to deduct the mass of the container</span> when reading the mass from an electronic balance.</p>
+
+        <!-- Part A -->
+        <div class="step-container" id="f-gp1-partA">
+          <div class="step-header">
+            <span>Part (a): Calculate Specific Heat Capacity</span>
+            <span class="step-status status-active" id="f-gp1-partA-badge">Step Active</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Calculate the specific heat capacity $c$ using nominal mass $m = 0.5\text{ kg}$, $P = 200\text{ W}$, $t = 30\text{ s}$, and $\Delta T = 5\text{ }^\circ\text{C}$:</p>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin: 0.5rem 0;">
+              <span>$c =$</span>
+              <input type="number" id="f-gp1-ansA" class="input-calc" placeholder="e.g. 2400" />
+              <span>$\text{J kg}^{-1}\text{ }^\circ\text{C}^{-1}$</span>
+              <button class="action-btn" onclick="checkF_GP1_A()">Check</button>
+            </div>
+            <div class="feedback" id="f-gp1-fbA"></div>
+          </div>
+        </div>
+
+        <!-- Part B: Step 1 & 2 -->
+        <div class="step-container locked" id="f-gp1-s12">
+          <div class="step-header">
+            <span>Part (b) — Step 1 &amp; 2: Formula Setup</span>
+            <span class="step-status status-locked" id="f-gp1-s12-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Which formula expresses the calculated specific heat capacity $c$ in terms of the experimental inputs?</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="f-gp1-eq" value="1"> $c = \frac{m \cdot \Delta T}{Pt}$</label>
+              <label class="opt-label"><input type="radio" name="f-gp1-eq" value="2"> $c = \frac{Pt}{m \cdot \Delta T}$</label>
+              <label class="opt-label"><input type="radio" name="f-gp1-eq" value="3"> $c = \frac{P \cdot \Delta T}{m \cdot t}$</label>
+            </div>
+            <button class="action-btn" onclick="checkF_GP1_S12()">Submit Step 1 &amp; 2</button>
+            <div class="feedback" id="f-gp1-fb12"></div>
+          </div>
+        </div>
+
+        <!-- Part B: Step 3 & 4 -->
+        <div class="step-container locked" id="f-gp1-s34">
+          <div class="step-header">
+            <span>Part (b) — Step 3 &amp; 4: Error Deduction</span>
+            <span class="step-status status-locked" id="f-gp1-s34-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Bob forgot to deduct the container mass. Complete the physical reasoning:</p>
+            <div style="margin-bottom:1rem; font-size:0.95rem; line-height: 1.8;">
+              1. The measured mass reading $m$ is 
+              <select id="f-gp1-m-select" style="padding:0.2rem 0.4rem;">
+                <option value="">-- Choose --</option>
+                <option value="larger">larger than actual (overestimated)</option>
+                <option value="smaller">smaller than actual (underestimated)</option>
+              </select>.<br>
+              2. Because $m$ is in the denominator ($c \propto \frac{1}{m}$), the calculated value of $c$ will be 
+              <select id="f-gp1-c-select" style="padding:0.2rem 0.4rem;">
+                <option value="">-- Choose --</option>
+                <option value="larger">larger</option>
+                <option value="smaller">smaller</option>
+              </select>.<br>
+              3. Therefore, the <strong>actual</strong> specific heat capacity is 
+              <select id="f-gp1-final-select" style="padding:0.2rem 0.4rem;">
+                <option value="">-- Choose --</option>
+                <option value="higher">higher than calculated</option>
+                <option value="lower">lower than calculated</option>
+              </select>.
+            </div>
+            <button class="action-btn" onclick="checkF_GP1_S34()">Verify Conclusion</button>
+            <div class="feedback" id="f-gp1-fb34"></div>
+          </div>
+        </div>
+
+        <button class="reset-btn" onclick="resetF_GP1()">↺ Reset Exercise</button>
+      </div>
+
+      <!-- Forward Guided Practice 2: Carol -->
+      <div class="card" id="card-f-gp2">
+        <span class="badge badge-forward">Guided Practice 2 (Interactive)</span>
+        <h2>Carol: Thermal Capacities of Container &amp; Heater</h2>
+        <p>Carol uses an immersion heater to heat a liquid of mass $0.4\text{ kg}$ ($c = 4200\text{ J kg}^{-1}\text{ }^\circ\text{C}^{-1}$). The electrical energy consumed is $10\ 000\text{ J}$.</p>
+
+        <!-- Part A -->
+        <div class="step-container" id="f-gp2-partA">
+          <div class="step-header">
+            <span>Part (a): Theoretical Temperature Rise $\Delta T$</span>
+            <span class="step-status status-active" id="f-gp2-partA-badge">Step Active</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Calculate expected $\Delta T = \frac{E}{mc}$ assuming only the liquid absorbs energy (give to 2 decimal places):</p>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span>$\Delta T \approx$</span>
+              <input type="number" step="0.01" id="f-gp2-ansA" class="input-calc" placeholder="e.g. 5.95" />
+              <span>$^\circ\text{C}$</span>
+              <button class="action-btn" onclick="checkF_GP2_A()">Check</button>
+            </div>
+            <div class="feedback" id="f-gp2-fbA"></div>
+          </div>
+        </div>
+
+        <!-- Part B -->
+        <div class="step-container locked" id="f-gp2-partB">
+          <div class="step-header">
+            <span>Part (b): Physical Heat Capacity Effect</span>
+            <span class="step-status status-locked" id="f-gp2-partB-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">In reality, the container and the heater itself are also heated up. Their heat capacities cannot be neglected. How is the actual $\Delta T$ of the liquid affected?</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="f-gp2-mc" value="1"> The actual temperature change will be <strong>smaller</strong>, because total heat capacity $C_{\text{total}} = mc + C_{\text{container}} + C_{\text{heater}}$ is larger.</label>
+              <label class="opt-label"><input type="radio" name="f-gp2-mc" value="2"> The actual temperature change will be <strong>larger</strong>, because the heater supplies extra heat capacity.</label>
+              <label class="opt-label"><input type="radio" name="f-gp2-mc" value="3"> Unaffected, because energy from joulemeter remains fixed at $10\ 000\text{ J}$.</label>
+            </div>
+            <button class="action-btn" onclick="checkF_GP2_B()">Verify Deduction</button>
+            <div class="feedback" id="f-gp2-fbB"></div>
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetF_GP2()">↺ Reset Exercise</button>
+      </div>
+
+      <!-- Forward Self Practice: Diana -->
+      <div class="card" id="card-f-sp">
+        <span class="badge badge-forward" style="background:#fed7aa; color:#9a3412;">Self Practice (Diana)</span>
+        <h2>Diana: Premature Temperature Measurement</h2>
+        <p>A metal block of mass $0.8\text{ kg}$ is heated up to $100\text{ }^\circ\text{C}$ and then submerged into cold water. Diana measures the water temperature, but <span class="highlight">she does not wait for a steady/maximum reading</span>.</p>
+
+        <!-- Step 1 -->
+        <div class="step-container" id="f-sp-s1">
+          <div class="step-header">
+            <span>Step 1: Effect on Water Temperature Rise $\Delta T_{\text{water}}$</span>
+            <span class="step-status status-active" id="f-sp-s1-badge">Step Active</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">(a) Because Diana records the reading prematurely before thermal equilibrium is attained:</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="f-sp-q1" value="smaller"> The recorded temperature rise of water is <strong>smaller</strong> than actual.</label>
+              <label class="opt-label"><input type="radio" name="f-sp-q1" value="larger"> The recorded temperature rise of water is <strong>larger</strong> than actual.</label>
+            </div>
+            <button class="action-btn" onclick="checkF_SP_1()">Check Step 1</button>
+            <div class="feedback" id="f-sp-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-container locked" id="f-sp-s2">
+          <div class="step-header">
+            <span>Step 2: Calculated Energy Lost by Block</span>
+            <span class="step-status status-locked" id="f-sp-s2-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">(b) Compare the calculated value of energy lost by the block ($E_{\text{lost}} = m_{\text{water}} c_{\text{water}} \Delta T_{\text{water}}$) with the actual energy lost:</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="f-sp-q2" value="smaller"> The calculated energy lost is <strong>smaller</strong> than actual.</label>
+              <label class="opt-label"><input type="radio" name="f-sp-q2" value="larger"> The calculated energy lost is <strong>larger</strong> than actual.</label>
+            </div>
+            <button class="action-btn" onclick="checkF_SP_2()">Check Step 2</button>
+            <div class="feedback" id="f-sp-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Step 3 & 4 -->
+        <div class="step-container locked" id="f-sp-s3">
+          <div class="step-header">
+            <span>Step 3 &amp; 4: Impact on Specific Heat Capacity of Metal</span>
+            <span class="step-status status-locked" id="f-sp-s3-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">(c) Using $c_{\text{metal}} = \frac{E_{\text{lost}}}{m_{\text{metal}} \cdot \Delta T_{\text{metal}}}$, how is the final estimated $c_{\text{metal}}$ affected?</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="f-sp-q3" value="smaller"> 
+                <strong>Smaller:</strong> Calculated $E_{\text{lost}}$ is smaller, and the recorded final temperature is lower (making measured $\Delta T_{\text{metal}} = 100^\circ\text{C} - T_{\text{final}}$ larger in the denominator). Both push calculated $c_{\text{metal}}$ lower.
+              </label>
+              <label class="opt-label"><input type="radio" name="f-sp-q3" value="larger"> 
+                <strong>Larger:</strong> The water temperature is lower, which makes the metal appear to hold more heat.
+              </label>
+            </div>
+            <button class="action-btn" onclick="checkF_SP_3()">Check Conclusion</button>
+            <div class="feedback" id="f-sp-fb3"></div>
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetF_SP()">↺ Reset Exercise</button>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: BACKWARD ERROR ANALYSIS -->
+    <!-- ============================================================== -->
+    <section id="tab-backward" class="tab-panel">
+
+      <!-- Backward Example: Peter -->
+      <div class="card">
+        <span class="badge badge-backward">Worked Example</span>
+        <h2>Peter: Overestimated Specific Heat Capacity of Water</h2>
+        <p>Peter heats $500\text{ g}$ of water using an immersion heater without lidding the cup. Energy transferred is $15\ 000\text{ J}$, and recorded $\Delta T = 6\text{ }^\circ\text{C}$. Peter switches off the heater and records the water temperature <em>immediately</em>.</p>
+        <div class="math-callout">
+          $$c = \frac{15\ 000}{(0.5)(6)} = 5000\text{ J kg}^{-1}\text{ }^\circ\text{C}^{-1} \quad (\text{Standard: } 4200\text{ J kg}^{-1}\text{ }^\circ\text{C}^{-1})$$
+        </div>
+        <p><strong>Deduction:</strong> The calculated value is <strong>larger</strong> than standard. Account for the difference.</p>
+
+        <div style="margin-top:1rem; background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid var(--border);">
+          <strong>Backward Deduction Protocol:</strong>
+          <p>• <strong>Step 1 &amp; 2:</strong> $c = \frac{E}{m \cdot \Delta T}$.</p>
+          <p>• <strong>Step 3:</strong> Calculated $c$ is <em>larger</em> if: measured $E$ is larger, measured $m$ is smaller, OR measured $\Delta T$ is smaller.</p>
+          <p>• <strong>Step 4: Factor evaluation:</strong></p>
+          <p>✓ <em>Cup not lidded:</em> Heat is lost to air $\implies$ heater must supply more energy for a given rise $\implies$ measured $E$ is larger $\implies c$ larger.</p>
+          <p>✓ <em>Recorded temperature immediately:</em> Convection not finished and heater still transferring residual heat $\implies$ measured $\Delta T$ is smaller than maximum $\implies c$ larger.</p>
+          <p>✗ <em>Heater left in when measuring mass:</em> Would make measured $m$ larger $\implies c$ smaller (rejected).</p>
+        </div>
+      </div>
+
+      <!-- Backward Guided Practice 1: Queenie -->
+      <div class="card" id="card-b-gp1">
+        <span class="badge badge-backward">Guided Practice 1 (Interactive)</span>
+        <h2>Queenie: Cold Liquid and Surrounding Heat</h2>
+        <p>Queenie heats $250\text{ g}$ of cold liquid using an $80\text{ W}$ heater for $90\text{ s}$. Surrounding room temperature is $30\text{ }^\circ\text{C}$. Initial temperature is $5\text{ }^\circ\text{C}$; final recorded temperature is $15\text{ }^\circ\text{C}$. Standard specific heat capacity is $3500\text{ J kg}^{-1}\text{ }^\circ\text{C}^{-1}$.</p>
+
+        <!-- Part A -->
+        <div class="step-container" id="b-gp1-partA">
+          <div class="step-header">
+            <span>Part (a): Calculate Estimated $c$</span>
+            <span class="step-status status-active" id="b-gp1-partA-badge">Step Active</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Compute $c = \frac{Pt}{m \Delta T}$ with $P = 80\text{ W}, t = 90\text{ s}, m = 0.25\text{ kg}, \Delta T = 15 - 5 = 10\text{ }^\circ\text{C}$:</p>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span>$c =$</span>
+              <input type="number" id="b-gp1-ansA" class="input-calc" placeholder="e.g. 2880" />
+              <span>$\text{J kg}^{-1}\text{ }^\circ\text{C}^{-1}$</span>
+              <button class="action-btn" onclick="checkB_GP1_A()">Check Part (a)</button>
+            </div>
+            <div class="feedback" id="b-gp1-fbA"></div>
+          </div>
+        </div>
+
+        <!-- Part B: Step 3 Condition -->
+        <div class="step-container locked" id="b-gp1-s3">
+          <div class="step-header">
+            <span>Part (b) — Step 3: Sensitivity Conditions for Smaller $c$</span>
+            <span class="step-status status-locked" id="b-gp1-s3-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Since $2880 < 3500$, the calculated $c$ is <strong>smaller</strong> than standard. Based on $c = \frac{E}{m \Delta T}$, which set of measurement errors would make calculated $c$ smaller?</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="b-gp1-cond" value="correct"> Measured $E$ is smaller, OR measured $m$ is larger, OR measured $\Delta T$ is larger.</label>
+              <label class="opt-label"><input type="radio" name="b-gp1-cond" value="wrong"> Measured $E$ is larger, OR measured $m$ is smaller, OR measured $\Delta T$ is smaller.</label>
+            </div>
+            <button class="action-btn" onclick="checkB_GP1_S3()">Verify Conditions</button>
+            <div class="feedback" id="b-gp1-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Part B: Step 4 Factor Investigation -->
+        <div class="step-container locked" id="b-gp1-s4">
+          <div class="step-header">
+            <span>Part (b) — Step 4: Physical Factor Verification</span>
+            <span class="step-status status-locked" id="b-gp1-s4-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Why did Queenie's experiment result in an underestimated specific heat capacity?</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="b-gp1-factor" value="1"> 
+                Liquid temperature ($5\to 15\text{ }^\circ\text{C}$) was well below room temperature ($30\text{ }^\circ\text{C}$), so heat was absorbed from the surroundings. Thus measured electrical $E$ was smaller than total heat received, making calculated $c$ smaller.
+              </label>
+              <label class="opt-label"><input type="radio" name="b-gp1-factor" value="2"> 
+                Queenie did not record the highest temperature attained, making $\Delta T$ smaller.
+              </label>
+            </div>
+            <button class="action-btn" onclick="checkB_GP1_S4()">Confirm Conclusion</button>
+            <div class="feedback" id="b-gp1-fb4"></div>
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetB_GP1()">↺ Reset Exercise</button>
+      </div>
+
+      <!-- Backward Guided Practice 2: Ricky -->
+      <div class="card" id="card-b-gp2">
+        <span class="badge badge-backward">Guided Practice 2 (Interactive)</span>
+        <h2>Ricky: Underestimation of Heating Time</h2>
+        <p>Ricky heats an aluminium cylinder with a known heater power rating and known specific heat capacity. He intends to raise the temperature by $10\text{ }^\circ\text{C}$. He finds that the <span class="highlight">actual time is longer than his estimation</span> (meaning his estimated time was an <strong>underestimation</strong>).</p>
+
+        <!-- Step 1 & 2 -->
+        <div class="step-container" id="b-gp2-s12">
+          <div class="step-header">
+            <span>Step 1 &amp; 2: Formula for Estimated Time $t$</span>
+            <span class="step-status status-active" id="b-gp2-s12-badge">Step Active</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Rearrange $Pt = mc\Delta T$ to isolate the time $t$:</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="b-gp2-eq" value="correct"> $t = \frac{mc\Delta T}{P}$</label>
+              <label class="opt-label"><input type="radio" name="b-gp2-eq" value="wrong1"> $t = \frac{P \cdot \Delta T}{mc}$</label>
+              <label class="opt-label"><input type="radio" name="b-gp2-eq" value="wrong2"> $t = \frac{P}{mc\Delta T}$</label>
+            </div>
+            <button class="action-btn" onclick="checkB_GP2_S12()">Check Step 1 &amp; 2</button>
+            <div class="feedback" id="b-gp2-fb12"></div>
+          </div>
+        </div>
+
+        <!-- Step 3 & 4 -->
+        <div class="step-container locked" id="b-gp2-s34">
+          <div class="step-header">
+            <span>Step 3 &amp; 4: Evaluate the Two Flaws</span>
+            <span class="step-status status-locked" id="b-gp2-s34-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Ricky made two mistakes. Select ALL statements that correctly explain the underestimation of time:</p>
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+              <label class="opt-label">
+                <input type="checkbox" id="b-gp2-chk1"> 
+                <span><strong>Balance reads $-50\text{ g}$ when empty:</strong> Measured mass $m$ is smaller than actual. From $t = \frac{mc\Delta T}{P}$, a smaller $m$ directly causes an underestimated time $t$.</span>
+              </label>
+              <label class="opt-label">
+                <input type="checkbox" id="b-gp2-chk2"> 
+                <span><strong>Forgetting to add oil into holes:</strong> Air gaps cause poor thermal contact. Effective power transferred is smaller than rated power $P$. Using rated (larger) $P$ in the denominator produces an underestimated time $t$.</span>
+              </label>
+            </div>
+            <button class="action-btn" onclick="checkB_GP2_S34()">Verify Reasons</button>
+            <div class="feedback" id="b-gp2-fb34"></div>
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetB_GP2()">↺ Reset Exercise</button>
+      </div>
+
+      <!-- Backward Self Practice: Susan -->
+      <div class="card" id="card-b-sp">
+        <span class="badge badge-backward" style="background:#fed7aa; color:#9a3412;">Self Practice (Susan)</span>
+        <h2>Susan: Method of Mixtures with a Metal Cube</h2>
+        <p>Susan heats a metal cube to $100\text{ }^\circ\text{C}$ in boiling water, then transfers it into cold liquid. The specific heat capacity calculated is <span class="highlight">LARGER than the standard value</span>.</p>
+        
+        <!-- Step 1 & 2 -->
+        <div class="step-container" id="b-sp-s12">
+          <div class="step-header">
+            <span>Step 1, 2 &amp; 3: Algebraic Criteria for Larger $c_{\text{metal}}$</span>
+            <span class="step-status status-active" id="b-sp-s12-badge">Step Active</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">For $c_{\text{metal}} = \frac{E_{\text{transferred}}}{m_{\text{metal}} \cdot \Delta T_{\text{metal}}}$ to be <strong>larger</strong> than normal, which condition is valid?</p>
+            <div class="options-group">
+              <label class="opt-label"><input type="radio" name="b-sp-crit" value="correct"> The perceived $E_{\text{transferred}}$ must be larger, OR measured $m_{\text{metal}}$ smaller, OR recorded $\Delta T_{\text{metal}}$ smaller.</label>
+              <label class="opt-label"><input type="radio" name="b-sp-crit" value="wrong"> Measured $m_{\text{metal}}$ must be larger.</label>
+            </div>
+            <button class="action-btn" onclick="checkB_SP_S12()">Check Conditions</button>
+            <div class="feedback" id="b-sp-fb12"></div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-container locked" id="b-sp-s4">
+          <div class="step-header">
+            <span>Step 4: Identify the Only Valid Reason</span>
+            <span class="step-status status-locked" id="b-sp-s4-badge">Locked</span>
+          </div>
+          <div class="step-content">
+            <p class="question-prompt">Her teacher drafted 3 observations. Which observation accounts for the <strong>larger</strong> calculated value?</p>
+            <div class="options-group">
+              <label class="opt-label">
+                <input type="radio" name="b-sp-obs" value="1"> 
+                1. Balance reads $+10\text{ g}$ when empty $\implies$ Measured $m$ is larger $\implies c$ calculated is smaller (Incorrect).
+              </label>
+              <label class="opt-label">
+                <input type="radio" name="b-sp-obs" value="2"> 
+                2. Some boiling water was attached to the cube during transfer $\implies$ Extra heat delivered to liquid $\implies$ Calculated $E_{\text{transferred}}$ is larger $\implies c$ calculated is larger (Correct).
+              </label>
+              <label class="opt-label">
+                <input type="radio" name="b-sp-obs" value="3"> 
+                3. Beaker is not well insulated $\implies$ Heat lost to surroundings $\implies$ Measured temperature rise of liquid is smaller $\implies c$ calculated is smaller (Incorrect).
+              </label>
+            </div>
+            <button class="action-btn" onclick="checkB_SP_S4()">Verify Selected Reason</button>
+            <div class="feedback" id="b-sp-fb4"></div>
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetB_SP()">↺ Reset Exercise</button>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: SUMMARY RULES & CHEAT SHEET -->
+    <!-- ============================================================== -->
+    <section id="tab-summary" class="tab-panel">
+      <div class="card">
+        <h2>Specific Heat Capacity Error Reference Table</h2>
+        <p style="margin-bottom:1rem;">Given the formula $c = \frac{P \cdot t}{m \cdot \Delta T}$:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Experimental Defect</th>
+              <th>Parameter Affected</th>
+              <th>Effect on Parameter</th>
+              <th>Effect on Calculated $c$</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Heat lost to surroundings (no lid / uninsulated)</td>
+              <td>Energy $E$ supplied</td>
+              <td>Larger $E$ needed for same $\Delta T$</td>
+              <td><strong style="color:var(--danger)">Overestimated (Larger)</strong></td>
+            </tr>
+            <tr>
+              <td>Liquid colder than room (absorbs heat from room)</td>
+              <td>Energy $E$ (from heater)</td>
+              <td>Smaller heater $E$ needed for given $\Delta T$</td>
+              <td><strong style="color:var(--primary)">Underestimated (Smaller)</strong></td>
+            </tr>
+            <tr>
+              <td>Did not stir / recorded $T$ prematurely</td>
+              <td>$\Delta T$</td>
+              <td>Smaller recorded $\Delta T$</td>
+              <td><strong style="color:var(--danger)">Overestimated (Larger)</strong></td>
+            </tr>
+            <tr>
+              <td>Container mass included (not tared)</td>
+              <td>Mass $m$</td>
+              <td>Larger measured $m$</td>
+              <td><strong style="color:var(--primary)">Underestimated (Smaller)</strong></td>
+            </tr>
+            <tr>
+              <td>Balance reads negative offset (e.g. $-50\text{ g}$)</td>
+              <td>Mass $m$</td>
+              <td>Smaller measured $m$</td>
+              <td><strong style="color:var(--danger)">Overestimated (Larger)</strong></td>
+            </tr>
+            <tr>
+              <td>Hot water droplets transferred with solid</td>
+              <td>Energy transferred</td>
+              <td>Larger heat received by water</td>
+              <td><strong style="color:var(--danger)">Overestimated (Larger)</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SCRIPT LOGIC FOR STEP-BY-STEP PROGRESSION & MATHJAX RE-RENDERING -->
+  <script>
+    // Tab Switching
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      triggerMathJax();
+    }
+
+    // Helper to safely trigger MathJax typesetting on dynamic changes
+    function triggerMathJax() {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    }
+
+    // --- Forward Guided Practice 1 (Bob) ---
+    function checkF_GP1_A() {
+      const val = parseFloat(document.getElementById('f-gp1-ansA').value);
+      const fb = document.getElementById('f-gp1-fbA');
+      if (Math.abs(val - 2400) < 5) {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct! $E = Pt = 200 \\times 30 = 6000\\text{ J}$, so $c = \\frac{6000}{(0.5)(5)} = 2400\\text{ J kg}^{-1}\\text{ }^\\circ\\text{C}^{-1}$. Step 1 & 2 unlocked below.";
+        unlockStep('f-gp1-s12', 'f-gp1-s12-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Not quite. Use $E = Pt = (200)(30) = 6000\\text{ J}$ and divide by $(0.5)(5)$. Answer should be 2400.";
+      }
+      triggerMathJax();
+    }
+
+    function checkF_GP1_S12() {
+      const selected = document.querySelector('input[name="f-gp1-eq"]:checked');
+      const fb = document.getElementById('f-gp1-fb12');
+      if (selected && selected.value === "2") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct! $c = \\frac{Pt}{m \\cdot \\Delta T}$. Step 3 & 4 unlocked below.";
+        unlockStep('f-gp1-s34', 'f-gp1-s34-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Remember that $Pt = mc\\Delta T$. Isolating $c$ yields $c = \\frac{Pt}{m\\Delta T}$.";
+      }
+      triggerMathJax();
+    }
+
+    function checkF_GP1_S34() {
+      const mSel = document.getElementById('f-gp1-m-select').value;
+      const cSel = document.getElementById('f-gp1-c-select').value;
+      const finalSel = document.getElementById('f-gp1-final-select').value;
+      const fb = document.getElementById('f-gp1-fb34');
+
+      if (mSel === "larger" && cSel === "smaller" && finalSel === "higher") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Fully Correct! Because Bob included the container mass, measured $m$ was larger. Since $m$ is in the denominator, the calculated $c$ is smaller (underestimated). Hence, the <strong>actual</strong> specific heat capacity is higher than calculated.";
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Check your deduction: If the container is included, is mass larger or smaller? Since $c \\propto \\frac{1}{m}$, what happens to $c$?";
+      }
+      triggerMathJax();
+    }
+
+    function resetF_GP1() {
+      document.getElementById('f-gp1-ansA').value = "";
+      document.getElementById('f-gp1-fbA').className = "feedback";
+      document.getElementById('f-gp1-fb12').className = "feedback";
+      document.getElementById('f-gp1-fb34').className = "feedback";
+      lockStep('f-gp1-s12', 'f-gp1-s12-badge');
+      lockStep('f-gp1-s34', 'f-gp1-s34-badge');
+    }
+
+    // --- Forward Guided Practice 2 (Carol) ---
+    function checkF_GP2_A() {
+      const val = parseFloat(document.getElementById('f-gp2-ansA').value);
+      const fb = document.getElementById('f-gp2-fbA');
+      if (Math.abs(val - 5.95) <= 0.05) {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct! $\\Delta T = \\frac{10000}{(0.4)(4200)} = \\frac{10000}{1680} \\approx 5.95\\text{ }^\\circ\\text{C}$. Part (b) unlocked.";
+        unlockStep('f-gp2-partB', 'f-gp2-partB-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Recheck the math: $\\frac{10000}{0.4 \\times 4200} = \\frac{10000}{1680} \\approx 5.95$.";
+      }
+      triggerMathJax();
+    }
+
+    function checkF_GP2_B() {
+      const selected = document.querySelector('input[name="f-gp2-mc"]:checked');
+      const fb = document.getElementById('f-gp2-fbB');
+      if (selected && selected.value === "1") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct! In reality, $E = C_{\\text{total}}\\Delta T$. Since $C_{\\text{total}} = mc + C_{\\text{container}} + C_{\\text{heater}} > mc$, the actual temperature rise $\\Delta T$ must be <strong>smaller</strong>.";
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect. The heater and container require a portion of the $10\\ 000\\text{ J}$, leaving less thermal energy available for heating the liquid.";
+      }
+      triggerMathJax();
+    }
+
+    function resetF_GP2() {
+      document.getElementById('f-gp2-ansA').value = "";
+      document.getElementById('f-gp2-fbA').className = "feedback";
+      document.getElementById('f-gp2-fbB').className = "feedback";
+      lockStep('f-gp2-partB', 'f-gp2-partB-badge');
+    }
+
+    // --- Forward Self Practice (Diana) ---
+    function checkF_SP_1() {
+      const sel = document.querySelector('input[name="f-sp-q1"]:checked');
+      const fb = document.getElementById('f-sp-fb1');
+      if (sel && sel.value === "smaller") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct: Because she does not wait for thermal equilibrium, the reading is taken while the water is still warming up. Step 2 unlocked.";
+        unlockStep('f-sp-s2', 'f-sp-s2-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect. The water has not reached its peak temperature yet.";
+      }
+      triggerMathJax();
+    }
+
+    function checkF_SP_2() {
+      const sel = document.querySelector('input[name="f-sp-q2"]:checked');
+      const fb = document.getElementById('f-sp-fb2');
+      if (sel && sel.value === "smaller") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct: Since calculated energy lost = $m_w c_w \\Delta T_w$, a smaller measured $\\Delta T_w$ yields a smaller calculated energy lost. Step 3 unlocked.";
+        unlockStep('f-sp-s3', 'f-sp-s3-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect. Heat lost by the block is calculated from heat gained by water.";
+      }
+      triggerMathJax();
+    }
+
+    function checkF_SP_3() {
+      const sel = document.querySelector('input[name="f-sp-q3"]:checked');
+      const fb = document.getElementById('f-sp-fb3');
+      if (sel && sel.value === "smaller") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Excellent! In $c = \\frac{E}{m \\Delta T_{\\text{metal}}}$, the numerator $E$ is smaller, and the denominator term $\\Delta T_{\\text{metal}} = 100 - T_{\\text{final}}$ is larger because $T_{\\text{final}}$ was read too low. Both make calculated $c$ smaller.";
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect. Inspect $c = \\frac{E}{m \\Delta T_{\\text{metal}}}$.";
+      }
+      triggerMathJax();
+    }
+
+    function resetF_SP() {
+      document.getElementById('f-sp-fb1').className = "feedback";
+      document.getElementById('f-sp-fb2').className = "feedback";
+      document.getElementById('f-sp-fb3').className = "feedback";
+      lockStep('f-sp-s2', 'f-sp-s2-badge');
+      lockStep('f-sp-s3', 'f-sp-s3-badge');
+    }
+
+    // --- Backward Guided Practice 1 (Queenie) ---
+    function checkB_GP1_A() {
+      const val = parseFloat(document.getElementById('b-gp1-ansA').value);
+      const fb = document.getElementById('b-gp1-fbA');
+      if (Math.abs(val - 2880) < 5) {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct! $E = 80 \\times 90 = 7200\\text{ J}$; $c = \\frac{7200}{(0.25)(10)} = 2880\\text{ J kg}^{-1}\\text{ }^\\circ\\text{C}^{-1}$. Step 3 unlocked.";
+        unlockStep('b-gp1-s3', 'b-gp1-s3-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect: $E = Pt = 7200\\text{ J}$. $\\Delta T = 15 - 5 = 10\\text{ }^\\circ\\text{C}$. $c = \\frac{7200}{0.25 \\times 10} = 2880$.";
+      }
+      triggerMathJax();
+    }
+
+    function checkB_GP1_S3() {
+      const sel = document.querySelector('input[name="b-gp1-cond"]:checked');
+      const fb = document.getElementById('b-gp1-fb3');
+      if (sel && sel.value === "correct") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct! For $c = \\frac{E}{m \\Delta T}$ to become smaller, numerator $E$ must be smaller, or denominators $m, \\Delta T$ must be larger. Step 4 unlocked.";
+        unlockStep('b-gp1-s4', 'b-gp1-s4-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Remember: Numerators have a direct relation, and denominators have an inverse relation.";
+      }
+      triggerMathJax();
+    }
+
+    function checkB_GP1_S4() {
+      const sel = document.querySelector('input[name="b-gp1-factor"]:checked');
+      const fb = document.getElementById('b-gp1-fb4');
+      if (sel && sel.value === "1") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct conclusion! Because the liquid was cold ($5\\to 15\\text{ }^\\circ\\text{C}$) compared to room temperature ($30\\text{ }^\\circ\\text{C}$), heat flowed from the room into the liquid. This means the measured heater energy $E$ was lower than total heat absorbed, explaining why calculated $c$ was smaller.";
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ If she did not record highest $T$, $\\Delta T$ would be smaller, which would make $c$ LARGER, contradicting our result.";
+      }
+      triggerMathJax();
+    }
+
+    function resetB_GP1() {
+      document.getElementById('b-gp1-ansA').value = "";
+      document.getElementById('b-gp1-fbA').className = "feedback";
+      document.getElementById('b-gp1-fb3').className = "feedback";
+      document.getElementById('b-gp1-fb4').className = "feedback";
+      lockStep('b-gp1-s3', 'b-gp1-s3-badge');
+      lockStep('b-gp1-s4', 'b-gp1-s4-badge');
+    }
+
+    // --- Backward Guided Practice 2 (Ricky) ---
+    function checkB_GP2_S12() {
+      const sel = document.querySelector('input[name="b-gp2-eq"]:checked');
+      const fb = document.getElementById('b-gp2-fb12');
+      if (sel && sel.value === "correct") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct: $t = \\frac{mc\\Delta T}{P}$. Step 3 & 4 unlocked.";
+        unlockStep('b-gp2-s34', 'b-gp2-s34-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect rearrangement. From $Pt = mc\\Delta T$, dividing by $P$ gives $t = \\frac{mc\\Delta T}{P}$.";
+      }
+      triggerMathJax();
+    }
+
+    function checkB_GP2_S34() {
+      const chk1 = document.getElementById('b-gp2-chk1').checked;
+      const chk2 = document.getElementById('b-gp2-chk2').checked;
+      const fb = document.getElementById('b-gp2-fb34');
+      if (chk1 && chk2) {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Excellent! BOTH factors contribute to underestimating the time: 1) Negative zero reading makes measured $m$ smaller $\\implies t$ smaller. 2) Lack of oil causes thermal resistance, meaning effective $P$ received was smaller than the rated $P$ substituted in the denominator.";
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Note: Examine both options carefully. Could both flaws be responsible for the underestimation?";
+      }
+      triggerMathJax();
+    }
+
+    function resetB_GP2() {
+      document.getElementById('b-gp2-fb12').className = "feedback";
+      document.getElementById('b-gp2-fb34').className = "feedback";
+      document.getElementById('b-gp2-chk1').checked = false;
+      document.getElementById('b-gp2-chk2').checked = false;
+      lockStep('b-gp2-s34', 'b-gp2-s34-badge');
+    }
+
+    // --- Backward Self Practice (Susan) ---
+    function checkB_SP_S12() {
+      const sel = document.querySelector('input[name="b-sp-crit"]:checked');
+      const fb = document.getElementById('b-sp-fb12');
+      if (sel && sel.value === "correct") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Correct criteria identified! Step 4 unlocked.";
+        unlockStep('b-sp-s4', 'b-sp-s4-badge');
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect: A larger measured mass in denominator would decrease calculated $c$.";
+      }
+      triggerMathJax();
+    }
+
+    function checkB_SP_S4() {
+      const sel = document.querySelector('input[name="b-sp-obs"]:checked');
+      const fb = document.getElementById('b-sp-fb4');
+      if (sel && sel.value === "2") {
+        fb.className = "feedback correct";
+        fb.innerHTML = "✓ Perfectly reasoned! Hot water clinging to the metal cube carries significant extra thermal energy into the beaker. This makes the apparent heat transferred $E$ larger, directly causing the calculated $c_{\\text{metal}}$ to be larger than standard.";
+      } else {
+        fb.className = "feedback wrong";
+        fb.innerHTML = "✗ Incorrect. Test that factor in $c = \\frac{E}{m\\Delta T}$: Does it make calculated $c$ larger or smaller?";
+      }
+      triggerMathJax();
+    }
+
+    function resetB_SP() {
+      document.getElementById('b-sp-fb12').className = "feedback";
+      document.getElementById('b-sp-fb4').className = "feedback";
+      lockStep('b-sp-s4', 'b-sp-s4-badge');
+    }
+
+    // Helper step unlock/lock routines
+    function unlockStep(containerId, badgeId) {
+      const el = document.getElementById(containerId);
+      const b = document.getElementById(badgeId);
+      el.classList.remove('locked');
+      b.className = "step-status status-active";
+      b.textContent = "Step Active";
+    }
+
+    function lockStep(containerId, badgeId) {
+      const el = document.getElementById(containerId);
+      const b = document.getElementById(badgeId);
+      el.classList.add('locked');
+      b.className = "step-status status-locked";
+      b.textContent = "Locked";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experiment 2.2: Specific Heat Capacity of Aluminium</title>
+
+  <!-- MathJax for rendering physics equations and mathematical notation -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --accent: #ea580c;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warn: #d97706;
+      --purple: #7c3aed;
+      --metal: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, #0369a1);
+      color: white;
+      padding: 20px 26px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.65rem;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.92;
+      font-size: 0.92rem;
+    }
+
+    /* Main Navigation Tabs */
+    .main-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #e2e8f0;
+      padding: 6px;
+      border-radius: 10px;
+    }
+
+    .nav-tab-btn {
+      flex: 1;
+      min-width: 160px;
+      background: transparent;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.65);
+      color: #0f172a;
+    }
+
+    .nav-tab-btn.active {
+      background: #ffffff;
+      color: var(--primary-dark);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 10px;
+      color: #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Simulation Stage */
+    .lab-stage {
+      position: relative;
+      width: 100%;
+      height: 350px;
+      background: linear-gradient(to bottom, #f1f5f9 68%, #cbd5e1 68%);
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Setup Checklist Toggles */
+    .rig-toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .rig-toggles label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    /* Dashboards */
+    .dashboards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .metric-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .metric-title {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .metric-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-val.energy { color: #d97706; }
+    .metric-val.temp { color: #dc2626; }
+
+    /* Controls */
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    /* Parameters */
+    .param-group {
+      margin-bottom: 12px;
+    }
+
+    .param-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    /* Calculation Table */
+    .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.88rem;
+    }
+
+    .calc-table td, .calc-table th {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+    }
+
+    .calc-table th {
+      background: #f8fafc;
+      text-align: left;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: bold;
+    }
+    .badge-on { background: #fee2e2; color: #b91c1c; }
+    .badge-off { background: #e2e8f0; color: #475569; }
+
+    .formula-box {
+      background: #f0f9ff;
+      border-left: 4px solid var(--primary);
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.92rem;
+    }
+
+    /* Error Studio Styles */
+    .error-studio-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .error-studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .equation-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+    }
+
+    .equation-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-around;
+      gap: 12px;
+      font-size: 0.96rem;
+    }
+
+    .equation-item {
+      text-align: center;
+      padding: 8px 14px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .live-fraction-box {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      text-align: center;
+      margin: 12px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .slider-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .slider-box-title {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .energy-bar-container {
+      margin: 14px 0;
+    }
+
+    .energy-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #e2e8f0;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    .energy-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      transition: width 0.25s ease;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .seg-metal { background: #0284c7; }
+    .seg-contact { background: #f59e0b; }
+    .seg-loss { background: #ef4444; }
+
+    .energy-legend {
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.78rem;
+      margin-top: 6px;
+      color: #64748b;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .error-metric-display {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+      transition: 0.2s;
+    }
+
+    .error-metric-display.high {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .error-metric-display.low {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    /* Precautions Cards */
+    .precaution-card {
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #0284c7;
+      background: #fafaf9;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .precaution-card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      background: #ffffff;
+    }
+
+    .precaution-card.danger {
+      border-left-color: #ef4444;
+    }
+
+    .precaution-card.warn {
+      border-left-color: #f59e0b;
+    }
+
+    .precaution-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .precaution-reason {
+      font-size: 0.86rem;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .tag-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tag-accuracy {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Q&A Accordion */
+    .qa-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .qa-header {
+      background: #f8fafc;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .qa-header:hover {
+      background: #f1f5f9;
+    }
+
+    .qa-body {
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      display: none;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+    }
+
+    .qa-body.show {
+      display: block;
+    }
+
+    canvas {
+      width: 100%;
+      height: 135px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    /* Photo Upload */
+    .photo-panel {
+      width: 100%;
+      min-height: 400px;
+      background: #fafafa;
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .photo-panel img {
+      max-width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Experiment: Specific Heat Capacity of Aluminium</h1>
+    <p><strong>Purpose:</strong> Determine specific heat capacity $c$ of an aluminium cylindrical block &nbsp;|&nbsp; Standard Reference: $900\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$</p>
+  </header>
+
+  <!-- Top-Level Main Navigation -->
+  <nav class="main-nav">
+    <button class="nav-tab-btn active" onclick="showMainTab('tabLab', this)">
+      <span>🧪</span> Virtual Lab & Rig
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabErrorStudio', this)">
+      <span>📊</span> Error Analysis Studio
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabPrecautions', this)">
+      <span>⚠️</span> Precautions & Reasons
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabDiscussion', this)">
+      <span>📝</span> Discussion Questions
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabPhoto', this)">
+      <span>📷</span> Lab Photo / Worksheet
+    </button>
+  </nav>
+
+  <!-- ==================== TAB 1: VIRTUAL LAB ==================== -->
+  <div id="tabLab" class="tab-content active">
+    <div class="grid-2">
+      <!-- Left Column: Simulation Rig -->
+      <div class="card">
+        <h2>
+          <span>Experimental Apparatus</span>
+          <span id="heaterStatus" class="badge badge-off">HEATER OFF</span>
+        </h2>
+
+        <div class="lab-stage">
+          <svg viewBox="0 0 540 330">
+            <defs>
+              <!-- Metallic Gradients for Aluminium Block -->
+              <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#94a3b8" />
+                <stop offset="25%" stop-color="#e2e8f0" />
+                <stop offset="60%" stop-color="#cbd5e1" />
+                <stop offset="100%" stop-color="#64748b" />
+              </linearGradient>
+              <linearGradient id="topCapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f1f5f9" />
+                <stop offset="100%" stop-color="#cbd5e1" />
+              </linearGradient>
+              <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#b45309" />
+                <stop offset="50%" stop-color="#d97706" />
+                <stop offset="100%" stop-color="#92400e" />
+              </linearGradient>
+            </defs>
+
+            <!-- Tabletop shadow -->
+            <ellipse cx="270" cy="285" rx="250" ry="18" fill="#94a3b8" opacity="0.35"/>
+
+            <!-- 1. Low Voltage Power Supply (Left) -->
+            <rect x="15" y="140" width="135" height="120" rx="6" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+            <rect x="25" y="152" width="60" height="42" rx="3" fill="#ffffff" stroke="#94a3b8" stroke-width="1"/>
+            <!-- Meter dial on power supply -->
+            <path d="M 32 185 A 22 22 0 0 1 78 185" fill="none" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="55" y1="185" x2="66" y2="168" stroke="#dc2626" stroke-width="1.5"/>
+            <circle cx="115" cy="172" r="14" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+            <text x="82" y="210" fill="#78350f" font-size="8.5" text-anchor="middle" font-weight="bold">LOW VOLTAGE POWER</text>
+            <circle cx="45" cy="235" r="7" fill="#dc2626"/>
+            <circle cx="110" cy="235" r="7" fill="#1e293b"/>
+
+            <!-- 2. Joulemeter (Center) -->
+            <rect x="175" y="125" width="125" height="135" rx="6" fill="#334155" stroke="#1e293b" stroke-width="2"/>
+            <rect x="185" y="138" width="105" height="48" rx="4" fill="#0f172a"/>
+            <text id="lcdJoules" x="237" y="169" fill="#38bdf8" font-family="Courier, monospace" font-size="16" text-anchor="middle" font-weight="bold">00000 J</text>
+            <text x="237" y="150" fill="#94a3b8" font-size="8.5" text-anchor="middle">JOULEMETER</text>
+            <!-- Terminals on joulemeter -->
+            <circle cx="195" cy="215" r="6" fill="#dc2626"/>
+            <circle cx="215" cy="215" r="6" fill="#1e293b"/>
+            <circle cx="260" cy="215" r="6" fill="#dc2626"/>
+            <circle cx="280" cy="215" r="6" fill="#1e293b"/>
+            <text id="lcdPowerIndicator" x="237" y="246" fill="#cbd5e1" font-size="9" text-anchor="middle">50 W ELEMENT</text>
+
+            <!-- 3. Wooden Insulating Block (Under Aluminium Block) -->
+            <g id="woodBlockGroup">
+              <path d="M 370 262 L 495 262 L 485 285 L 360 285 Z" fill="url(#woodGrad)" stroke="#78350f" stroke-width="1.5"/>
+              <rect x="360" y="275" width="125" height="12" rx="2" fill="#78350f" opacity="0.4"/>
+              <text x="427" y="280" fill="#fef3c7" font-size="7.5" font-weight="bold" text-anchor="middle">WOODEN BLOCK</text>
+            </g>
+
+            <!-- Cotton wool wrap (conditional display) -->
+            <g id="cottonWoolGroup" style="display: none;">
+              <rect x="375" y="125" width="105" height="138" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="4,4" stroke-width="3" opacity="0.92"/>
+              <text x="427" y="200" fill="#64748b" font-size="9" font-weight="bold" text-anchor="middle">COTTON WOOL</text>
+            </g>
+
+            <!-- 4. Cylindrical Aluminium Block -->
+            <g id="alBlockGroup">
+              <!-- Cylinder Body -->
+              <path d="M 380 135 L 380 260 C 380 274, 475 274, 475 260 L 475 135 Z" fill="url(#metalGrad)" stroke="#475569" stroke-width="1.5"/>
+              <!-- Top Cap Ellipse -->
+              <ellipse cx="427.5" cy="135" rx="47.5" ry="12" fill="url(#topCapGrad)" stroke="#64748b" stroke-width="1.5"/>
+
+              <!-- Borehole 1: Heater Bore -->
+              <ellipse cx="410" cy="135" rx="9" ry="3.5" fill="#334155"/>
+              <!-- Borehole 2: Thermometer Bore -->
+              <ellipse cx="445" cy="135" rx="7" ry="2.8" fill="#334155"/>
+
+              <!-- Oil Drops Indicator -->
+              <g id="oilLayerVisual" style="display: none;">
+                <ellipse cx="410" cy="135" rx="8" ry="3" fill="#f59e0b" opacity="0.85"/>
+                <ellipse cx="445" cy="135" rx="6.5" ry="2.4" fill="#f59e0b" opacity="0.85"/>
+              </g>
+
+              <text x="428" y="220" fill="#334155" font-size="9.5" font-weight="bold" text-anchor="middle" letter-spacing="1">ALUMINIUM</text>
+            </g>
+
+            <!-- 5. Immersion Heater Inserted into Hole 1 -->
+            <g id="heaterGroup">
+              <rect x="406" y="80" width="8" height="60" rx="2" fill="#475569" stroke="#1e293b" stroke-width="1"/>
+              <!-- Heater rod inside block -->
+              <rect id="heaterElementInside" x="406.5" y="140" width="7" height="100" rx="2" fill="#64748b" stroke="#334155" stroke-width="1"/>
+              <!-- Heating coil glow effect -->
+              <line id="heaterGlow" x1="410" y1="145" x2="410" y2="235" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+            </g>
+
+            <!-- 6. Thermometer Inserted into Hole 2 -->
+            <rect x="442" y="45" width="6" height="195" rx="3" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2"/>
+            <rect id="thermoLiquid" x="443" y="170" width="4" height="65" rx="1.5" fill="#dc2626"/>
+            <circle cx="445" cy="235" r="5.5" fill="#dc2626"/>
+
+            <!-- 7. Connecting Wires -->
+            <!-- Power supply to joulemeter -->
+            <path d="M 45 235 Q 110 280 195 215" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 110 235 Q 160 290 215 215" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Joulemeter to Immersion Heater -->
+            <path d="M 260 215 Q 330 110 407 85" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 280 215 Q 345 125 413 85" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Rig Setup Checklist / Practical Precautions Applied -->
+        <div class="rig-toggles">
+          <label>
+            <input type="checkbox" id="checkOil" checked onchange="toggleOil(this.checked)" />
+            <span>Add Oil into Boreholes</span>
+          </label>
+          <label>
+            <input type="checkbox" id="checkCotton" checked onchange="toggleCotton(this.checked)" />
+            <span>Wrap Block with Cotton Wool</span>
+          </label>
+        </div>
+
+        <div class="dashboards">
+          <div class="metric-box">
+            <div class="metric-title">Joulemeter ($E$)</div>
+            <div class="metric-val energy" id="readoutEnergy">0 J</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-title">Block Temp ($T$)</div>
+            <div class="metric-val temp" id="readoutTemp">22.0 °C</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-title">Elapsed Time</div>
+            <div class="metric-val" id="readoutTime">00:00</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-danger" id="toggleHeaterBtn" onclick="toggleHeater()">Switch ON Heater</button>
+          <button class="btn btn-secondary" onclick="resetExperiment()">Reset Rig</button>
+        </div>
+
+        <div style="margin-top: 15px;">
+          <canvas id="tempChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Right Column: Settings & Data Log -->
+      <div class="card">
+        <h2>Workbench & Calculation</h2>
+
+        <div class="formula-box">
+          <strong>Calculation Formula:</strong><br />
+          $$c_{\text{Al}} = \frac{E_1 - E_0}{m\,(T_1 - T_0)} = \frac{\Delta E}{m\,\Delta T}$$
+        </div>
+
+        <!-- Mass Slider -->
+        <div class="param-group">
+          <label>
+            <span>Mass of Aluminium Block ($m$):</span>
+            <span id="massVal">1.000 kg</span>
+          </label>
+          <input type="range" id="massInput" min="0.5" max="2.0" value="1.0" step="0.05" oninput="updateMass(this.value)" />
+        </div>
+
+        <!-- Power Slider -->
+        <div class="param-group">
+          <label>
+            <span>Immersion Heater Power ($P$):</span>
+            <span id="powerVal" style="color: #ea580c;">50 W</span>
+          </label>
+          <input type="range" id="powerInput" min="30" max="120" value="50" step="5" oninput="updatePower(this.value)" />
+        </div>
+
+        <!-- Data Log Table -->
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Recorded Reading</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Initial Energy ($E_0$)</td>
+              <td id="cellE0">--</td>
+              <td rowspan="2">
+                <button class="btn btn-secondary" style="font-size:0.78rem; padding: 5px 8px;" onclick="recordInitial()">Record Initial</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Initial Temp ($T_0$)</td>
+              <td id="cellT0">--</td>
+            </tr>
+            <tr>
+              <td>Final Energy ($E_1$)</td>
+              <td id="cellE1">--</td>
+              <td rowspan="2">
+                <button class="btn btn-secondary" style="font-size:0.78rem; padding: 5px 8px;" onclick="recordFinal()">Record Highest</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Highest Temp ($T_1$)</td>
+              <td id="cellT1">--</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="calculateResult()">Calculate Specific Heat Capacity ($c$)</button>
+
+        <!-- Results Display -->
+        <div id="resultBox" style="margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; display: none;">
+          <h4 style="margin: 0 0 6px 0; font-size: 0.95rem;">Experimental Result:</h4>
+          <div style="font-size: 1.3rem; font-weight: bold; color: var(--primary);" id="resultC">-- J kg⁻¹ °C⁻¹</div>
+          <p style="font-size: 0.85rem; color: #475569; margin: 6px 0 0 0;" id="resultCompare"></p>
+        </div>
+
+        <!-- Step-by-Step Procedure Checklist -->
+        <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
+          <h4 style="margin: 0 0 8px 0; font-size: 0.88rem; color: #475569; text-transform: uppercase;">Standard Procedure:</h4>
+          <ol style="font-size: 0.82rem; color: #64748b; padding-left: 18px; margin: 0; line-height: 1.55;">
+            <li>Measure mass $m$ of the aluminium block using an electronic balance.</li>
+            <li>Add drops of oil into the two holes and insert heater & thermometer.</li>
+            <li>Connect heater to power supply via joulemeter.</li>
+            <li>Record initial temperature $T_0$ and initial joulemeter reading $E_0$.</li>
+            <li>Switch on heater for ~5–10 mins, then switch off.</li>
+            <li>Wait for the thermometer reading to stop rising and record highest temperature $T_1$ and final energy $E_1$.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: ERROR ANALYSIS STUDIO ==================== -->
+  <div id="tabErrorStudio" class="tab-content">
+    <div class="card" style="border-top: 4px solid var(--purple);">
+      <h2>
+        <span>Interactive Error Analysis Studio</span>
+        <span style="font-size: 0.85rem; font-weight: normal; color: #64748b;">Formula & Systematic Error Visualizer</span>
+      </h2>
+
+      <!-- Equation Breakdown Card -->
+      <div class="equation-card">
+        <h4 style="margin: 0 0 8px 0; color: #334155; font-size: 0.95rem;">1. Governing Conservation of Energy Equation:</h4>
+        <div class="equation-row">
+          <div class="equation-item">
+            <span style="font-size: 0.78rem; color: #64748b; display: block;">Experimental Formula:</span>
+            $$c_{\text{exp}} = \frac{\Delta E_{\text{electrical}}}{m_{\text{recorded}} \cdot \Delta T_{\text{measured}}}$$
+          </div>
+          <div class="equation-item">
+            <span style="font-size: 0.78rem; color: #64748b; display: block;">Actual Energy Destination:</span>
+            $$\Delta E_{\text{electrical}} = \underbrace{m \cdot c_{\text{Al}} \cdot \Delta T}_{\text{Absorbed by Al Block}} + \underbrace{Q_{\text{contact lag}}}_{\text{Air gaps (no oil)}} + \underbrace{Q_{\text{loss}}}_{\text{Escaped to air \& table}}$$
+          </div>
+        </div>
+
+        <!-- Live Fraction Substitution Box -->
+        <h4 style="margin: 14px 0 4px 0; color: #334155; font-size: 0.95rem;">2. Live Dynamic Mathematical Substitution:</h4>
+        <div class="live-fraction-box" id="liveEquationBox">
+          $$c_{\text{exp}} = \frac{15\,000\text{ J}}{1.000\text{ kg} \times 15.15^\circ\text{C}} = 990\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$$
+        </div>
+        <p style="font-size: 0.82rem; color: #64748b; margin: 4px 0 0 0; text-align: center;">
+          Adjust the sliders below to see how each real-world discrepancy directly shifts the values in the fraction!
+        </p>
+      </div>
+
+      <div class="error-studio-grid">
+        <!-- Sliders Column -->
+        <div>
+          <!-- Factor 1: Thermal contact (Oil presence) -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(a) Thermal Contact Quality (Oil in holes)</span>
+              <span id="errContactVal" style="color: #f59e0b;">Drops of Oil Added (Good contact)</span>
+            </div>
+            <input type="range" id="errContactSlider" min="0" max="2" value="2" step="1" oninput="updateErrorModel()" />
+            <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:2px;">
+              <span>No oil (Air gaps)</span>
+              <span>Partial oil</span>
+              <span>Well lubricated</span>
+            </div>
+            <small style="color: #64748b; font-size: 0.76rem; display:block; margin-top:4px;">Poor thermal contact traps heat inside the heater and creates delayed thermometer response, underestimating $\Delta T$.</small>
+          </div>
+
+          <!-- Factor 2: Heat Loss (Cotton wool & wooden block) -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(b) Heat Lost to Surroundings ($Q_{\text{loss}}$)</span>
+              <span id="errLossVal" style="color: #ef4444;">8 %</span>
+            </div>
+            <input type="range" id="errLossSlider" min="0" max="30" value="8" step="1" oninput="updateErrorModel()" />
+            <small style="color: #64748b; font-size: 0.76rem;">Heat dissipating into room air & table lowers measured temperature rise $\Delta T$ $\rightarrow$ calculated $c_{\text{exp}}$ increases.</small>
+          </div>
+
+          <!-- Factor 3: Mass balance error -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(c) Aluminium Mass Inaccuracy ($\Delta m$)</span>
+              <span id="errMassVal" style="color: #0284c7;">0 g (Accurate)</span>
+            </div>
+            <input type="range" id="errMassSlider" min="-150" max="150" value="0" step="10" oninput="updateErrorModel()" />
+            <small style="color: #64748b; font-size: 0.76rem;">Notice: <strong>Overestimating</strong> mass increases the denominator $\rightarrow$ <em>lowers</em> $c_{\text{exp}}$.</small>
+          </div>
+
+          <!-- Factor 4: Temperature Reading Timing -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(d) Temperature Reading Timing (Discussion Q)</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button id="btnPeakTrue" class="btn btn-primary" style="flex: 1; padding: 6px; font-size: 0.8rem;" onclick="setErrorTimingMode(true)">Highest Peak $T_1$ (Correct)</button>
+              <button id="btnPeakFalse" class="btn btn-secondary" style="flex: 1; padding: 6px; font-size: 0.8rem;" onclick="setErrorTimingMode(false)">At Switch-off (Premature)</button>
+            </div>
+            <small style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 4px;">At switch-off, significant residual thermal energy is still locked inside the heater core.</small>
+          </div>
+        </div>
+
+        <!-- Metrics & Visualization Column -->
+        <div>
+          <div id="errorMetricBox" class="error-metric-display high">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Calculated Specific Heat Capacity $c_{\text{exp}}$</div>
+            <div id="simulatedC" style="font-size: 2rem; font-weight: 800; color: #dc2626; margin: 4px 0;">990 J kg⁻¹ °C⁻¹</div>
+            <div id="simulatedDev" style="font-size: 0.92rem; font-weight: 600; color: #b91c1c;">+10.0% vs standard (900 J kg⁻¹ °C⁻¹)</div>
+          </div>
+
+          <!-- Energy Partition Bar -->
+          <div class="energy-bar-container">
+            <div style="font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Where does electrical energy ($\Delta E$) go?</div>
+            <div class="energy-bar">
+              <div id="barMetal" class="energy-segment seg-metal" style="width: 85%;">85% Aluminium</div>
+              <div id="barContact" class="energy-segment seg-contact" style="width: 7%;">7% Contact</div>
+              <div id="barLoss" class="energy-segment seg-loss" style="width: 8%;">8% Loss</div>
+            </div>
+            <div class="energy-legend">
+              <span><span class="legend-dot" style="background:#0284c7;"></span>Aluminium Block</span>
+              <span><span class="legend-dot" style="background:#f59e0b;"></span>Thermal Contact Lag</span>
+              <span><span class="legend-dot" style="background:#ef4444;"></span>Surroundings Loss</span>
+            </div>
+          </div>
+
+          <!-- Diagnosis Box -->
+          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.85rem; line-height: 1.45;">
+            <strong style="color: #0f172a;">Mathematical Diagnosis:</strong>
+            <div id="errorDynamicReason" style="margin-top: 6px; color: #475569;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: PRECAUTIONS & REASONS ==================== -->
+  <div id="tabPrecautions" class="tab-content">
+    <div class="card">
+      <h2>Experimental Precautions & Scientific Reasons</h2>
+
+      <!-- Precaution 1 -->
+      <div class="precaution-card">
+        <div class="precaution-title">
+          <span class="tag-accuracy">ACCURACY</span>
+          <span>1. Add a few drops of oil to the holes in the block for the thermometer and the heater</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> Air is an extremely poor thermal conductor. Air pockets between the heater/thermometer and the metal block create high thermal contact resistance. Adding oil displaces the trapped air and ensures <strong>good thermal contact</strong>, enabling fast and efficient heat conduction from the heater to the aluminium block and from the block to the thermometer bulb.
+        </div>
+      </div>
+
+      <!-- Precaution 2 -->
+      <div class="precaution-card danger">
+        <div class="precaution-title">
+          <span class="tag-danger">SAFETY & ACCURACY</span>
+          <span>2. Completely insert the heating part of the heater into the block before switching on</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> To <strong>prevent the heater from overheating</strong> and burning out. If the heating element is exposed to air, heat cannot conduct away quickly. Furthermore, heat transferred directly to ambient air escapes without warming the block, causing electrical energy $\Delta E$ to be recorded while failing to raise the block's temperature ($\Delta T$), artificially inflating $c_{\text{exp}}$.
+        </div>
+      </div>
+
+      <!-- Precaution 3 -->
+      <div class="precaution-card">
+        <div class="precaution-title">
+          <span class="tag-accuracy">ACCURACY</span>
+          <span>3. Place the aluminium block on a wooden block</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> To <strong>prevent heat loss to the table</strong> via thermal conduction. Laboratory benches (especially metal, slate, or composite tops) act as large heat sinks with high thermal conductivity. Wood is a good thermal insulator that thermally isolates the block from the bench surface.
+        </div>
+      </div>
+
+      <!-- Precaution 4 -->
+      <div class="precaution-card">
+        <div class="precaution-title">
+          <span class="tag-accuracy">ACCURACY</span>
+          <span>4. Wrap the aluminium block with cotton wool</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> To <strong>prevent heat loss to the surroundings</strong> via convection and radiation. Cotton wool traps tiny pockets of still air, providing an insulating barrier that minimizes thermal energy escaping from the hot block surfaces into room air.
+        </div>
+      </div>
+
+      <!-- Precaution 5 -->
+      <div class="precaution-card warn">
+        <div class="precaution-title">
+          <span class="tag-danger">SAFETY</span>
+          <span>5. Do not touch the immersion heater or block immediately after heating</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> Beware of the hot heater! The immersion heater and block attain temperatures capable of causing severe skin burns. Always allow the equipment to cool naturally before touching or disassembling the apparatus.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4: DISCUSSION QUESTIONS ==================== -->
+  <div id="tabDiscussion" class="tab-content">
+    <div class="card">
+      <h2>Discussion Questions & Standard HKDSE Solutions</h2>
+
+      <!-- Question 1 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>1. Why should we add some oil to the hole that contains the thermometer?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          Air is a poor conductor of heat. Without oil, the small air gap between the thermometer bulb and the metal wall creates large thermal contact resistance. Adding drops of oil expels the trapped air and ensures <strong>good thermal contact</strong> between the aluminium block and the thermometer, allowing the thermometer to respond rapidly and reach thermal equilibrium with the block.
+        </div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>2. Compare the experimental value with the standard value ($900\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$). Account for any difference between the two.</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          The experimental value is typically <strong>higher</strong> than the standard reference value ($900\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$).<br><br>
+          From the formula $c = \dfrac{\Delta E}{m \cdot \Delta T}$:
+          <ul>
+            <li><strong>Heat lost to the surroundings:</strong> Some supplied electrical energy $\Delta E$ escapes to the surrounding air via convection and radiation, and to the benchtop via conduction. As a result, the measured temperature rise $\Delta T$ is smaller than it would be in an ideal insulated system, leading to an <strong>overestimate</strong> of $c$.</li>
+            <li><strong>Heat absorbed by heater and thermometer:</strong> A portion of the energy is consumed in heating up the immersion heater casing and the glass thermometer rather than the aluminium block itself.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>3. Why does the thermometer reading continue to rise after the heater has been switched off?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          The heating element inside the heater is much hotter than the aluminium block when the power is turned off. <strong>Residual heat continues to conduct</strong> from the heating element into the aluminium block until they reach thermal equilibrium.<br><br>
+          <strong>Why record the highest temperature?</strong> The joulemeter recorded all the electrical energy delivered to the heating element. Recording the highest temperature ($T_1$) ensures that all this stored thermal energy transferred into the block is fully accounted for.
+        </div>
+      </div>
+
+      <!-- Question 4 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>4. Would overestimating the mass of the aluminium block explain why the experimental value is higher?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          <strong>No.</strong> In the formula $c = \dfrac{\Delta E}{m\,\Delta T}$, the mass $m$ appears in the denominator. If the mass $m$ is overestimated, the calculated value of $c$ will become <strong>smaller</strong>, not larger. Therefore, mass overestimation cannot explain an experimental value that is higher than standard.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 5: PHOTO UPLOAD ==================== -->
+  <div id="tabPhoto" class="tab-content">
+    <div class="card">
+      <h2>Upload Lab Worksheet or Physical Rig Photo</h2>
+      <div class="photo-panel">
+        <div id="uploadPlaceholder">
+          <p style="font-size: 1.15rem; color: #475569; margin-bottom: 6px; font-weight: 600;">Upload Textbook Page or Physical Rig Photo</p>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0;">Cross-reference textbook diagrams, teacher notes, or your handwritten laboratory findings side-by-side.</p>
+          <label class="file-input-wrapper" style="margin-top: 10px;">
+            <span class="btn btn-primary" style="display:inline-block; padding: 10px 20px;">Choose Photo File</span>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" />
+          </label>
+        </div>
+        <img id="uploadedImage" style="display: none;" alt="Uploaded Lab Reference" />
+        <button id="removePhotoBtn" class="btn btn-secondary" style="position: absolute; top: 12px; right: 12px; display: none; padding: 5px 12px; font-size: 0.8rem;" onclick="removePhoto()">Remove Photo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab Navigation
+  function showMainTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+  }
+
+  // Simulation Physical State
+  let massAl = 1.000;      // kg
+  let power = 50.0;        // Watts
+  let tempBlock = 22.0;    // °C
+  let tempHeater = 22.0;   // °C
+  let tempAmbient = 22.0;  // °C
+  let energyJoules = 0.0;
+  let isHeaterOn = false;
+  let elapsedSeconds = 0;
+
+  let hasOil = true;
+  let hasCotton = true;
+
+  // Recorded values
+  let recE0 = null;
+  let recT0 = null;
+  let recE1 = null;
+  let recT1 = null;
+
+  // Error Studio State
+  let errWaitPeak = true;
+
+  // Canvas Temperature-Time Graph
+  const chartCanvas = document.getElementById('tempChart');
+  const chartCtx = chartCanvas.getContext('2d');
+  let timeSeries = [];
+  let tempSeries = [];
+
+  function setupCanvas() {
+    chartCanvas.width = chartCanvas.clientWidth * window.devicePixelRatio;
+    chartCanvas.height = 135 * window.devicePixelRatio;
+    chartCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  setupCanvas();
+  window.addEventListener('resize', setupCanvas);
+
+  // Thermodynamics Constants for Aluminium
+  const dt = 0.1;
+  const cAlReal = 900;    // J/(kg K)
+  const cHeater = 22.0;   // J/K internal heat capacity of cartridge heater
+
+  // Physics Simulation Loop
+  setInterval(() => {
+    elapsedSeconds += dt;
+
+    if (isHeaterOn) {
+      energyJoules += power * dt;
+      tempHeater += (power * dt) / cHeater;
+    }
+
+    // Heat transfer cartridge -> aluminium block (governed by oil presence)
+    const kContact = hasOil ? 9.2 : 2.8; // W/K thermal conductance
+    const dQ_heater_to_block = kContact * (tempHeater - tempBlock) * dt;
+    tempHeater -= dQ_heater_to_block / cHeater;
+
+    // Ambient heat loss coefficient (reduced by cotton wool insulation)
+    const kLoss = hasCotton ? 0.045 : 0.14;
+    const dQ_loss = kLoss * (tempBlock - tempAmbient) * dt;
+
+    // Aluminium block temperature update
+    const totalBlockHeatCapacity = massAl * cAlReal;
+    tempBlock += (dQ_heater_to_block - dQ_loss) / totalBlockHeatCapacity;
+
+    if (tempBlock < tempAmbient) tempBlock = tempAmbient;
+
+    updateUI();
+
+    // Update graph every 1 second
+    if (Math.floor(elapsedSeconds / dt) % 10 === 0) {
+      timeSeries.push(Math.round(elapsedSeconds));
+      tempSeries.push(tempBlock);
+      if (timeSeries.length > 55) {
+        timeSeries.shift();
+        tempSeries.shift();
+      }
+      drawChart();
+    }
+  }, dt * 1000);
+
+  function updateUI() {
+    document.getElementById('readoutEnergy').innerText = `${Math.round(energyJoules)} J`;
+    document.getElementById('lcdJoules').textContent = `${String(Math.round(energyJoules)).padStart(5, '0')} J`;
+    document.getElementById('readoutTemp').innerText = `${tempBlock.toFixed(1)} °C`;
+
+    const mins = Math.floor(elapsedSeconds / 60);
+    const secs = Math.floor(elapsedSeconds % 60);
+    document.getElementById('readoutTime').innerText = 
+      `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    // Thermometer column SVG height
+    const thermoCol = document.getElementById('thermoLiquid');
+    const height = Math.min(130, Math.max(15, (tempBlock - 20) * 3.8 + 20));
+    thermoCol.setAttribute('height', height);
+    thermoCol.setAttribute('y', 235 - height);
+
+    // Heater element dynamic glow in SVG
+    const heaterGlow = document.getElementById('heaterGlow');
+    if (isHeaterOn || tempHeater > tempBlock + 3) {
+      const glowColor = power > 80 ? '#ff2a00' : '#f97316';
+      heaterGlow.setAttribute('stroke', glowColor);
+      heaterGlow.setAttribute('stroke-width', power > 80 ? '6' : '5');
+    } else {
+      heaterGlow.setAttribute('stroke', '#64748b');
+      heaterGlow.setAttribute('stroke-width', '4');
+    }
+  }
+
+  function toggleHeater() {
+    isHeaterOn = !isHeaterOn;
+    const btn = document.getElementById('toggleHeaterBtn');
+    const badge = document.getElementById('heaterStatus');
+
+    if (isHeaterOn) {
+      btn.innerText = "Switch OFF Heater";
+      btn.className = "btn btn-danger";
+      badge.innerText = "HEATER ON";
+      badge.className = "badge badge-on";
+    } else {
+      btn.innerText = "Switch ON Heater";
+      btn.className = "btn btn-primary";
+      badge.innerText = "HEATER OFF";
+      badge.className = "badge badge-off";
+    }
+  }
+
+  function toggleOil(val) {
+    hasOil = val;
+    document.getElementById('oilLayerVisual').style.display = hasOil ? 'block' : 'none';
+  }
+
+  function toggleCotton(val) {
+    hasCotton = val;
+    document.getElementById('cottonWoolGroup').style.display = hasCotton ? 'block' : 'none';
+  }
+
+  function updateMass(val) {
+    if (elapsedSeconds > 1 && energyJoules > 10) {
+      if (!confirm("Changing mass mid-experiment will invalidate current data. Reset?")) return;
+      resetExperiment();
+    }
+    massAl = parseFloat(val);
+    document.getElementById('massVal').innerText = `${massAl.toFixed(3)} kg`;
+  }
+
+  function updatePower(val) {
+    power = parseFloat(val);
+    document.getElementById('powerVal').innerText = `${power} W`;
+    document.getElementById('lcdPowerIndicator').textContent = `${power} W ELEMENT`;
+  }
+
+  function recordInitial() {
+    recE0 = energyJoules;
+    recT0 = tempBlock;
+    document.getElementById('cellE0').innerText = `${Math.round(recE0)} J`;
+    document.getElementById('cellT0').innerText = `${recT0.toFixed(1)} °C`;
+  }
+
+  function recordFinal() {
+    recE1 = energyJoules;
+    recT1 = tempBlock;
+    document.getElementById('cellE1').innerText = `${Math.round(recE1)} J`;
+    document.getElementById('cellT1').innerText = `${recT1.toFixed(1)} °C`;
+  }
+
+  function calculateResult() {
+    if (recE0 === null || recT0 === null || recE1 === null || recT1 === null) {
+      alert("Please record both Initial (E₀, T₀) and Highest (E₁, T₁) readings first!");
+      return;
+    }
+
+    const deltaE = recE1 - recE0;
+    const deltaT = recT1 - recT0;
+
+    if (deltaE <= 0 || deltaT <= 0) {
+      alert("Supplied electrical energy (ΔE) and temperature rise (ΔT) must be greater than 0.");
+      return;
+    }
+
+    const cExp = deltaE / (massAl * deltaT);
+    const box = document.getElementById('resultBox');
+    box.style.display = 'block';
+
+    document.getElementById('resultC').innerHTML = `${Math.round(cExp)} J&middot;kg<sup>-1</sup>&middot;&deg;C<sup>-1</sup>`;
+
+    const diffPercent = (((cExp - 900) / 900) * 100).toFixed(1);
+    let comparisonText = `Standard reference for aluminium is ~900 J·kg⁻¹·°C⁻¹. `;
+    if (cExp > 900) {
+      comparisonText += `Your calculated value is ${Math.abs(diffPercent)}% higher than reference. This aligns with standard laboratory results: inevitable thermal radiation to ambient air and heat absorbed by the thermometer/heater casing cause the recorded temperature rise (ΔT) to be slightly suppressed.`;
+    } else {
+      comparisonText += `Your result matches closely with standard theoretical values!`;
+    }
+    document.getElementById('resultCompare').innerText = comparisonText;
+
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+  }
+
+  function resetExperiment() {
+    isHeaterOn = false;
+    tempBlock = 22.0;
+    tempHeater = 22.0;
+    energyJoules = 0;
+    elapsedSeconds = 0;
+    recE0 = recE1 = recT0 = recT1 = null;
+
+    document.getElementById('cellE0').innerText = '--';
+    document.getElementById('cellT0').innerText = '--';
+    document.getElementById('cellE1').innerText = '--';
+    document.getElementById('cellT1').innerText = '--';
+    document.getElementById('resultBox').style.display = 'none';
+
+    document.getElementById('toggleHeaterBtn').innerText = "Switch ON Heater";
+    document.getElementById('toggleHeaterBtn').className = "btn btn-danger";
+    document.getElementById('heaterStatus').innerText = "HEATER OFF";
+    document.getElementById('heaterStatus').className = "badge badge-off";
+
+    timeSeries = [];
+    tempSeries = [];
+    drawChart();
+    updateUI();
+  }
+
+  function drawChart() {
+    const w = chartCanvas.clientWidth;
+    const h = 135;
+    chartCtx.clearRect(0, 0, w, h);
+
+    if (tempSeries.length < 2) return;
+
+    chartCtx.strokeStyle = "#cbd5e1";
+    chartCtx.lineWidth = 1;
+    chartCtx.beginPath();
+    chartCtx.moveTo(35, 10);
+    chartCtx.lineTo(35, h - 22);
+    chartCtx.lineTo(w - 10, h - 22);
+    chartCtx.stroke();
+
+    const minT = 20;
+    const maxT = Math.max(35, Math.ceil(Math.max(...tempSeries) + 2));
+
+    chartCtx.strokeStyle = "#dc2626";
+    chartCtx.lineWidth = 2;
+    chartCtx.beginPath();
+
+    for (let i = 0; i < tempSeries.length; i++) {
+      const x = 35 + (i / (tempSeries.length - 1)) * (w - 55);
+      const y = (h - 22) - ((tempSeries[i] - minT) / (maxT - minT)) * (h - 35);
+      if (i === 0) chartCtx.moveTo(x, y);
+      else chartCtx.lineTo(x, y);
+    }
+    chartCtx.stroke();
+
+    chartCtx.fillStyle = "#64748b";
+    chartCtx.font = "10px sans-serif";
+    chartCtx.fillText(`${maxT}°C`, 5, 18);
+    chartCtx.fillText(`${minT}°C`, 5, h - 22);
+    chartCtx.fillText("Temperature vs Time (Al Block)", w / 2 - 75, 14);
+  }
+
+  // --- ERROR ANALYSIS STUDIO LOGIC ---
+  function updateErrorModel() {
+    const contactLevel = parseInt(document.getElementById('errContactSlider').value);
+    const lossPct = parseFloat(document.getElementById('errLossSlider').value);
+    const massErrGrams = parseFloat(document.getElementById('errMassSlider').value);
+
+    // Label Displays
+    const contactLabels = ["No Oil (Severe Air Gaps)", "Partial Oil", "Drops of Oil Added (Good Contact)"];
+    document.getElementById('errContactVal').innerText = contactLabels[contactLevel];
+    document.getElementById('errLossVal').innerText = `${lossPct} %`;
+
+    let massText = `${massErrGrams > 0 ? '+' : ''}${massErrGrams} g`;
+    if (massErrGrams === 0) massText += " (Accurate)";
+    else if (massErrGrams > 0) massText += " (Overestimated)";
+    else massText += " (Underestimated)";
+    document.getElementById('errMassVal').innerText = massText;
+
+    // Mathematical Modelling
+    const trueMass = 1.000; // 1.0 kg standard Al block
+    const recordedMass = trueMass + (massErrGrams / 1000);
+    const cTrueAl = 900;    // Reference standard
+    const nominalDeltaE = 15000; // Joules supplied
+
+    // Partitioning
+    const lossFraction = lossPct / 100;
+    const contactLossPenalty = contactLevel === 0 ? 0.14 : (contactLevel === 1 ? 0.05 : 0.0);
+    const usefulEnergy = nominalDeltaE * (1 - lossFraction - contactLossPenalty);
+
+    let actualDeltaT = usefulEnergy / (trueMass * cTrueAl);
+
+    // Premature switch-off timing effect
+    if (!errWaitPeak) {
+      actualDeltaT *= 0.86; // 14% heat trapped in heater cartridge at switch-off
+    }
+
+    const simulatedC = nominalDeltaE / (recordedMass * actualDeltaT);
+    const deviation = ((simulatedC - cTrueAl) / cTrueAl) * 100;
+
+    // Update Live Equation Box
+    const eqBox = document.getElementById('liveEquationBox');
+    eqBox.innerHTML = `$$c_{\\text{exp}} = \\frac{${nominalDeltaE.toLocaleString()}\\text{ J}}{${recordedMass.toFixed(3)}\\text{ kg} \\times ${actualDeltaT.toFixed(2)}^\\circ\\text{C}} = \\mathbf{${Math.round(simulatedC)}\\text{ J kg}^{-1}{^\\circ\\text{C}}^{-1}}$$`;
+
+    // Render Metric Display
+    const metricBox = document.getElementById('errorMetricBox');
+    const cDisplay = document.getElementById('simulatedC');
+    const devDisplay = document.getElementById('simulatedDev');
+
+    cDisplay.innerText = `${Math.round(simulatedC)} J kg⁻¹ °C⁻¹`;
+
+    if (deviation >= 0) {
+      metricBox.className = "error-metric-display high";
+      cDisplay.style.color = "#dc2626";
+      devDisplay.style.color = "#b91c1c";
+      devDisplay.innerText = `+${deviation.toFixed(1)}% higher than standard (900 J kg⁻¹ °C⁻¹)`;
+    } else {
+      metricBox.className = "error-metric-display low";
+      cDisplay.style.color = "#0284c7";
+      devDisplay.style.color = "#0369a1";
+      devDisplay.innerText = `${deviation.toFixed(1)}% lower than standard (900 J kg⁻¹ °C⁻¹)`;
+    }
+
+    // Energy Partition Visualizer Bar
+    const energyAl = trueMass * cTrueAl * actualDeltaT;
+    const energyContact = nominalDeltaE * contactLossPenalty;
+    const energyLoss = nominalDeltaE * lossFraction;
+    const totalE = energyAl + energyContact + energyLoss;
+
+    const pctMetal = Math.max(5, Math.round((energyAl / totalE) * 100));
+    const pctLoss = Math.max(3, Math.round((energyLoss / totalE) * 100));
+    const pctContact = Math.max(0, 100 - pctMetal - pctLoss);
+
+    document.getElementById('barMetal').style.width = `${pctMetal}%`;
+    document.getElementById('barMetal').innerText = `${pctMetal}% Block`;
+
+    document.getElementById('barContact').style.width = `${pctContact}%`;
+    document.getElementById('barContact').innerText = pctContact > 4 ? `${pctContact}% Contact` : '';
+
+    document.getElementById('barLoss').style.width = `${pctLoss}%`;
+    document.getElementById('barLoss').innerText = `${pctLoss}% Loss`;
+
+    // Pedagogical Explanations
+    let reasons = [];
+    if (contactLevel < 2) {
+      reasons.push("<strong>Air Gaps in Holes (No Oil):</strong> Air is a poor thermal conductor. Air gaps slow down heat transfer and cause thermometer response lag, decreasing the observed $\\Delta T$ and pushing $c_{\\text{exp}}$ UP.");
+    }
+    if (lossPct > 5) {
+      reasons.push("<strong>Heat Loss:</strong> Radiation to room air and conduction into the bench table reduce the final $\\Delta T$. In $c = \\frac{\\Delta E}{m \\cdot \\Delta T}$, a smaller $\\Delta T$ in the denominator produces an artificially HIGH value for $c_{\\text{exp}}$.");
+    }
+    if (!errWaitPeak) {
+      reasons.push("<strong>Reading at Switch-off (Premature):</strong> Immediately switching off ignores residual thermal energy inside the heating cartridge, yielding an incomplete $\\Delta T$ and inflating calculated $c$.");
+    }
+    if (massErrGrams > 0) {
+      reasons.push("<strong>Overestimated Mass:</strong> A larger mass $m$ increases the denominator, which <em>lowers</em> $c_{\\text{exp}}$. Hence, mass overestimation CANNOT explain why experimental values exceed 900 J kg⁻¹ °C⁻¹.");
+    } else if (massErrGrams < 0) {
+      reasons.push("<strong>Underestimated Mass:</strong> A smaller denominator $m$ drives $c_{\\text{exp}}$ higher.");
+    }
+
+    if (reasons.length === 0) {
+      document.getElementById('errorDynamicReason').innerHTML = "All parameters configured under near-ideal conditions! The calculated value converges on the standard value of <strong>900 J kg⁻¹ °C⁻¹</strong>.";
+    } else {
+      document.getElementById('errorDynamicReason').innerHTML = reasons.join("<br><br>");
+    }
+
+    if (window.MathJax) {
+      MathJax.typesetPromise([eqBox, document.getElementById('errorDynamicReason')]);
+    }
+  }
+
+  function setErrorTimingMode(isPeak) {
+    errWaitPeak = isPeak;
+    const btnTrue = document.getElementById('btnPeakTrue');
+    const btnFalse = document.getElementById('btnPeakFalse');
+
+    if (isPeak) {
+      btnTrue.className = "btn btn-primary";
+      btnFalse.className = "btn btn-secondary";
+    } else {
+      btnTrue.className = "btn btn-secondary";
+      btnFalse.className = "btn btn-danger";
+    }
+    updateErrorModel();
+  }
+
+  // Photo Upload Handler
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const img = document.getElementById('uploadedImage');
+      img.src = evt.target.result;
+      img.style.display = 'block';
+      document.getElementById('uploadPlaceholder').style.display = 'none';
+      document.getElementById('removePhotoBtn').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removePhoto() {
+    const img = document.getElementById('uploadedImage');
+    img.src = '';
+    img.style.display = 'none';
+    document.getElementById('imageInput').value = '';
+    document.getElementById('uploadPlaceholder').style.display = 'block';
+    document.getElementById('removePhotoBtn').style.display = 'none';
+  }
+
+  // Discussion Accordion Toggle
+  function toggleQA(headerEl) {
+    const body = headerEl.nextElementSibling;
+    const symbol = headerEl.querySelector('span:last-child');
+    if (body.classList.contains('show')) {
+      body.classList.remove('show');
+      symbol.innerText = '+';
+    } else {
+      body.classList.add('show');
+      symbol.innerText = '−';
+    }
+  }
+
+  // Initial Calculation
+  updateErrorModel();
+</script>
+</body>
+</html>

@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experiment 2.1: Specific Heat Capacity of Water</title>
+
+  <!-- MathJax for rendering equations and symbols -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #0d47a1;
+      --accent: #ff5722;
+      --bg: #f4f7f9;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --border: #dcdfe6;
+      --success: #2e7d32;
+      --danger: #dc2626;
+      --warn: #d97706;
+      --purple: #7c3aed;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1565c0, #1976d2);
+      color: white;
+      padding: 18px 24px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.65rem;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.95;
+      font-size: 0.92rem;
+    }
+
+    /* Main Navigation Tabs */
+    .main-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #e2e8f0;
+      padding: 6px;
+      border-radius: 10px;
+    }
+
+    .nav-tab-btn {
+      flex: 1;
+      min-width: 160px;
+      background: transparent;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.6);
+      color: #1e293b;
+    }
+
+    .nav-tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      border-bottom: 2px solid #eef2f6;
+      padding-bottom: 10px;
+      color: var(--primary-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Simulation Viewport */
+    .lab-stage {
+      position: relative;
+      width: 100%;
+      height: 340px;
+      background: linear-gradient(to bottom, #fdfbf7 65%, #c8b7a6 65%);
+      border-radius: 8px;
+      border: 1px solid #dcdcdc;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Photo Panel */
+    .photo-panel {
+      width: 100%;
+      min-height: 400px;
+      background: #fafafa;
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .photo-panel img {
+      max-width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Dashboards */
+    .dashboards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .metric-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .metric-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .metric-val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-val.energy { color: #d97706; }
+    .metric-val.temp { color: #dc2626; }
+
+    /* Controls */
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-danger { background: var(--accent); color: white; }
+    .btn-danger:hover { background: #e64a19; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    /* Parameters */
+    .param-group {
+      margin-bottom: 12px;
+    }
+
+    .param-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    /* Calculation Table */
+    .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+
+    .calc-table td, .calc-table th {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+    }
+
+    .calc-table th {
+      background: #f8fafc;
+      text-align: left;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .badge-on { background: #fee2e2; color: #b91c1c; }
+    .badge-off { background: #e2e8f0; color: #475569; }
+
+    .formula-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 10px 14px;
+      margin-bottom: 15px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+    }
+
+    /* Error Studio Styles */
+    .error-studio-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .error-studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .equation-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+    }
+
+    .equation-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-around;
+      gap: 12px;
+      font-size: 1rem;
+    }
+
+    .equation-item {
+      text-align: center;
+      padding: 6px 12px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .live-fraction-box {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      text-align: center;
+      margin: 12px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .slider-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .slider-box-title {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .energy-bar-container {
+      margin: 14px 0;
+    }
+
+    .energy-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #e2e8f0;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .energy-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      transition: width 0.25s ease;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .seg-water { background: #3b82f6; }
+    .seg-cup { background: #f59e0b; }
+    .seg-loss { background: #ef4444; }
+
+    .energy-legend {
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.78rem;
+      margin-top: 6px;
+      color: #64748b;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .error-metric-display {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+      transition: 0.2s;
+    }
+
+    .error-metric-display.high {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .error-metric-display.low {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    /* Precautions Cards */
+    .precaution-card {
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #f59e0b;
+      background: #fafaf9;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .precaution-card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      background: #ffffff;
+    }
+
+    .precaution-card.danger {
+      border-left-color: #ef4444;
+    }
+
+    .precaution-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .precaution-reason {
+      font-size: 0.86rem;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .tag-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tag-accuracy {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Q&A Accordion */
+    .qa-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .qa-header {
+      background: #f8fafc;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .qa-header:hover {
+      background: #f1f5f9;
+    }
+
+    .qa-body {
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      display: none;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+    }
+
+    .qa-body.show {
+      display: block;
+    }
+
+    canvas {
+      width: 100%;
+      height: 135px;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Experiment 2.1: Specific Heat Capacity of Water</h1>
+    <p><strong>Goal:</strong> Determine specific heat capacity $c$ of water &nbsp;|&nbsp; Reference Standard: $4200\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$</p>
+  </header>
+
+  <!-- Top-Level Main Tabs -->
+  <nav class="main-nav">
+    <button class="nav-tab-btn active" onclick="showMainTab('tabLab', this)">
+      <span>🧪</span> Virtual Lab & Rig
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabErrorStudio', this)">
+      <span>📊</span> Error Analysis Studio
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabPrecautions', this)">
+      <span>⚠️</span> Precautions & Reasons
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabDiscussion', this)">
+      <span>📝</span> Discussion Questions
+    </button>
+    <button class="nav-tab-btn" onclick="showMainTab('tabPhoto', this)">
+      <span>📷</span> Lab Photo / Worksheet
+    </button>
+  </nav>
+
+  <!-- ==================== TAB 1: VIRTUAL LAB ==================== -->
+  <div id="tabLab" class="tab-content active">
+    <div class="grid-2">
+      <!-- Left Column: Simulation -->
+      <div class="card">
+        <h2>
+          <span>Experimental Apparatus</span>
+          <span id="heaterStatus" class="badge badge-off">HEATER OFF</span>
+        </h2>
+
+        <div class="lab-stage">
+          <svg viewBox="0 0 500 320">
+            <ellipse cx="250" cy="275" rx="200" ry="15" fill="#a89a8b" opacity="0.45"/>
+
+            <!-- Joulemeter & Power Unit -->
+            <rect x="25" y="105" width="135" height="160" rx="6" fill="#334155" stroke="#1e293b" stroke-width="2"/>
+            <rect x="35" y="120" width="115" height="60" rx="4" fill="#0f172a"/>
+            <text id="lcdJoules" x="92" y="158" fill="#38bdf8" font-family="Courier, monospace" font-size="19" text-anchor="middle" font-weight="bold">00000 J</text>
+            <text x="92" y="135" fill="#94a3b8" font-size="9" text-anchor="middle">JOULEMETER</text>
+            <circle cx="60" cy="230" r="10" fill="#dc2626"/>
+            <circle cx="120" cy="230" r="10" fill="#1e293b"/>
+            <text id="lcdPowerIndicator" x="92" y="255" fill="#cbd5e1" font-size="10" text-anchor="middle">50 W AC</text>
+
+            <!-- Polystyrene Cup Body -->
+            <path d="M 280 160 L 300 270 Q 350 280 400 270 L 420 160 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+            <ellipse cx="350" cy="160" rx="70" ry="12" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+
+            <!-- Water Inside Cup -->
+            <path id="waterLevel" d="M 290 195 L 302 265 Q 350 274 398 265 L 410 195 Q 350 205 290 195 Z" fill="#60a5fa" opacity="0.75"/>
+
+            <!-- Lid -->
+            <ellipse cx="350" cy="155" rx="72" ry="11" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+
+            <!-- Immersion Heater Rods -->
+            <path d="M 330 135 L 330 245" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 342 135 L 342 245" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+            <!-- Heating Element Loop -->
+            <path id="heaterCoil" d="M 326 225 C 326 265, 346 265, 346 225" fill="none" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+
+            <!-- Thermometer -->
+            <rect x="368" y="55" width="8" height="200" rx="4" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+            <rect id="thermoLiquid" x="370" y="200" width="4" height="55" rx="2" fill="#ef4444"/>
+            <circle cx="372" cy="255" r="6.5" fill="#ef4444"/>
+
+            <!-- Stirrer -->
+            <g id="stirrerGroup" transform="translate(0, 0)">
+              <path d="M 392 65 L 392 250" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+              <ellipse cx="392" cy="250" rx="14" ry="4" fill="none" stroke="#94a3b8" stroke-width="2"/>
+            </g>
+
+            <!-- Connecting Wires -->
+            <path d="M 120 215 Q 220 230 330 140" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 120 225 Q 225 245 342 140" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="dashboards">
+          <div class="metric-box">
+            <div class="metric-title">Joulemeter ($E$)</div>
+            <div class="metric-val energy" id="readoutEnergy">0 J</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-title">Water Temp ($T$)</div>
+            <div class="metric-val temp" id="readoutTemp">22.0 °C</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-title">Elapsed Time</div>
+            <div class="metric-val" id="readoutTime">00:00</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-danger" id="toggleHeaterBtn" onclick="toggleHeater()">Switch ON Heater</button>
+          <button class="btn btn-secondary" id="stirBtn" onclick="stirWater()">Stir Water (Gently)</button>
+        </div>
+
+        <div style="margin-top: 15px;">
+          <canvas id="tempChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Right Column: Settings & Data Log -->
+      <div class="card">
+        <h2>Workbench & Calculation</h2>
+
+        <div class="formula-box">
+          <strong>Calculation Formula:</strong><br />
+          $$c = \frac{E_1 - E_0}{m\,(T_1 - T_0)} = \frac{\Delta E}{m\,\Delta T}$$
+        </div>
+
+        <!-- Mass Slider -->
+        <div class="param-group">
+          <label>
+            <span>Mass of Water ($m$):</span>
+            <span id="massVal">200 g (0.200 kg)</span>
+          </label>
+          <input type="range" id="massInput" min="100" max="300" value="200" step="5" oninput="updateMass(this.value)" />
+        </div>
+
+        <!-- Power Slider -->
+        <div class="param-group">
+          <label>
+            <span>Heater Power Rating ($P$):</span>
+            <span id="powerVal" style="color: #ea580c;">50 W</span>
+          </label>
+          <input type="range" id="powerInput" min="20" max="150" value="50" step="5" oninput="updatePower(this.value)" />
+        </div>
+
+        <!-- Log Table -->
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Recorded Reading</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Initial Energy ($E_0$)</td>
+              <td id="cellE0">--</td>
+              <td rowspan="2">
+                <button class="btn btn-secondary" style="font-size:0.78rem; padding: 5px 8px;" onclick="recordInitial()">Record Initial</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Initial Temp ($T_0$)</td>
+              <td id="cellT0">--</td>
+            </tr>
+            <tr>
+              <td>Final Energy ($E_1$)</td>
+              <td id="cellE1">--</td>
+              <td rowspan="2">
+                <button class="btn btn-secondary" style="font-size:0.78rem; padding: 5px 8px;" onclick="recordFinal()">Record Highest</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Highest Temp ($T_1$)</td>
+              <td id="cellT1">--</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="calculateResult()">Calculate Specific Heat Capacity ($c$)</button>
+
+        <!-- Results Display -->
+        <div id="resultBox" style="margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; display: none;">
+          <h4 style="margin: 0 0 6px 0; font-size: 0.95rem;">Experimental Result:</h4>
+          <div style="font-size: 1.25rem; font-weight: bold; color: var(--primary);" id="resultC">-- J kg⁻¹ °C⁻¹</div>
+          <p style="font-size: 0.85rem; color: #475569; margin: 6px 0 0 0;" id="resultCompare"></p>
+        </div>
+
+        <div style="margin-top: 15px;">
+          <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem;" onclick="resetExperiment()">Reset Experiment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: ERROR ANALYSIS STUDIO ==================== -->
+  <div id="tabErrorStudio" class="tab-content">
+    <div class="card" style="border-top: 4px solid var(--purple);">
+      <h2>
+        <span>Interactive Error Analysis Studio</span>
+        <span style="font-size: 0.85rem; font-weight: normal; color: #64748b;">Formula & Sensitivity Visualizer</span>
+      </h2>
+
+      <!-- Equation Breakdown Card -->
+      <div class="equation-card">
+        <h4 style="margin: 0 0 8px 0; color: #334155; font-size: 0.95rem;">1. The Governing Physics Equations:</h4>
+        <div class="equation-row">
+          <div class="equation-item">
+            <span style="font-size: 0.78rem; color: #64748b; display: block;">What you calculate:</span>
+            $$c_{\text{exp}} = \frac{\Delta E_{\text{electrical}}}{m_{\text{recorded}} \cdot \Delta T_{\text{measured}}}$$
+          </div>
+          <div class="equation-item">
+            <span style="font-size: 0.78rem; color: #64748b; display: block;">Where the energy actually goes:</span>
+            $$\Delta E_{\text{electrical}} = \underbrace{m \cdot c_{\text{water}} \cdot \Delta T}_{\text{Energy to water}} + \underbrace{C_{\text{cup}} \cdot \Delta T}_{\text{Apparatus}} + \underbrace{Q_{\text{loss}}}_{\text{Heat lost to room}}$$
+          </div>
+        </div>
+
+        <!-- Live Fraction Substitution Box -->
+        <h4 style="margin: 14px 0 4px 0; color: #334155; font-size: 0.95rem;">2. Live Dynamic Equation Substitution:</h4>
+        <div class="live-fraction-box" id="liveEquationBox">
+          $$c_{\text{exp}} = \frac{25\,000\text{ J}}{0.200\text{ kg} \times 26.5^\circ\text{C}} = 4717\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$$
+        </div>
+        <p style="font-size: 0.82rem; color: #64748b; margin: 4px 0 0 0; text-align: center;">
+          Adjust the sliders below to see how each error parameter physically alters the numbers in this fraction!
+        </p>
+      </div>
+
+      <div class="error-studio-grid">
+        <!-- Error Controls -->
+        <div>
+          <!-- Error 1: Cup & Stirrer -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(a) Apparatus Heat Absorption ($C_{\text{apparatus}}$)</span>
+              <span id="errCapVal" style="color: #f59e0b;">40 J °C⁻¹</span>
+            </div>
+            <input type="range" id="errCapSlider" min="0" max="100" value="40" step="5" oninput="updateErrorModel()" />
+            <small style="color: #64748b; font-size: 0.76rem;">Energy absorbed by the cup & stirrer lowers $\Delta T$ $\rightarrow$ increases $c_{\text{exp}}$.</small>
+          </div>
+
+          <!-- Error 2: Heat Loss -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(b) Heat Lost to Room ($Q_{\text{loss}}$)</span>
+              <span id="errLossVal" style="color: #ef4444;">8 %</span>
+            </div>
+            <input type="range" id="errLossSlider" min="0" max="25" value="8" step="1" oninput="updateErrorModel()" />
+            <small style="color: #64748b; font-size: 0.76rem;">Heat escaping via convection/evaporation lowers $\Delta T$ $\rightarrow$ increases $c_{\text{exp}}$.</small>
+          </div>
+
+          <!-- Error 3: Mass error -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(c) Water Mass Inaccuracy ($\Delta m$)</span>
+              <span id="errMassVal" style="color: #3b82f6;">0 g (Accurate)</span>
+            </div>
+            <input type="range" id="errMassSlider" min="-30" max="30" value="0" step="2" oninput="updateErrorModel()" />
+            <small style="color: #64748b; font-size: 0.76rem;">Notice: <strong>Overestimating</strong> mass increases denominator $\rightarrow$ <em>decreases</em> $c_{\text{exp}}$!</small>
+          </div>
+
+          <!-- Error 4: Timing -->
+          <div class="slider-box">
+            <div class="slider-box-title">
+              <span>(d) Temperature Reading Timing (Discussion Q4)</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button id="btnPeakTrue" class="btn btn-primary" style="flex: 1; padding: 6px; font-size: 0.8rem;" onclick="setTimingMode(true)">Highest Peak $T_1$ (Correct)</button>
+              <button id="btnPeakFalse" class="btn btn-secondary" style="flex: 1; padding: 6px; font-size: 0.8rem;" onclick="setTimingMode(false)">At Switch-off (Premature)</button>
+            </div>
+            <small style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 4px;">At switch-off, hot residual heat is still inside the heating coil.</small>
+          </div>
+        </div>
+
+        <!-- Live Visual Output -->
+        <div>
+          <div id="errorMetricBox" class="error-metric-display high">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Calculated Specific Heat $c_{\text{exp}}$</div>
+            <div id="simulatedC" style="font-size: 2rem; font-weight: 800; color: #dc2626; margin: 4px 0;">4717 J kg⁻¹ °C⁻¹</div>
+            <div id="simulatedDev" style="font-size: 0.92rem; font-weight: 600; color: #b91c1c;">+12.3% vs standard (4200 J kg⁻¹ °C⁻¹)</div>
+          </div>
+
+          <!-- Energy Partition Bar -->
+          <div class="energy-bar-container">
+            <div style="font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Where does the electrical energy ($\Delta E$) go?</div>
+            <div class="energy-bar">
+              <div id="barWater" class="energy-segment seg-water" style="width: 80%;">80% Water</div>
+              <div id="barCup" class="energy-segment seg-cup" style="width: 12%;">12% Cup</div>
+              <div id="barLoss" class="energy-segment seg-loss" style="width: 8%;">8% Loss</div>
+            </div>
+            <div class="energy-legend">
+              <span><span class="legend-dot" style="background:#3b82f6;"></span>Water</span>
+              <span><span class="legend-dot" style="background:#f59e0b;"></span>Apparatus</span>
+              <span><span class="legend-dot" style="background:#ef4444;"></span>Loss</span>
+            </div>
+          </div>
+
+          <!-- Mathematical Diagnostic Explanation -->
+          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.85rem; line-height: 1.45;">
+            <strong style="color: #1e293b;">Mathematical Diagnosis:</strong>
+            <div id="errorDynamicReason" style="margin-top: 6px; color: #475569;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: PRECAUTIONS & REASONS ==================== -->
+  <div id="tabPrecautions" class="tab-content">
+    <div class="card">
+      <h2>Experimental Precautions & Scientific Reasons</h2>
+
+      <!-- Precaution 1 -->
+      <div class="precaution-card danger">
+        <div class="precaution-title">
+          <span class="tag-danger">SAFETY & ACCURACY</span>
+          <span>1. Completely immerse the heating part before switching on</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> Air is an extremely poor thermal conductor compared to water. If the heating coil operates partially in air, it cannot dissipate heat quickly and will rapidly overheat, potentially burning out the coil. Furthermore, heat transferred directly to room air bypasses the water, causing an overestimation of electrical energy supplied to the water ($\Delta E$).
+        </div>
+      </div>
+
+      <!-- Precaution 2 -->
+      <div class="precaution-card">
+        <div class="precaution-title">
+          <span class="tag-accuracy">ACCURACY</span>
+          <span>2. Cover the polystyrene cup with a lid</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> Warm water readily evaporates and induces natural air convection above the surface. Water has a very large latent heat of vaporisation ($\approx 2.26 \times 10^6\text{ J kg}^{-1}$); even a tiny amount of evaporation carries away substantial thermal energy, causing the recorded temperature rise ($\Delta T$) to be lower and producing an artificially high calculated value for $c$.
+        </div>
+      </div>
+
+      <!-- Precaution 3 -->
+      <div class="precaution-card">
+        <div class="precaution-title">
+          <span class="tag-accuracy">ACCURACY</span>
+          <span>3. Keep stirring the water gently throughout</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> Water is a poor thermal conductor. Without stirring, localized hot pockets form close to the heating element while outer water remains cooler. Gentle stirring guarantees a <strong>uniform bulk temperature</strong>, ensuring the thermometer accurately records the true bulk average temperature. <em>(Note: Stir gently to avoid splashing water out or introducing mechanical friction heating.)</em>
+        </div>
+      </div>
+
+      <!-- Precaution 4 -->
+      <div class="precaution-card">
+        <div class="precaution-title">
+          <span class="tag-accuracy">ACCURACY</span>
+          <span>4. Place the cup on an insulating tile (if necessary)</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> Bench surfaces (especially slate or metal lab tables) are large heat sinks. Placing the cup on an insulating tile minimises conductive heat loss through the bottom of the container to the benchtop.
+        </div>
+      </div>
+
+      <!-- Precaution 5 -->
+      <div class="precaution-card danger">
+        <div class="precaution-title">
+          <span class="tag-danger">SAFETY & ACCURACY</span>
+          <span>5. Ensure the heater does not touch the cup wall or thermometer bulb</span>
+        </div>
+        <div class="precaution-reason">
+          <strong>Scientific Reason:</strong> The surface of the heating element reaches temperatures far higher than boiling water. Direct contact with the polystyrene wall will melt or puncture the cup, causing water leaks. Direct contact with the thermometer bulb will record the heater coil's surface temperature rather than the water's temperature, and can crack the glass bulb due to localized thermal shock.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4: DISCUSSION QUESTIONS ==================== -->
+  <div id="tabDiscussion" class="tab-content">
+    <div class="card">
+      <h2>Discussion Questions & Standard Solutions</h2>
+
+      <!-- Question 1 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>1. What is the advantage of using a polystyrene cup as the container?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          Polystyrene is an <strong>excellent thermal insulator</strong> and has a very <strong>low heat capacity</strong>. This minimises unwanted heat loss to the surrounding air and ensures negligible thermal energy is absorbed by the cup itself.
+        </div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>2. Why should the water be stirred throughout the process?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          Water is a poor conductor of heat. Stirring promotes convection and ensures a <strong>uniform temperature distribution</strong> across the whole volume, avoiding hot spots near the heater and giving an accurate bulk temperature.
+        </div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>3. Why is the experimental value often larger than the standard value ($4200\text{ J kg}^{-1}{^\circ\text{C}}^{-1}$)?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          From the formula $c = \dfrac{\Delta E}{m\,\Delta T}$:
+          <ul>
+            <li><strong>(a) The cup and stirrer also warm up:</strong> Some measured energy $\Delta E$ is absorbed by the container, stirrer, and thermometer, meaning $\Delta T$ of the water is lower than expected $\rightarrow$ calculated $c$ becomes <strong>larger</strong>.</li>
+            <li><strong>(b) Heat loss to the surroundings:</strong> Dissipated heat lowers the final temperature rise $\Delta T$ for the supplied electrical energy $\rightarrow$ calculated $c$ becomes <strong>larger</strong>.</li>
+            <li><strong>(c) The mass of water is overestimated:</strong> Since $m$ is in the denominator, overestimating $m$ would yield a <em>smaller</em> $c$, so this is <strong>not</strong> a reason for an overestimate! (You can verify this in the Error Studio tab).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Question 4 -->
+      <div class="qa-item">
+        <div class="qa-header" onclick="toggleQA(this)">
+          <span>4. Why does the water temperature rise even though the heater is switched off?</span>
+          <span>+</span>
+        </div>
+        <div class="qa-body">
+          The heating coil has internal heat capacity and becomes significantly hotter than the surrounding water. When switched off, <strong>residual heat continues conducting from the coil into the cooler water</strong> until thermal equilibrium is established.<br><br>
+          <strong>Why record the highest temperature?</strong> Because all electrical energy registered by the joulemeter entered the heater coil. Using the peak temperature ($T_1$) ensures that all supplied energy transferred into the water is properly accounted for.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 5: PHOTO UPLOAD ==================== -->
+  <div id="tabPhoto" class="tab-content">
+    <div class="card">
+      <h2>Upload Lab Photo / Worksheet Reference</h2>
+      <div class="photo-panel">
+        <div id="uploadPlaceholder">
+          <p style="font-size: 1.15rem; color: #475569; margin-bottom: 6px; font-weight: 600;">Upload Textbook Page or Physical Rig Photo</p>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0;">Easily inspect your worksheet side-by-side with the digital lab.</p>
+          <label class="file-input-wrapper" style="margin-top: 10px;">
+            <span class="btn btn-primary" style="display:inline-block; padding: 10px 20px;">Choose Photo File</span>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" />
+          </label>
+        </div>
+        <img id="uploadedImage" style="display: none;" alt="Uploaded Lab Reference" />
+        <button id="removePhotoBtn" class="btn btn-secondary" style="position: absolute; top: 12px; right: 12px; display: none; padding: 5px 12px; font-size: 0.8rem;" onclick="removePhoto()">Remove Photo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Main Tab Navigation
+  function showMainTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+  }
+
+  // Simulation Physical State
+  let mass = 0.200;       // kg
+  let power = 50.0;       // Watts
+  let tempWater = 22.0;   // °C
+  let tempHeater = 22.0;  // °C
+  let tempAmbient = 22.0; // °C
+  let energyJoules = 0.0;
+  let isHeaterOn = false;
+  let isStirring = false;
+  let stirTimer = null;
+  let elapsedSeconds = 0;
+
+  // Recorded values
+  let recE0 = null;
+  let recT0 = null;
+  let recE1 = null;
+  let recT1 = null;
+
+  // Error Studio State
+  let errWaitPeak = true;
+
+  // Canvas
+  const chartCanvas = document.getElementById('tempChart');
+  const chartCtx = chartCanvas.getContext('2d');
+  let timeSeries = [];
+  let tempSeries = [];
+
+  function setupCanvas() {
+    chartCanvas.width = chartCanvas.clientWidth * window.devicePixelRatio;
+    chartCanvas.height = 135 * window.devicePixelRatio;
+    chartCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  setupCanvas();
+  window.addEventListener('resize', setupCanvas);
+
+  // Thermodynamics constants
+  const dt = 0.1;
+  const cWaterReal = 4184; // J/(kg K)
+  const cHeater = 25.0;    // J/K
+  const cCup = 35.0;       // J/K
+  const kLoss = 0.12;      // Ambient heat loss coefficient
+
+  // Physics Loop
+  setInterval(() => {
+    elapsedSeconds += dt;
+
+    if (isHeaterOn) {
+      energyJoules += power * dt;
+      tempHeater += (power * dt) / cHeater;
+    }
+
+    // Heat transfer coil -> water
+    const heatTransferRate = isStirring ? 8.5 : 4.2;
+    const dQ_heater_to_water = heatTransferRate * (tempHeater - tempWater) * dt;
+    tempHeater -= dQ_heater_to_water / cHeater;
+
+    // Dissipation to room
+    const dQ_loss = kLoss * (tempWater - tempAmbient) * dt;
+
+    // Water temp update
+    const effectiveWaterC = mass * cWaterReal + cCup;
+    tempWater += (dQ_heater_to_water - dQ_loss) / effectiveWaterC;
+
+    if (tempWater < tempAmbient) tempWater = tempAmbient;
+
+    updateUI();
+
+    // Chart update every second
+    if (Math.floor(elapsedSeconds / dt) % 10 === 0) {
+      timeSeries.push(Math.round(elapsedSeconds));
+      tempSeries.push(tempWater);
+      if (timeSeries.length > 55) {
+        timeSeries.shift();
+        tempSeries.shift();
+      }
+      drawChart();
+    }
+  }, dt * 1000);
+
+  function updateUI() {
+    document.getElementById('readoutEnergy').innerText = `${Math.round(energyJoules)} J`;
+    document.getElementById('lcdJoules').textContent = `${String(Math.round(energyJoules)).padStart(5, '0')} J`;
+    document.getElementById('readoutTemp').innerText = `${tempWater.toFixed(1)} °C`;
+
+    const mins = Math.floor(elapsedSeconds / 60);
+    const secs = Math.floor(elapsedSeconds % 60);
+    document.getElementById('readoutTime').innerText = 
+      `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    // Thermometer mercury height in SVG
+    const thermoCol = document.getElementById('thermoLiquid');
+    const height = Math.min(130, Math.max(15, (tempWater - 20) * 4.2 + 20));
+    thermoCol.setAttribute('height', height);
+    thermoCol.setAttribute('y', 260 - height);
+
+    // Dynamic glow for heating element
+    const heaterSvg = document.getElementById('heaterCoil');
+    if (isHeaterOn || tempHeater > tempWater + 3) {
+      const glowColor = power > 90 ? '#ff1e00' : '#ef4444';
+      heaterSvg.setAttribute('stroke', glowColor);
+      heaterSvg.setAttribute('stroke-width', power > 90 ? '7' : '6');
+    } else {
+      heaterSvg.setAttribute('stroke', '#64748b');
+      heaterSvg.setAttribute('stroke-width', '6');
+    }
+  }
+
+  function toggleHeater() {
+    isHeaterOn = !isHeaterOn;
+    const btn = document.getElementById('toggleHeaterBtn');
+    const badge = document.getElementById('heaterStatus');
+
+    if (isHeaterOn) {
+      btn.innerText = "Switch OFF Heater";
+      btn.className = "btn btn-danger";
+      badge.innerText = "HEATER ON";
+      badge.className = "badge badge-on";
+    } else {
+      btn.innerText = "Switch ON Heater";
+      btn.className = "btn btn-primary";
+      badge.innerText = "HEATER OFF";
+      badge.className = "badge badge-off";
+    }
+  }
+
+  function stirWater() {
+    isStirring = true;
+    const stirrer = document.getElementById('stirrerGroup');
+    stirrer.setAttribute('transform', 'translate(0, -10)');
+
+    clearTimeout(stirTimer);
+    stirTimer = setTimeout(() => {
+      stirrer.setAttribute('transform', 'translate(0, 0)');
+      isStirring = false;
+    }, 600);
+  }
+
+  function updateMass(val) {
+    if (elapsedSeconds > 1 && energyJoules > 10) {
+      if (!confirm("Changing mass mid-experiment will invalidate current data. Reset?")) return;
+      resetExperiment();
+    }
+    mass = val / 1000;
+    document.getElementById('massVal').innerText = `${val} g (${mass.toFixed(3)} kg)`;
+  }
+
+  function updatePower(val) {
+    power = parseFloat(val);
+    document.getElementById('powerVal').innerText = `${power} W`;
+    document.getElementById('lcdPowerIndicator').textContent = `${power} W AC`;
+  }
+
+  function recordInitial() {
+    recE0 = energyJoules;
+    recT0 = tempWater;
+    document.getElementById('cellE0').innerText = `${Math.round(recE0)} J`;
+    document.getElementById('cellT0').innerText = `${recT0.toFixed(1)} °C`;
+  }
+
+  function recordFinal() {
+    recE1 = energyJoules;
+    recT1 = tempWater;
+    document.getElementById('cellE1').innerText = `${Math.round(recE1)} J`;
+    document.getElementById('cellT1').innerText = `${recT1.toFixed(1)} °C`;
+  }
+
+  function calculateResult() {
+    if (recE0 === null || recT0 === null || recE1 === null || recT1 === null) {
+      alert("Please record both Initial (E₀, T₀) and Highest (E₁, T₁) readings first!");
+      return;
+    }
+
+    const deltaE = recE1 - recE0;
+    const deltaT = recT1 - recT0;
+
+    if (deltaE <= 0 || deltaT <= 0) {
+      alert("Supplied energy (ΔE) and temperature rise (ΔT) must be greater than 0.");
+      return;
+    }
+
+    const cExp = deltaE / (mass * deltaT);
+    const box = document.getElementById('resultBox');
+    box.style.display = 'block';
+
+    document.getElementById('resultC').innerHTML = `${Math.round(cExp)} J&middot;kg<sup>-1</sup>&middot;&deg;C<sup>-1</sup>`;
+
+    const diffPercent = (((cExp - 4200) / 4200) * 100).toFixed(1);
+    let comparisonText = `Standard reference for water is ~4200 J·kg⁻¹·°C⁻¹. `;
+    if (cExp > 4200) {
+      comparisonText += `Your experimental value is ${Math.abs(diffPercent)}% higher. This matches expected real-world outcomes because some energy is absorbed by the cup/stirrer and lost to the surrounding air.`;
+    } else {
+      comparisonText += `Your result is very close to standard theoretical values.`;
+    }
+    document.getElementById('resultCompare').innerText = comparisonText;
+
+    if (window.MathJax) {
+      MathJax.typesetPromise();
+    }
+  }
+
+  function resetExperiment() {
+    isHeaterOn = false;
+    tempWater = 22.0;
+    tempHeater = 22.0;
+    energyJoules = 0;
+    elapsedSeconds = 0;
+    recE0 = recE1 = recT0 = recT1 = null;
+
+    document.getElementById('cellE0').innerText = '--';
+    document.getElementById('cellT0').innerText = '--';
+    document.getElementById('cellE1').innerText = '--';
+    document.getElementById('cellT1').innerText = '--';
+    document.getElementById('resultBox').style.display = 'none';
+
+    document.getElementById('toggleHeaterBtn').innerText = "Switch ON Heater";
+    document.getElementById('toggleHeaterBtn').className = "btn btn-danger";
+    document.getElementById('heaterStatus').innerText = "HEATER OFF";
+    document.getElementById('heaterStatus').className = "badge badge-off";
+
+    timeSeries = [];
+    tempSeries = [];
+    drawChart();
+    updateUI();
+  }
+
+  function drawChart() {
+    const w = chartCanvas.clientWidth;
+    const h = 135;
+    chartCtx.clearRect(0, 0, w, h);
+
+    if (tempSeries.length < 2) return;
+
+    chartCtx.strokeStyle = "#cbd5e1";
+    chartCtx.lineWidth = 1;
+    chartCtx.beginPath();
+    chartCtx.moveTo(35, 10);
+    chartCtx.lineTo(35, h - 22);
+    chartCtx.lineTo(w - 10, h - 22);
+    chartCtx.stroke();
+
+    const minT = 20;
+    const maxT = Math.max(35, Math.ceil(Math.max(...tempSeries) + 2));
+
+    chartCtx.strokeStyle = "#dc2626";
+    chartCtx.lineWidth = 2;
+    chartCtx.beginPath();
+
+    for (let i = 0; i < tempSeries.length; i++) {
+      const x = 35 + (i / (tempSeries.length - 1)) * (w - 55);
+      const y = (h - 22) - ((tempSeries[i] - minT) / (maxT - minT)) * (h - 35);
+      if (i === 0) chartCtx.moveTo(x, y);
+      else chartCtx.lineTo(x, y);
+    }
+    chartCtx.stroke();
+
+    chartCtx.fillStyle = "#64748b";
+    chartCtx.font = "10px sans-serif";
+    chartCtx.fillText(`${maxT}°C`, 5, 18);
+    chartCtx.fillText(`${minT}°C`, 5, h - 22);
+    chartCtx.fillText("Temperature vs Time Graph", w / 2 - 60, 14);
+  }
+
+  // --- ERROR ANALYSIS STUDIO LOGIC & LIVE EQUATION ---
+  function updateErrorModel() {
+    const cApparatus = parseFloat(document.getElementById('errCapSlider').value);
+    const lossPct = parseFloat(document.getElementById('errLossSlider').value);
+    const massErrGrams = parseFloat(document.getElementById('errMassSlider').value);
+
+    // Update Slider Value Displays
+    document.getElementById('errCapVal').innerText = `${cApparatus} J °C⁻¹`;
+    document.getElementById('errLossVal').innerText = `${lossPct} %`;
+    
+    let massText = `${massErrGrams > 0 ? '+' : ''}${massErrGrams} g`;
+    if (massErrGrams === 0) massText += " (Accurate)";
+    else if (massErrGrams > 0) massText += " (Overestimated)";
+    else massText += " (Underestimated)";
+    document.getElementById('errMassVal').innerText = massText;
+
+    // Mathematical Error Model
+    const trueMass = 0.200; // 200g standard
+    const recordedMass = trueMass + (massErrGrams / 1000);
+    const cTrueWater = 4200; // Standard reference
+    const nominalDeltaE = 25000; // Joules supplied
+
+    // Partitioning Energy
+    const lossFraction = lossPct / 100;
+    const usefulEnergy = nominalDeltaE * (1 - lossFraction);
+
+    // Actual Temperature Rise
+    const effectiveSystemC = (trueMass * cTrueWater) + cApparatus;
+    let actualDeltaT = usefulEnergy / effectiveSystemC;
+
+    // Timing effect (premature vs peak)
+    if (!errWaitPeak) {
+      actualDeltaT *= 0.88; // 12% heat still locked in heater
+    }
+
+    // Calculated specific heat
+    const simulatedC = nominalDeltaE / (recordedMass * actualDeltaT);
+    const deviation = ((simulatedC - cTrueWater) / cTrueWater) * 100;
+
+    // Update Live Equation Box
+    const eqBox = document.getElementById('liveEquationBox');
+    eqBox.innerHTML = `$$c_{\\text{exp}} = \\frac{${nominalDeltaE.toLocaleString()}\\text{ J}}{${recordedMass.toFixed(3)}\\text{ kg} \\times ${actualDeltaT.toFixed(2)}^\\circ\\text{C}} = \\mathbf{${Math.round(simulatedC)}\\text{ J kg}^{-1}{^\\circ\\text{C}}^{-1}}$$`;
+
+    // Render Metric Display
+    const metricBox = document.getElementById('errorMetricBox');
+    const cDisplay = document.getElementById('simulatedC');
+    const devDisplay = document.getElementById('simulatedDev');
+
+    cDisplay.innerText = `${Math.round(simulatedC)} J kg⁻¹ °C⁻¹`;
+
+    if (deviation >= 0) {
+      metricBox.className = "error-metric-display high";
+      cDisplay.style.color = "#dc2626";
+      devDisplay.style.color = "#b91c1c";
+      devDisplay.innerText = `+${deviation.toFixed(1)}% higher than standard (4200 J kg⁻¹ °C⁻¹)`;
+    } else {
+      metricBox.className = "error-metric-display low";
+      cDisplay.style.color = "#2563eb";
+      devDisplay.style.color = "#1d4ed8";
+      devDisplay.innerText = `${deviation.toFixed(1)}% lower than standard (4200 J kg⁻¹ °C⁻¹)`;
+    }
+
+    // Update Energy Distribution Bar
+    const energyWater = trueMass * cTrueWater * actualDeltaT;
+    const energyCup = cApparatus * actualDeltaT;
+    const energyLoss = nominalDeltaE * lossFraction;
+    const totalE = energyWater + energyCup + energyLoss;
+
+    const pctWater = Math.max(5, Math.round((energyWater / totalE) * 100));
+    const pctLoss = Math.max(3, Math.round((energyLoss / totalE) * 100));
+    const pctCup = Math.max(3, 100 - pctWater - pctLoss);
+
+    document.getElementById('barWater').style.width = `${pctWater}%`;
+    document.getElementById('barWater').innerText = `${pctWater}% Water`;
+
+    document.getElementById('barCup').style.width = `${pctCup}%`;
+    document.getElementById('barCup').innerText = `${pctCup}% Cup`;
+
+    document.getElementById('barLoss').style.width = `${pctLoss}%`;
+    document.getElementById('barLoss').innerText = `${pctLoss}% Loss`;
+
+    // Dynamic Pedagogical Diagnosis
+    let reasons = [];
+    if (cApparatus > 20) {
+      reasons.push("<strong>Cup & Stirrer Absorption:</strong> Heat absorbed by the container reduces the observed $\\Delta T$. In $c = \\frac{\\Delta E}{m \\cdot \\Delta T}$, a smaller denominator $\\Delta T$ drives $c_{\\text{exp}}$ UP.");
+    }
+    if (lossPct > 4) {
+      reasons.push("<strong>Heat Loss:</strong> Thermal energy escaping to the room further reduces $\\Delta T$, pushing $c_{\\text{exp}}$ higher.");
+    }
+    if (!errWaitPeak) {
+      reasons.push("<strong>Reading Prematurely (Q4):</strong> Switching off without recording the peak ignores residual heat inside the heater coil, leaving measured $\\Delta T$ artificially low and inflating $c_{\\text{exp}}$.");
+    }
+    if (massErrGrams > 0) {
+      reasons.push("<strong>Proving Q3(c):</strong> Notice how overestimating mass puts a larger number $m$ in the denominator, which <em>reduces</em> $c_{\\text{exp}}$. Therefore, overestimating mass CANNOT be why experimental values are larger!");
+    } else if (massErrGrams < 0) {
+      reasons.push("<strong>Underestimating mass:</strong> Reduces denominator $m$, which artificially increases calculated $c$.");
+    }
+
+    if (reasons.length === 0) {
+      document.getElementById('errorDynamicReason').innerHTML = "All parameters set to near-ideal conditions! The calculated value aligns closely with the reference standard of <strong>4200 J kg⁻¹ °C⁻¹</strong>.";
+    } else {
+      document.getElementById('errorDynamicReason').innerHTML = reasons.join("<br><br>");
+    }
+
+    if (window.MathJax) {
+      MathJax.typesetPromise([eqBox, document.getElementById('errorDynamicReason')]);
+    }
+  }
+
+  function setTimingMode(isPeak) {
+    errWaitPeak = isPeak;
+    const btnTrue = document.getElementById('btnPeakTrue');
+    const btnFalse = document.getElementById('btnPeakFalse');
+
+    if (isPeak) {
+      btnTrue.className = "btn btn-primary";
+      btnFalse.className = "btn btn-secondary";
+    } else {
+      btnTrue.className = "btn btn-secondary";
+      btnFalse.className = "btn btn-danger";
+    }
+    updateErrorModel();
+  }
+
+  // Photo Upload Handler
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const img = document.getElementById('uploadedImage');
+      img.src = evt.target.result;
+      img.style.display = 'block';
+      document.getElementById('uploadPlaceholder').style.display = 'none';
+      document.getElementById('removePhotoBtn').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removePhoto() {
+    const img = document.getElementById('uploadedImage');
+    img.src = '';
+    img.style.display = 'none';
+    document.getElementById('imageInput').value = '';
+    document.getElementById('uploadPlaceholder').style.display = 'block';
+    document.getElementById('removePhotoBtn').style.display = 'none';
+  }
+
+  // Accordion Toggle
+  function toggleQA(headerEl) {
+    const body = headerEl.nextElementSibling;
+    const symbol = headerEl.querySelector('span:last-child');
+    if (body.classList.contains('show')) {
+      body.classList.remove('show');
+      symbol.innerText = '+';
+    } else {
+      body.classList.add('show');
+      symbol.innerText = '−';
+    }
+  }
+
+  // Initial calculation for Error Studio
+  updateErrorModel();
+</script>
+</body>
+</html>
