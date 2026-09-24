@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thermal Physics & Calorimetry Interactive Learning Lab</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --hot: #ef4444;
+      --cold: #0ea5e9;
+      --eq: #8b5cf6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+      color: white;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.05rem;
+      opacity: 0.92;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      background: #ffffff;
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 1rem 1.4rem;
+      border: none;
+      background: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 3px solid transparent;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary-light);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .module-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .module-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 1.8rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h2 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.35rem;
+    }
+
+    .formula-banner {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary-light);
+      padding: 0.9rem 1.2rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      font-size: 0.98rem;
+    }
+
+    .formula-math {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 820px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .control-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: #cbd5e1;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .val-display {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .sim-display {
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 250px;
+      position: relative;
+    }
+
+    .result-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+      margin-top: 1rem;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 0.93rem;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      font-size: 1.05rem;
+      color: var(--primary);
+      padding-top: 0.5rem;
+    }
+
+    .calculation-breakdown {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.75rem;
+      font-family: 'Cambria Math', monospace, serif;
+      font-size: 0.92rem;
+      color: #0f172a;
+      line-height: 1.5;
+    }
+
+    .btn-action {
+      background: var(--primary-light);
+      color: white;
+      border: none;
+      padding: 0.55rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.2s;
+    }
+
+    .btn-action:hover {
+      background: var(--primary);
+    }
+
+    /* Block Stage Canvas */
+    .block-stage {
+      position: relative;
+      width: 100%;
+      height: 310px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      overflow: hidden;
+    }
+
+    .temp-level-line {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      border-top: 1.5px dashed #94a3b8;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .temp-level-tag {
+      position: absolute;
+      right: 12px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      color: #475569;
+      transform: translateY(-50%);
+      background: white;
+      padding: 0 4px;
+      z-index: 11;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Thermal Physics & Calorimetry Learning Lab</h1>
+    <p>Explore heat capacity, method of mixtures, energy conservation models, and real-world heat losses through interactive simulations.</p>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('mix', event)">🥛 1. Method of Mixtures</button>
+    <button class="tab-btn" onclick="switchTab('tea', event)">🫖 2. Teapot & Energy Blocks</button>
+    <button class="tab-btn" onclick="switchTab('metal', event)">🧪 3. Metal Cube Calorimeter</button>
+    <button class="tab-btn" onclick="switchTab('loss', event)">⚡ 4. Immersion Heater & Heat Loss</button>
+  </nav>
+
+  <div class="container">
+
+    <!-- MODULE 1: METHOD OF MIXTURES (Reference: Image 1) -->
+    <section id="module-mix" class="module-section active">
+      <div class="card">
+        <h2>Module 1: Mixing Hot and Cold Liquids (Polystyrene Cups)</h2>
+        <p>Hot water is poured into cold water inside insulated polystyrene cups. Because polystyrene is an insulator, heat loss to the surroundings is minimized.</p>
+        
+        <div class="formula-banner">
+          <strong>Governing Principle: Conservation of Energy</strong><br>
+          <span class="formula-math">Energy Lost by Hot Water = Energy Gained by Cold Water</span><br>
+          <span class="formula-math">C₁ · (T₁ - T<sub>eq</sub>) = C₂ · (T<sub>eq</sub> - T₂) &implies; T<sub>eq</sub> = (C₁T₁ + C₂T₂) / (C₁ + C₂)</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3>Experimental Parameters</h3>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Hot Water Mass (m₁):</span>
+                <span class="val-display" id="m1_val">0.10 kg</span>
+              </div>
+              <input type="range" id="m1" min="0.05" max="0.30" step="0.01" value="0.10" oninput="calcMixture()">
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Hot Water Initial Temp (T₁):</span>
+                <span class="val-display" id="t1_val">80 °C</span>
+              </div>
+              <input type="range" id="t1" min="50" max="95" step="1" value="80" oninput="calcMixture()">
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Cold Water Mass (m₂):</span>
+                <span class="val-display" id="m2_val">0.15 kg</span>
+              </div>
+              <input type="range" id="m2" min="0.05" max="0.30" step="0.01" value="0.15" oninput="calcMixture()">
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Cold Water Initial Temp (T₂):</span>
+                <span class="val-display" id="t2_val">20 °C</span>
+              </div>
+              <input type="range" id="t2" min="5" max="30" step="1" value="20" oninput="calcMixture()">
+            </div>
+          </div>
+
+          <div>
+            <h3>Calculation & Real-Time Results</h3>
+            <div class="result-box">
+              <div class="result-row">
+                <span>Heat Capacity of Cold Water (C₂ = m₂ · c):</span>
+                <span id="c_cold">630.0 J °C⁻¹</span>
+              </div>
+              <div class="result-row">
+                <span>Heat Capacity of Hot Water (C₁ = m₁ · c):</span>
+                <span id="c_hot">420.0 J °C⁻¹</span>
+              </div>
+              <div class="result-row">
+                <span>Equilibrium Final Temperature (T<sub>eq</sub>):</span>
+                <span id="t_eq">44.0 °C</span>
+              </div>
+
+              <!-- Mathematical Substitution -->
+              <div class="calculation-breakdown" id="mix_calc_steps"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 2: TEAPOT & ANIMATED ENERGY BLOCKS (Reference: Images 3 & 4) -->
+    <section id="module-tea" class="module-section">
+      <div class="card">
+        <h2>Module 2: Chinese Tea Problem & Energy Block Model</h2>
+        <p><em>Problem:</em> Kate pours 0.2 kg of boiling water (100 °C) into a 25 °C teapot. Teapot heat capacity = 230 J °C⁻¹.</p>
+        
+        <div class="formula-banner">
+          <strong>Key Visual Concept: Column Width = Heat Capacity (C)</strong><br>
+          • <strong>Water Column:</strong> Wider base (<span class="formula-math">C<sub>w</sub> = 840 J °C⁻¹</span> &rarr; 8 blocks wide).<br>
+          • <strong>Teapot Column:</strong> Narrower base (<span class="formula-math">C<sub>pot</sub> = 230 J °C⁻¹</span> &rarr; 3 blocks wide).<br>
+          • <strong>Conservation:</strong> 8 blocks wide &times; 3 rows dropped = <strong>24 blocks lost</strong> (red blocks disappear). 3 blocks wide &times; 8 rows raised = <strong>24 blocks gained</strong> (orange blocks appear). Both levels settle at <strong>T = 83.9 °C</strong>!
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3>Energy Transfer Animation</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.8rem;">
+              Click <strong>Play Energy Transfer</strong>: watch the red energy blocks leave and disappear from the cooling water, transferring across the arrow to fill the teapot until equilibrium at 83.9 °C is reached.
+            </p>
+
+            <!-- Interactive Stage Canvas with Perfect Level Alignment -->
+            <div class="block-stage" id="blockStage">
+              <!-- 100 °C Reference Line (y = 44px) -->
+              <div class="temp-level-line" style="top: 44px;"></div>
+              <span class="temp-level-tag" style="top: 44px;">100 °C</span>
+
+              <!-- Equilibrium Line T = 83.9 °C (y = 92px) -->
+              <div class="temp-level-line" id="lineTeq" style="top: 92px; border-color: #8b5cf6;"></div>
+              <span class="temp-level-tag" id="tagTeq" style="top: 92px; color: #8b5cf6;">T = 83.9 °C</span>
+
+              <!-- 25 °C Reference Line (y = 220px) -->
+              <div class="temp-level-line" style="top: 220px;"></div>
+              <span class="temp-level-tag" style="top: 220px;">25 °C</span>
+
+              <svg id="blockSvg" width="100%" height="100%" style="position: absolute; top:0; left:0;"></svg>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; gap: 0.8rem; align-items: center;">
+              <button class="btn-action" id="btnPlayTea" onclick="playTeaAnimation()">▶ Play Energy Transfer</button>
+              <button class="btn-action" style="background: #64748b;" onclick="resetTeaAnimation()">↺ Reset</button>
+              <span id="animStatus" style="font-size: 0.88rem; font-weight: 600; color: #0284c7;"></span>
+            </div>
+          </div>
+
+          <div>
+            <h3>Conservation of Energy Derivation</h3>
+            <div class="result-box" style="margin-top: 0;">
+              <div class="result-row">
+                <span>Heat Capacity of Water (C<sub>w</sub>):</span>
+                <span>840 J °C⁻¹ (Wide Column)</span>
+              </div>
+              <div class="result-row">
+                <span>Heat Capacity of Teapot (C<sub>pot</sub>):</span>
+                <span>230 J °C⁻¹ (Narrow Column)</span>
+              </div>
+              <div class="result-row">
+                <span>Heat Lost = Heat Gained:</span>
+                <span>840 · (100 - T) = 230 · (T - 25)</span>
+              </div>
+              <div class="result-row">
+                <span>Total Energy Transferred (&Delta;Q):</span>
+                <span>13,542 J</span>
+              </div>
+              <div class="result-row">
+                <span>Equilibrium Final Temp (T<sub>eq</sub>):</span>
+                <span style="color: #8b5cf6;">83.9 °C</span>
+              </div>
+            </div>
+
+            <div class="calculation-breakdown" style="margin-top: 1rem;">
+              <strong>Step-by-step Solution:</strong><br>
+              84,000 - 840 T = 230 T - 5,750<br>
+              84,000 + 5,750 = (840 + 230) T<br>
+              89,750 = 1,070 T<br>
+              <strong>T = 89,750 / 1,070 = 83.88 °C ≈ 83.9 °C</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 3: METAL CUBE CALORIMETER (Reference: Image 5) -->
+    <section id="module-metal" class="module-section">
+      <div class="card">
+        <h2>Module 3: Finding Unknown Specific Heat Capacity</h2>
+        <p><em>Problem:</em> Alice heats a 25 g metal cube in boiling water (100 °C), then transfers it into 0.2 kg of 25 °C water. The highest recorded temperature is T<sub>f</sub> = 27 °C.</p>
+
+        <div class="grid-2">
+          <div>
+            <h3>Experimental Data</h3>
+            <div class="sim-display">
+              <svg width="220" height="150" viewBox="0 0 220 150">
+                <polygon points="40,25 55,135 165,135 180,25" fill="#f8fafc" stroke="#94a3b8" stroke-width="4"/>
+                <polygon points="46,55 55,130 165,130 174,55" fill="#bae6fd" opacity="0.75"/>
+                <rect x="95" y="105" width="28" height="25" fill="#64748b" stroke="#334155" stroke-width="2"/>
+                <rect x="140" y="10" width="7" height="115" rx="3" fill="#e2e8f0" stroke="#64748b"/>
+                <line x1="143.5" y1="70" x2="143.5" y2="122" stroke="#ef4444" stroke-width="3"/>
+                <line x1="75" y1="10" x2="88" y2="120" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <div class="control-group" style="margin-top: 1rem;">
+              <div class="control-label-row">
+                <span>Final Measured Temp (T<sub>f</sub>):</span>
+                <span class="val-display" id="final_temp_val">27.0 °C</span>
+              </div>
+              <input type="range" id="final_temp" min="25.5" max="35.0" step="0.1" value="27.0" oninput="solveMetalProblem()">
+            </div>
+          </div>
+
+          <div>
+            <h3>Mathematical Deduction</h3>
+            <div class="formula-banner">
+              <span class="formula-math">Energy Gained by Water = m<sub>w</sub> · c<sub>w</sub> · (T<sub>f</sub> - 25 °C)</span><br>
+              <span class="formula-math">Energy Lost by Metal = m<sub>m</sub> · c<sub>m</sub> · (100 °C - T<sub>f</sub>)</span>
+            </div>
+
+            <div class="result-box">
+              <div class="result-row">
+                <span>&Delta;T of Water (T<sub>f</sub> - 25 °C):</span>
+                <span id="dt_water">+2.0 °C</span>
+              </div>
+              <div class="result-row">
+                <span>Energy Gained by Water (Q):</span>
+                <span id="q_water">1,680.0 J</span>
+              </div>
+              <div class="result-row">
+                <span>&Delta;T of Metal (100 °C - T<sub>f</sub>):</span>
+                <span id="dt_metal">-73.0 °C</span>
+              </div>
+              <div class="result-row">
+                <span>Calculated c of Metal:</span>
+                <span id="c_metal">920.5 J kg⁻¹ °C⁻¹ (Aluminium)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 4: HEATER & HEAT LOSS (Reference: Image 2) -->
+    <section id="module-loss" class="module-section">
+      <div class="card">
+        <h2>Module 4: Immersion Heater with Real-World Heat Loss</h2>
+        <p><em>Reference Problem:</em> An electric immersion heater delivers power to water. In reality, some energy is lost to the surroundings.</p>
+
+        <div class="formula-banner">
+          <strong>Thermodynamic Energy Conservation:</strong><br>
+          <span class="formula-math">E<sub>supplied</sub> (P · t) = E<sub>absorbed</sub> (m · c · &Delta;T) + E<sub>lost</sub></span><br>
+          <span class="formula-math">Useful energy absorbed cannot exceed electrical energy supplied.</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3>Heater Parameters</h3>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Heater Power (P):</span>
+                <span class="val-display" id="p_val">60 W</span>
+              </div>
+              <input type="range" id="p_in" min="30" max="150" step="5" value="60" oninput="onParamChange()">
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Heating Time (t):</span>
+                <span class="val-display" id="t_time_val">200 s</span>
+              </div>
+              <input type="range" id="time_in" min="50" max="600" step="10" value="200" oninput="onParamChange()">
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Water Mass (m):</span>
+                <span class="val-display" id="m_loss_val">1.0 kg</span>
+              </div>
+              <input type="range" id="m_loss" min="0.2" max="2.0" step="0.1" value="1.0" oninput="onParamChange()">
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>Observed Temp Rise (&Delta;T):</span>
+                <span class="val-display" id="dt_loss_val">2.0 °C</span>
+              </div>
+              <input type="range" id="dt_loss" min="0.1" max="2.8" step="0.1" value="2.0" oninput="calcLoss()">
+              <small id="dt_limit_note" style="color: #64748b; font-size: 0.78rem;"></small>
+            </div>
+          </div>
+
+          <div>
+            <h3>Energy Accounting Breakdown</h3>
+            <div class="result-box">
+              <div class="result-row">
+                <span>Total Electrical Energy Supplied (P &times; t):</span>
+                <span id="e_supp">12,000 J</span>
+              </div>
+              <div class="result-row">
+                <span>Useful Energy Absorbed (m · c · &Delta;T):</span>
+                <span id="e_use">8,400 J</span>
+              </div>
+              <div class="result-row">
+                <span>Energy Lost to Surroundings (E<sub>lost</sub>):</span>
+                <span id="e_loss" style="color: #ef4444;">3,600 J</span>
+              </div>
+              <div class="result-row">
+                <span>Thermal Efficiency (&eta;):</span>
+                <span id="eff">70.0%</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.8rem;">
+              <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 4px;">Energy Distribution</div>
+              <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden; background: #fee2e2;">
+                <div id="bar_use" style="background: #10b981; width: 70%; transition: width 0.2s;"></div>
+                <div id="bar_loss" style="background: #ef4444; width: 30%; transition: width 0.2s;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                <span>🟩 Useful Energy Absorbed</span>
+                <span>🟥 Heat Lost</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Tab navigation
+    function switchTab(tabId, event) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.module-section').forEach(sec => sec.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById('module-' + tabId).classList.add('active');
+
+      if (tabId === 'tea') {
+        setTimeout(initBlockStage, 50);
+      }
+    }
+
+    // Module 1: Method of Mixtures with explicit calculation
+    function calcMixture() {
+      const m1 = parseFloat(document.getElementById('m1').value);
+      const t1 = parseFloat(document.getElementById('t1').value);
+      const m2 = parseFloat(document.getElementById('m2').value);
+      const t2 = parseFloat(document.getElementById('t2').value);
+      const c = 4200;
+
+      document.getElementById('m1_val').textContent = m1.toFixed(2) + " kg";
+      document.getElementById('t1_val').textContent = t1.toFixed(0) + " °C";
+      document.getElementById('m2_val').textContent = m2.toFixed(2) + " kg";
+      document.getElementById('t2_val').textContent = t2.toFixed(0) + " °C";
+
+      const c_hot = m1 * c;
+      const c_cold = m2 * c;
+      const numerator = (c_hot * t1) + (c_cold * t2);
+      const denominator = c_hot + c_cold;
+      const t_eq = numerator / denominator;
+
+      document.getElementById('c_cold').textContent = c_cold.toFixed(1) + " J °C⁻¹";
+      document.getElementById('c_hot').textContent = c_hot.toFixed(1) + " J °C⁻¹";
+      document.getElementById('t_eq').textContent = t_eq.toFixed(1) + " °C";
+
+      document.getElementById('mix_calc_steps').innerHTML = `
+        <strong>Calculation:</strong><br>
+        T<sub>eq</sub> = (C₁T₁ + C₂T₂) / (C₁ + C₂)<br>
+        T<sub>eq</sub> = [(${c_hot.toFixed(0)} × ${t1}) + (${c_cold.toFixed(0)} × ${t2})] / (${c_hot.toFixed(0)} + ${c_cold.toFixed(0)})<br>
+        T<sub>eq</sub> = [${(c_hot * t1).toFixed(0)} + ${(c_cold * t2).toFixed(0)}] / ${denominator.toFixed(0)} = <strong>${t_eq.toFixed(1)} °C</strong>
+      `;
+    }
+
+    // Module 2: Energy Blocks with Disappearing Red Blocks & Exact Alignment
+    let currentAnimFrame = null;
+    let animProgress = 0; // 0 to 1
+
+    function getRowY(rowIndex) {
+      const rowHeight = 14;
+      const rowStep = 16;
+      const baseBottomY = 252;
+      return baseBottomY - (rowIndex * rowStep) - rowHeight;
+    }
+
+    function initBlockStage() {
+      drawBlocksState(animProgress);
+    }
+
+    function drawBlocksState(p) {
+      const svg = document.getElementById('blockSvg');
+      svg.innerHTML = '';
+
+      const wCols = 8;
+      const tCols = 3;
+      const blockWidth = 14;
+      const blockHeight = 14;
+      const gap = 2;
+
+      const waterStartX = 40;
+      const teapotStartX = 210;
+
+      // Labels
+      const waterLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      waterLabel.setAttribute('x', waterStartX + (wCols * (blockWidth + gap)) / 2);
+      waterLabel.setAttribute('y', 280);
+      waterLabel.setAttribute('text-anchor', 'middle');
+      waterLabel.setAttribute('font-size', '12');
+      waterLabel.setAttribute('font-weight', 'bold');
+      waterLabel.setAttribute('fill', '#334155');
+      waterLabel.textContent = "energy of water (Wide)";
+      svg.appendChild(waterLabel);
+
+      const potLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      potLabel.setAttribute('x', teapotStartX + (tCols * (blockWidth + gap)) / 2);
+      potLabel.setAttribute('y', 280);
+      potLabel.setAttribute('text-anchor', 'middle');
+      potLabel.setAttribute('font-size', '12');
+      potLabel.setAttribute('font-weight', 'bold');
+      potLabel.setAttribute('fill', '#334155');
+      potLabel.textContent = "energy of teapot";
+      svg.appendChild(potLabel);
+
+      // 1. Water Permanent Grey Base (Rows 0 to 9, up to T = 83.9 °C)
+      for (let r = 0; r <= 9; r++) {
+        const y = getRowY(r);
+        for (let c = 0; c < wCols; c++) {
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', waterStartX + c * (blockWidth + gap));
+          rect.setAttribute('y', y);
+          rect.setAttribute('width', blockWidth);
+          rect.setAttribute('height', blockHeight);
+          rect.setAttribute('rx', 2);
+          rect.setAttribute('fill', '#94a3b8');
+          rect.setAttribute('stroke', '#64748b');
+          svg.appendChild(rect);
+        }
+      }
+
+      // 2. Water Red Energy Blocks (Rows 10, 11, 12)
+      // As p increases from 0 to 1, these red blocks disappear sequentially from top (12) to bottom (10)!
+      for (let r = 10; r <= 12; r++) {
+        const y = getRowY(r);
+        // Row 12 vanishes first (p: 0 -> 0.33), then 11 (p: 0.33 -> 0.67), then 10 (p: 0.67 -> 1.0)
+        const rowStart = (12 - r) / 3;
+        const rowEnd = (13 - r) / 3;
+        let opacity = 1;
+
+        if (p >= rowEnd) {
+          opacity = 0; // completely disappeared
+        } else if (p > rowStart) {
+          opacity = 1 - ((p - rowStart) / (rowEnd - rowStart));
+        }
+
+        for (let c = 0; c < wCols; c++) {
+          // Subtle dashed outline showing initial 100 °C boundary
+          const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          ghost.setAttribute('x', waterStartX + c * (blockWidth + gap));
+          ghost.setAttribute('y', y);
+          ghost.setAttribute('width', blockWidth);
+          ghost.setAttribute('height', blockHeight);
+          ghost.setAttribute('rx', 2);
+          ghost.setAttribute('fill', 'none');
+          ghost.setAttribute('stroke', '#cbd5e1');
+          ghost.setAttribute('stroke-dasharray', '2');
+          svg.appendChild(ghost);
+
+          // Active red block fading and disappearing
+          if (opacity > 0.02) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', waterStartX + c * (blockWidth + gap));
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', blockWidth);
+            rect.setAttribute('height', blockHeight);
+            rect.setAttribute('rx', 2);
+            rect.setAttribute('fill', '#ef4444');
+            rect.setAttribute('stroke', '#b91c1c');
+            rect.setAttribute('opacity', opacity);
+            svg.appendChild(rect);
+          }
+        }
+      }
+
+      // 3. Teapot Base Blocks (Rows 0 and 1, below 25 °C)
+      for (let r = 0; r <= 1; r++) {
+        const y = getRowY(r);
+        for (let c = 0; c < tCols; c++) {
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', teapotStartX + c * (blockWidth + gap));
+          rect.setAttribute('y', y);
+          rect.setAttribute('width', blockWidth);
+          rect.setAttribute('height', blockHeight);
+          rect.setAttribute('rx', 2);
+          rect.setAttribute('fill', '#94a3b8');
+          rect.setAttribute('stroke', '#64748b');
+          svg.appendChild(rect);
+        }
+      }
+
+      // 4. Teapot Gained Blocks (Rows 2 to 9, from 25 °C up to T = 83.9 °C)
+      // When p = 1, exactly 8 rows are gained, reaching Row 9 (y = 92px) - matching water!
+      const gainedRows = Math.round(p * 8);
+      for (let r = 2; r < 2 + gainedRows; r++) {
+        const y = getRowY(r);
+        for (let c = 0; c < tCols; c++) {
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', teapotStartX + c * (blockWidth + gap));
+          rect.setAttribute('y', y);
+          rect.setAttribute('width', blockWidth);
+          rect.setAttribute('height', blockHeight);
+          rect.setAttribute('rx', 2);
+          rect.setAttribute('fill', '#ffedd5');
+          rect.setAttribute('stroke', '#ea580c');
+          rect.setAttribute('stroke-dasharray', '2');
+          svg.appendChild(rect);
+        }
+      }
+
+      // 5. Transfer Arrow & Flowing Energy Packets
+      const startX = waterStartX + (wCols * (blockWidth + gap)) + 2;
+      const startY = 65;
+      const endX = teapotStartX - 6;
+      const endY = 92 + 10;
+
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arrow.setAttribute('d', `M ${startX} ${startY} Q ${(startX + endX) / 2} ${startY - 25} ${endX} ${endY}`);
+      arrow.setAttribute('fill', 'none');
+      arrow.setAttribute('stroke', '#eab308');
+      arrow.setAttribute('stroke-width', '4');
+      svg.appendChild(arrow);
+
+      // Animated energy packet traveling while transfer is active
+      if (p > 0 && p < 1) {
+        const t = (p * 5) % 1; // cycle packet along path
+        const qx = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * ((startX + endX) / 2) + t * t * endX;
+        const qy = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * (startY - 25) + t * t * endY;
+
+        const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pulse.setAttribute('cx', qx);
+        pulse.setAttribute('cy', qy);
+        pulse.setAttribute('r', 5);
+        pulse.setAttribute('fill', '#ef4444');
+        pulse.setAttribute('stroke', '#ffffff');
+        pulse.setAttribute('stroke-width', '1.5');
+        svg.appendChild(pulse);
+      }
+    }
+
+    function playTeaAnimation() {
+      if (currentAnimFrame) cancelAnimationFrame(currentAnimFrame);
+      let start = null;
+      const duration = 2400; // smooth 2.4s transfer
+      const initialP = animProgress >= 1 ? 0 : animProgress;
+
+      document.getElementById('animStatus').textContent = "Transferring energy: water cools as blocks leave...";
+
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const elapsed = timestamp - start;
+        animProgress = Math.min(1, initialP + (elapsed / duration) * (1 - initialP));
+        drawBlocksState(animProgress);
+
+        if (animProgress < 1) {
+          currentAnimFrame = requestAnimationFrame(step);
+        } else {
+          document.getElementById('animStatus').textContent = "Equilibrium reached! Red blocks disappeared, both levels at 83.9 °C.";
+        }
+      }
+      currentAnimFrame = requestAnimationFrame(step);
+    }
+
+    function resetTeaAnimation() {
+      if (currentAnimFrame) cancelAnimationFrame(currentAnimFrame);
+      animProgress = 0;
+      drawBlocksState(0);
+      document.getElementById('animStatus').textContent = "Initial state: Water at 100 °C, Teapot at 25 °C.";
+    }
+
+    // Module 3: Metal Cube Problem
+    function solveMetalProblem() {
+      const tf = parseFloat(document.getElementById('final_temp').value);
+      document.getElementById('final_temp_val').textContent = tf.toFixed(1) + " °C";
+
+      const mw = 0.2;
+      const cw = 4200;
+      const ti_w = 25.0;
+      const mm = 0.025;
+      const ti_m = 100.0;
+
+      const dTw = tf - ti_w;
+      const dTm = ti_m - tf;
+
+      const qw = mw * cw * dTw;
+      const cm = qw / (mm * dTm);
+
+      document.getElementById('dt_water').textContent = "+" + dTw.toFixed(1) + " °C";
+      document.getElementById('q_water').textContent = qw.toFixed(1) + " J";
+      document.getElementById('dt_metal').textContent = "-" + dTm.toFixed(1) + " °C";
+      document.getElementById('c_metal').textContent = cm.toFixed(1) + " J kg⁻¹ °C⁻¹ (Aluminium)";
+    }
+
+    // Module 4: Heat Loss Constraint
+    function onParamChange() {
+      const P = parseFloat(document.getElementById('p_in').value);
+      const t = parseFloat(document.getElementById('time_in').value);
+      const m = parseFloat(document.getElementById('m_loss').value);
+      const c = 4200;
+
+      const maxDt = (P * t) / (m * c);
+      const dtSlider = document.getElementById('dt_loss');
+      dtSlider.max = maxDt.toFixed(2);
+      document.getElementById('dt_limit_note').textContent = `Max possible ΔT (at 100% efficiency): ${maxDt.toFixed(2)} °C`;
+
+      if (parseFloat(dtSlider.value) > maxDt) {
+        dtSlider.value = maxDt.toFixed(1);
+      }
+      calcLoss();
+    }
+
+    function calcLoss() {
+      const P = parseFloat(document.getElementById('p_in').value);
+      const t = parseFloat(document.getElementById('time_in').value);
+      const m = parseFloat(document.getElementById('m_loss').value);
+      const c = 4200;
+
+      const maxDt = (P * t) / (m * c);
+      let dt = parseFloat(document.getElementById('dt_loss').value);
+
+      if (dt > maxDt) {
+        dt = maxDt;
+        document.getElementById('dt_loss').value = dt.toFixed(1);
+      }
+
+      document.getElementById('p_val').textContent = P + " W";
+      document.getElementById('t_time_val').textContent = t + " s";
+      document.getElementById('m_loss_val').textContent = m.toFixed(1) + " kg";
+      document.getElementById('dt_loss_val').textContent = dt.toFixed(1) + " °C";
+
+      const e_supplied = P * t;
+      const e_useful = m * c * dt;
+      let e_lost = e_supplied - e_useful;
+      if (e_lost < 0) e_lost = 0;
+
+      const eff = Math.min(100, Math.max(0, (e_useful / e_supplied) * 100));
+
+      document.getElementById('e_supp').textContent = Math.round(e_supplied).toLocaleString() + " J";
+      document.getElementById('e_use').textContent = Math.round(e_useful).toLocaleString() + " J";
+      document.getElementById('e_loss').textContent = Math.round(e_lost).toLocaleString() + " J";
+      document.getElementById('eff').textContent = eff.toFixed(1) + "%";
+
+      document.getElementById('bar_use').style.width = eff + "%";
+      document.getElementById('bar_loss').style.width = (100 - eff) + "%";
+    }
+
+    // Initialize all modules
+    calcMixture();
+    solveMetalProblem();
+    onParamChange();
+    resetTeaAnimation();
+  </script>
+</body>
+</html>
