@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermal Physics Lab: Heating & Cooling Curves</title>
+  
+  <!-- Chart.js for smooth interactive plotting -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #dc2626;
+      --cool: #0284c7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+      --accent-phase: #d97706;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 6px 0;
+      color: #0f172a;
+      font-size: 26px;
+    }
+    .math-font {
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-style: italic;
+    }
+    /* Proper Fraction Styling */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 0.9em;
+      line-height: 1.1;
+    }
+    .frac > .num {
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 1px;
+    }
+    .frac > .den {
+      padding-top: 1px;
+    }
+    /* Tab Styling */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #64748b;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+    .tab-btn.active.cooling {
+      color: var(--cool);
+      border-bottom: 3px solid var(--cool);
+    }
+    .formula-banner {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 14.5px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .formula-banner.cooling {
+      background: #f0f9ff;
+      border-left-color: var(--cool);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .control-group {
+      margin-bottom: 16px;
+    }
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    .val-display {
+      color: var(--primary);
+      font-weight: bold;
+    }
+    .val-display.cooling {
+      color: var(--cool);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+    .cooling input[type="range"] {
+      accent-color: var(--cool);
+    }
+    .presets {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .preset-btn:hover {
+      background: #e2e8f0;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #92400e;
+      margin-top: 12px;
+    }
+    .toggle-row input {
+      margin-top: 3px;
+      accent-color: var(--accent-phase);
+      cursor: pointer;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .metric-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .chart-wrapper {
+      position: relative;
+      height: 440px;
+      width: 100%;
+    }
+    .explanation {
+      margin-top: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+    .highlight-blue { color: var(--primary); font-weight: bold; }
+    .highlight-red { color: var(--secondary); font-weight: bold; }
+    .highlight-cool { color: var(--cool); font-weight: bold; }
+    .highlight-phase { color: var(--accent-phase); font-weight: bold; }
+    .eq-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 14px;
+      margin: 6px 0;
+      display: inline-block;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Thermal Physics Lab: <span class="math-font">T–t</span> Graph Explorer</h1>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" id="tab-heating-btn" onclick="switchTab('heating')">🔥 Heating Curve & Phase Change Limits</button>
+    <button class="tab-btn" id="tab-cooling-btn" onclick="switchTab('cooling')">❄️ Cooling Curve (Newton's Law)</button>
+  </div>
+
+  <!-- Dynamic Banner -->
+  <div class="formula-banner" id="banner-text"></div>
+
+  <div class="grid">
+    <!-- Controls Column -->
+    <div class="card" id="controls-container"></div>
+
+    <!-- Graph & Metrics Column -->
+    <div>
+      <div class="card">
+        <div class="chart-wrapper">
+          <canvas id="tempChart"></canvas>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics" id="metrics-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conceptual Explanation Section -->
+  <div class="explanation" id="explanation-container"></div>
+</div>
+
+<script>
+  let currentTab = 'heating';
+
+  // Application State
+  const state = {
+    P: 800,                  // Heater power (W)
+    m: 1.0,                  // Mass (kg)
+    c: 4184,                 // Specific heat capacity J/(kg·°C)
+    substanceName: 'Water',
+    phaseType: 'Boiling',    // 'Boiling' for liquids, 'Melting' for solids
+    Tphase: 100,             // Phase change temp (°C)
+    T0: 20,                  // Initial temp for heating (°C)
+    T0_cool: 95,             // Initial temp for cooling (°C)
+    Tenv: 20,                // Ambient room temp (°C)
+    k: 2.0,                  // Heat dissipation factor (W/°C)
+    tMax: 900,               // Duration (s)
+    enablePhaseLimit: true   // Cap at melting/boiling point
+  };
+
+  let chartInstance = null;
+
+  function initChart() {
+    const ctx = document.getElementById('tempChart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 0 },
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: {
+            title: { display: true, text: 'Time t (seconds)', font: { weight: 'bold' } },
+            grid: { color: '#f1f5f9' }
+          },
+          y: {
+            title: { display: true, text: 'Temperature T (°C)', font: { weight: 'bold' } },
+            grid: { color: '#f1f5f9' }
+          }
+        },
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 20 } }
+        }
+      }
+    });
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-heating-btn').className = `tab-btn ${tab === 'heating' ? 'active' : ''}`;
+    document.getElementById('tab-cooling-btn').className = `tab-btn ${tab === 'cooling' ? 'active cooling' : ''}`;
+    renderUI();
+    updateSimulation();
+  }
+
+  function renderUI() {
+    const controls = document.getElementById('controls-container');
+    const banner = document.getElementById('banner-text');
+    const exp = document.getElementById('explanation-container');
+
+    if (currentTab === 'heating') {
+      banner.className = 'formula-banner';
+      banner.innerHTML = `
+        <strong>Heating Formula:</strong> 
+        <span class="math-font">P · t = m · c · ΔT</span> &nbsp;⟶&nbsp;
+        <strong>Slope:</strong> 
+        <span class="frac math-font"><span class="num">dT</span><span class="den">dt</span></span>
+        <span class="math-font"> = </span>
+        <span class="frac math-font"><span class="num">P</span><span class="den">m · c</span></span>
+        <br>
+        <strong>Phase Change Plateau:</strong> At <span class="math-font">T = T<sub>phase</sub></span> 
+        (Boiling point for liquids, Melting point for solids), temperature stays constant (<span class="math-font">ΔT = 0</span>) 
+        because energy is absorbed as <strong>Latent Heat</strong> (<span class="math-font">Q = m · L</span>).
+      `;
+
+      controls.innerHTML = `
+        <h3 style="margin-top:0;">Heating Parameters</h3>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Heater Power (<span class="math-font">P</span>)</span>
+            <span class="val-display" id="val-P">${state.P} W</span>
+          </div>
+          <input type="range" min="100" max="3000" step="50" value="${state.P}" oninput="updateVal('P', this.value, ' W')">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Mass (<span class="math-font">m</span>)</span>
+            <span class="val-display" id="val-m">${state.m.toFixed(2)} kg</span>
+          </div>
+          <input type="range" min="0.1" max="4.0" step="0.1" value="${state.m}" oninput="updateVal('m', this.value, ' kg', 2)">
+        </div>
+
+        <!-- Specific Heat & Presets -->
+        <div class="control-group">
+          <div class="control-header">
+            <span>Substance: <strong>${state.substanceName}</strong> (<span class="math-font">c</span>)</span>
+            <span class="val-display" id="val-c">${state.c} J/(kg·°C)</span>
+          </div>
+          <input type="range" min="200" max="4500" step="25" value="${state.c}" id="slider-c" oninput="updateVal('c', this.value, ' J/(kg·°C)')">
+          <div class="presets">
+            <button class="preset-btn" onclick="applyPreset('Water', 4184, 100, 'Boiling')">Water (Liquid, 100 °C boil)</button>
+            <button class="preset-btn" onclick="applyPreset('Cooking Oil', 2000, 250, 'Boiling')">Oil (Liquid, 250 °C boil)</button>
+            <button class="preset-btn" onclick="applyPreset('Aluminium', 900, 660, 'Melting')">Aluminium (Solid, 660 °C melt)</button>
+            <button class="preset-btn" onclick="applyPreset('Copper', 385, 1085, 'Melting')">Copper (Solid, 1085 °C melt)</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Initial & Ambient Temp (<span class="math-font">T<sub>0</sub> = T<sub>env</sub></span>)</span>
+            <span class="val-display" id="val-T0">${state.T0} °C</span>
+          </div>
+          <input type="range" min="0" max="40" step="1" value="${state.T0}" oninput="updateVal('T0', this.value, ' °C'); state.Tenv = state.T0;">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span style="color:var(--secondary)">Heat Loss Factor (<span class="math-font">k</span>)</span>
+            <span class="val-display" style="color:var(--secondary)" id="val-k">${state.k.toFixed(1)} W/°C</span>
+          </div>
+          <input type="range" min="0" max="15" step="0.5" value="${state.k}" oninput="updateVal('k', this.value, ' W/°C', 1)">
+          <small style="color: #64748b; font-size: 11px;">k = 0 corresponds to perfect thermal insulation.</small>
+        </div>
+
+        <!-- Phase Change Enforcer -->
+        <div class="toggle-row">
+          <input type="checkbox" id="toggle-phase" ${state.enablePhaseLimit ? 'checked' : ''} onchange="state.enablePhaseLimit = this.checked; updateSimulation();">
+          <label for="toggle-phase">
+            <strong>Cap at ${state.phaseType} Point (${state.Tphase} °C)</strong><br>
+            <span style="font-size:11px; font-weight:normal;">
+              ${state.phaseType === 'Melting' 
+                ? `Solid ${state.substanceName} cannot exceed its melting point (${state.Tphase} °C) while undergoing solid-to-liquid phase change.` 
+                : `Liquid ${state.substanceName} cannot exceed ${state.Tphase} °C in open conditions while boiling.`}
+            </span>
+          </label>
+        </div>
+
+        <div class="control-group" style="margin-top:16px;">
+          <div class="control-header">
+            <span>Duration (<span class="math-font">t<sub>max</sub></span>)</span>
+            <span class="val-display" id="val-tMax">${state.tMax} s</span>
+          </div>
+          <input type="range" min="120" max="3600" step="60" value="${state.tMax}" oninput="updateVal('tMax', this.value, ' s')">
+        </div>
+      `;
+
+      exp.innerHTML = `
+        <h3 style="margin-top:0;">Physics Explanation: Specific Heat & Phase Changes</h3>
+        <ol>
+          <li>
+            <strong>Why Aluminium & Copper Cap at Melting Point (<span class="math-font">T<sub>melt</sub></span>):</strong><br>
+            When heating a solid metal (Aluminium at 660 °C or Copper at 1085 °C), it reaches its <strong>melting point</strong>. 
+            At this temperature, the temperature rise halts (Slope = 0) because all input heat is absorbed as 
+            <strong>Latent Heat of Fusion</strong> (<span class="math-font">Q = m · L<sub>f</sub></span>) to break metallic lattice bonds.
+          </li>
+          <li style="margin-top: 10px;">
+            <strong>Why Water Caps at Boiling Point (<span class="math-font">T<sub>boil</sub> = 100 °C</span>):</strong><br>
+            Water begins as liquid at room temperature (20 °C). Its phase transition is vaporization at 100 °C. Liquid water cannot exceed 100 °C under atmospheric pressure because energy is consumed by the 
+            <strong>Latent Heat of Vaporization</strong> (<span class="math-font">Q = m · L<sub>v</sub></span>, where <span class="math-font">L<sub>v</sub> ≈ 2.26 × 10<sup>6</sup> J/kg</span>).
+          </li>
+          <li style="margin-top: 10px;">
+            <strong>Slope of the Heating Line:</strong><br>
+            <div class="eq-box math-font">
+              Slope = <span class="frac"><span class="num">dT</span><span class="den">dt</span></span> = 
+              <span class="frac"><span class="num">P − k(T − T<sub>env</sub>)</span><span class="den">m · c</span></span>
+            </div>
+            <ul>
+              <li>Copper has a very small heat capacity (<span class="math-font">c ≈ 385 J/(kg·°C)</span>), resulting in a steep slope and rapid heating.</li>
+              <li>Water has a very high heat capacity (<span class="math-font">c ≈ 4184 J/(kg·°C)</span>), resisting temperature changes and producing a much gentler slope.</li>
+            </ul>
+          </li>
+        </ol>
+      `;
+
+    } else {
+      // Cooling Tab
+      banner.className = 'formula-banner cooling';
+      banner.innerHTML = `
+        <strong>Newton's Law of Cooling:</strong> 
+        <span class="math-font">m · c · </span><span class="frac math-font"><span class="num">dT</span><span class="den">dt</span></span>
+        <span class="math-font"> = −k(T − T<sub>env</sub>)</span> &nbsp;⟶&nbsp;
+        <strong>Negative Slope:</strong> 
+        <span class="frac math-font"><span class="num">dT</span><span class="den">dt</span></span>
+        <span class="math-font"> = −</span>
+        <span class="frac math-font"><span class="num">k</span><span class="den">m · c</span></span>
+        <span class="math-font">(T − T<sub>env</sub>)</span>
+        <br>
+        <strong>Cooling Profile:</strong> <span class="math-font">T(t) = T<sub>env</sub> + (T<sub>0</sub> − T<sub>env</sub>) · e<sup>−[k / (m·c)] · t</sup></span>.
+      `;
+
+      controls.innerHTML = `
+        <h3 style="margin-top:0;">Cooling Parameters</h3>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Initial Hot Temp (<span class="math-font">T<sub>0</sub></span>)</span>
+            <span class="val-display cooling" id="val-T0_cool">${state.T0_cool} °C</span>
+          </div>
+          <input type="range" min="40" max="100" step="1" value="${state.T0_cool}" oninput="updateVal('T0_cool', this.value, ' °C')">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Ambient Room Temp (<span class="math-font">T<sub>env</sub></span>)</span>
+            <span class="val-display" id="val-Tenv">${state.Tenv} °C</span>
+          </div>
+          <input type="range" min="0" max="35" step="1" value="${state.Tenv}" oninput="updateVal('Tenv', this.value, ' °C')">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Mass (<span class="math-font">m</span>)</span>
+            <span class="val-display cooling" id="val-m">${state.m.toFixed(2)} kg</span>
+          </div>
+          <input type="range" min="0.1" max="4.0" step="0.1" value="${state.m}" oninput="updateVal('m', this.value, ' kg', 2)">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Specific Heat (<span class="math-font">c</span>)</span>
+            <span class="val-display cooling" id="val-c">${state.c} J/(kg·°C)</span>
+          </div>
+          <input type="range" min="300" max="4500" step="50" value="${state.c}" oninput="updateVal('c', this.value, ' J/(kg·°C)')">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span style="color:var(--cool)">Heat Dissipation Factor (<span class="math-font">k</span>)</span>
+            <span class="val-display cooling" id="val-k">${state.k.toFixed(1)} W/°C</span>
+          </div>
+          <input type="range" min="0.5" max="15" step="0.5" value="${state.k}" oninput="updateVal('k', this.value, ' W/°C', 1)">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Duration (<span class="math-font">t<sub>max</sub></span>)</span>
+            <span class="val-display" id="val-tMax">${state.tMax} s</span>
+          </div>
+          <input type="range" min="120" max="2400" step="60" value="${state.tMax}" oninput="updateVal('tMax', this.value, ' s')">
+        </div>
+      `;
+
+      exp.innerHTML = `
+        <h3 style="margin-top:0;">Cooling Dynamics & Slope</h3>
+        <ol>
+          <li>
+            <strong>Newton's Cooling Law:</strong> The rate of temperature loss is directly proportional to temperature difference:
+            <div class="eq-box math-font">
+              <span class="frac"><span class="num">dT</span><span class="den">dt</span></span> = 
+              − <span class="frac"><span class="num">k</span><span class="den">m · c</span></span> (T − T<sub>env</sub>)
+            </div>
+          </li>
+          <li style="margin-top: 10px;">
+            <strong>Decreasing Rate of Cooling:</strong>
+            The slope is negative and steepest at <span class="math-font">t = 0</span> when the temperature gap is largest. As the body approaches room temperature <span class="math-font">T<sub>env</sub></span>, the slope approaches zero (<span class="math-font">dT/dt → 0</span>).
+          </li>
+          <li style="margin-top: 10px;">
+            <strong>Thermal Time Constant (<span class="math-font">τ</span>):</strong>
+            The decay timescale is <span class="math-font">τ = (m · c) / k</span>. Higher mass or specific heat increases thermal inertia, slowing cooling.
+          </li>
+        </ol>
+      `;
+    }
+  }
+
+  function applyPreset(name, cVal, phaseTemp, phaseType) {
+    state.substanceName = name;
+    state.c = cVal;
+    state.Tphase = phaseTemp;
+    state.phaseType = phaseType;
+    renderUI();
+    updateSimulation();
+  }
+
+  function updateVal(key, val, unit, decimals = 0) {
+    state[key] = parseFloat(val);
+    const disp = document.getElementById(`val-${key}`);
+    if (disp) {
+      disp.textContent = decimals > 0 ? `${state[key].toFixed(decimals)}${unit}` : `${state[key]}${unit}`;
+    }
+    updateSimulation();
+  }
+
+  function updateSimulation() {
+    const metricsCont = document.getElementById('metrics-container');
+
+    if (currentTab === 'heating') {
+      const idealSlope = state.P / (state.m * state.c);
+      const Teq = state.k > 0 ? (state.T0 + state.P / state.k) : Infinity;
+
+      let phaseStatus = "No Phase Change";
+      if (state.enablePhaseLimit) {
+        if (state.k === 0) {
+          const tToPhase = (state.Tphase - state.T0) / idealSlope;
+          phaseStatus = tToPhase <= state.tMax ? `${state.phaseType}s at ${Math.round(tToPhase)} s` : `${state.phaseType}s at ${Math.round(tToPhase)} s (> t_max)`;
+        } else if (Teq >= state.Tphase) {
+          const tToPhase = -(state.m * state.c / state.k) * Math.log((Teq - state.Tphase) / (Teq - state.T0));
+          phaseStatus = tToPhase <= state.tMax ? `${state.phaseType}s at ${Math.round(tToPhase)} s` : `${state.phaseType}s at ${Math.round(tToPhase)} s (> t_max)`;
+        } else {
+          phaseStatus = `Never reaches ${state.phaseType.toLowerCase()} (T_eq = ${Teq.toFixed(0)} °C)`;
+        }
+      }
+
+      metricsCont.innerHTML = `
+        <div class="metric-card">
+          <div class="metric-label">Ideal Slope [P / (m · c)]</div>
+          <div class="metric-value highlight-blue">${idealSlope.toFixed(3)} °C/s</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Equilibrium Temp (T<sub>eq</sub>)</div>
+          <div class="metric-value">${isFinite(Teq) ? Teq.toFixed(0) + ' °C' : '∞ (No loss)'}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">${state.phaseType} Point</div>
+          <div class="metric-value highlight-phase">${state.Tphase} °C</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Phase Change Status</div>
+          <div class="metric-value highlight-phase" style="font-size:14px;">${phaseStatus}</div>
+        </div>
+      `;
+
+      const points = 100;
+      const dt = state.tMax / points;
+      const labels = [];
+      const idealData = [];
+      const realData = [];
+      const phaseLine = [];
+
+      for (let i = 0; i <= points; i++) {
+        const t = i * dt;
+        labels.push(Math.round(t));
+
+        // Ideal Line
+        let T_id = state.T0 + idealSlope * t;
+        if (state.enablePhaseLimit && T_id > state.Tphase) {
+          T_id = state.Tphase;
+        }
+        idealData.push(T_id);
+
+        // Real curve with loss
+        let T_re;
+        if (state.k === 0) {
+          T_re = T_id;
+        } else {
+          T_re = Teq + (state.T0 - Teq) * Math.exp(-(state.k / (state.m * state.c)) * t);
+          if (state.enablePhaseLimit && T_re > state.Tphase) {
+            T_re = state.Tphase;
+          }
+        }
+        realData.push(T_re);
+
+        if (state.enablePhaseLimit) {
+          phaseLine.push(state.Tphase);
+        }
+      }
+
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets = [
+        {
+          label: 'Ideal (No Heat Loss, k = 0)',
+          data: idealData,
+          borderColor: '#2563eb',
+          backgroundColor: '#2563eb',
+          borderWidth: 2.5,
+          borderDash: [5, 5],
+          pointRadius: 0
+        },
+        {
+          label: 'Realistic (With Heat Loss)',
+          data: realData,
+          borderColor: '#dc2626',
+          backgroundColor: '#dc2626',
+          borderWidth: 3,
+          pointRadius: 0
+        }
+      ];
+
+      if (state.enablePhaseLimit) {
+        chartInstance.data.datasets.push({
+          label: `${state.substanceName} ${state.phaseType} Point (${state.Tphase} °C)`,
+          data: phaseLine,
+          borderColor: '#d97706',
+          borderWidth: 1.5,
+          borderDash: [3, 3],
+          pointRadius: 0
+        });
+      }
+
+    } else {
+      // Cooling Calculations
+      const initialSlope = -(state.k / (state.m * state.c)) * (state.T0_cool - state.Tenv);
+      const tau = (state.m * state.c) / state.k;
+
+      metricsCont.innerHTML = `
+        <div class="metric-card">
+          <div class="metric-label">Initial Slope (dT/dt at t = 0)</div>
+          <div class="metric-value highlight-cool">${initialSlope.toFixed(4)} °C/s</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Time Constant [τ = (m · c) / k]</div>
+          <div class="metric-value">${tau.toFixed(1)} s</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Ambient Room Temp (T<sub>env</sub>)</div>
+          <div class="metric-value">${state.Tenv.toFixed(1)} °C</div>
+        </div>
+      `;
+
+      const points = 100;
+      const dt = state.tMax / points;
+      const labels = [];
+      const coolData = [];
+      const envLine = [];
+      const tangentLine = [];
+
+      for (let i = 0; i <= points; i++) {
+        const t = i * dt;
+        labels.push(Math.round(t));
+
+        const T_c = state.Tenv + (state.T0_cool - state.Tenv) * Math.exp(-(state.k / (state.m * state.c)) * t);
+        coolData.push(T_c);
+        envLine.push(state.Tenv);
+
+        const T_tan = state.T0_cool + initialSlope * t;
+        tangentLine.push(T_tan >= state.Tenv ? T_tan : null);
+      }
+
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets = [
+        {
+          label: 'Cooling Curve T(t)',
+          data: coolData,
+          borderColor: '#0284c7',
+          backgroundColor: '#0284c7',
+          borderWidth: 3,
+          pointRadius: 0
+        },
+        {
+          label: 'Ambient Temp (T_env)',
+          data: envLine,
+          borderColor: '#94a3b8',
+          borderWidth: 2,
+          borderDash: [4, 4],
+          pointRadius: 0
+        },
+        {
+          label: 'Initial Tangent Line',
+          data: tangentLine,
+          borderColor: '#f59e0b',
+          borderWidth: 1.5,
+          borderDash: [2, 2],
+          pointRadius: 0
+        }
+      ];
+    }
+
+    chartInstance.update();
+  }
+
+  // Initialize
+  initChart();
+  renderUI();
+  updateSimulation();
+</script>
+
+</body>
+</html>
