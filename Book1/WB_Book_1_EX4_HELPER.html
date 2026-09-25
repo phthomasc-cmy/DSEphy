@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Ch.2 - Power, Heat Capacity & Specific Heat Capacity</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --error: #dc2626;
+      --error-bg: #fee2e2;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* Header & Timer */
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(5px);
+      padding: 8px 16px;
+      border-radius: 8px;
+      gap: 12px;
+      font-weight: 600;
+    }
+
+    .timer-display {
+      font-family: monospace;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+    }
+
+    .timer-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+
+    .timer-btn:hover {
+      opacity: 0.85;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      background-color: var(--gray-50);
+      border-bottom: 2px solid var(--gray-200);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 12px 18px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--gray-200);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    /* Question Content */
+    .content-area {
+      padding: 24px;
+    }
+
+    .q-panel {
+      display: none;
+    }
+
+    .q-panel.active {
+      display: block;
+    }
+
+    .q-header {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--gray-200);
+    }
+
+    .q-header h2 {
+      font-size: 1.15rem;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+
+    .q-desc {
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      background: var(--gray-50);
+      padding: 14px;
+      border-left: 4px solid var(--primary);
+      border-radius: 4px;
+    }
+
+    /* Step Card */
+    .step-card {
+      margin-top: 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 18px;
+      background: #ffffff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .step-card.locked {
+      opacity: 0.45;
+      pointer-events: none;
+      background: var(--gray-50);
+    }
+
+    .step-card.completed {
+      border-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .step-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"], input[type="number"], select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    button.check-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+
+    button.check-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    button.hint-btn {
+      background: #fff;
+      color: var(--warning);
+      border: 1px solid var(--warning);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    button.hint-btn:hover {
+      background: var(--warning-bg);
+    }
+
+    .hint-content {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--warning-bg);
+      border-left: 4px solid var(--warning);
+      border-radius: 4px;
+      font-size: 0.88rem;
+      color: #78350f;
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .feedback.success {
+      display: block;
+      color: var(--success);
+    }
+
+    .feedback.error {
+      display: block;
+      color: var(--error);
+    }
+
+    .solution-box {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #1e3a8a;
+      background: #eff6ff;
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header & Timer -->
+  <header>
+    <div>
+      <h1>Physics Interactive Worksheet</h1>
+      <p>Exercise 4: Power, Heat Capacity & Specific Heat Capacity</p>
+    </div>
+    <div class="timer-box">
+      <span>⏱️ </span>
+      <span class="timer-display" id="timerDisplay">00:00</span>
+      <button class="timer-btn" id="startPauseBtn" onclick="toggleTimer()">Start</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset</button>
+    </div>
+  </header>
+
+  <!-- Question Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">Q1 (P.55)</button>
+    <button class="tab-btn" onclick="switchTab(1)">Q2 (P.55)</button>
+    <button class="tab-btn" onclick="switchTab(2)">Q3 (P.59)</button>
+    <button class="tab-btn" onclick="switchTab(3)">Q4 (P.62)</button>
+    <button class="tab-btn" onclick="switchTab(4)">Q5 (P.63)</button>
+    <button class="tab-btn" onclick="switchTab(5)">Q6 (P.66)</button>
+    <button class="tab-btn" onclick="switchTab(6)">Q7 (P.66)</button>
+  </div>
+
+  <div class="content-area">
+
+    <!-- QUESTION 1 -->
+    <div class="q-panel active" id="tab-0">
+      <div class="q-header">
+        <h2>Question 1 (P.55 Example 2.1)</h2>
+        <div class="q-desc">
+          Two electric kettles A and B have consumed <b>6.0 × 10⁵ J</b> and <b>4.8 × 10⁵ J</b> in <b>5 minutes</b> respectively. The kettles are filled with the same mass of water at 25 °C.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q1-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Calculate the power of Kettle A</div>
+        <p>Convert time into seconds and use <i>P = E / t</i>.</p>
+        <div class="input-row">
+          <span>Power of A = </span>
+          <input type="number" id="q1-a-input" placeholder="e.g. 100" step="any">
+          <span>W (or J/s)</span>
+          <button class="check-btn" onclick="checkQ1S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h1">
+          提示：時間需轉換成秒 (s)：5 分鐘 = 5 × 60 = 300 秒。<br>
+          使用功率公式：P = E / t = 600,000 J / 300 s。
+        </div>
+        <div class="feedback" id="q1-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q1-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (a) Calculate the power of Kettle B</div>
+        <div class="input-row">
+          <span>Power of B = </span>
+          <input type="number" id="q1-b-input" placeholder="e.g. 100" step="any">
+          <span>W (or J/s)</span>
+          <button class="check-btn" onclick="checkQ1S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h2">
+          提示：P = E / t = 4.8 × 10⁵ J / 300 s。
+        </div>
+        <div class="feedback" id="q1-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q1-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> (b) Which kettle of water will boil first?</div>
+        <div class="input-row">
+          <select id="q1-c-input">
+            <option value="">-- Choose an answer --</option>
+            <option value="A">Kettle A</option>
+            <option value="B">Kettle B</option>
+          </select>
+          <button class="check-btn" onclick="checkQ1S3()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h3">
+          提示：兩水煲中水質量相同、初溫相同，加熱到沸騰所需能量相同。功率較大者加熱速率更快。
+        </div>
+        <div class="feedback" id="q1-fb3"></div>
+      </div>
+    </div>
+
+    <!-- QUESTION 2 -->
+    <div class="q-panel" id="tab-1">
+      <div class="q-header">
+        <h2>Question 2 (P.55 Example 2.2)</h2>
+        <div class="q-desc">
+          A solar water heating system has a solar panel of area <b>0.5 m²</b>. The panel captures <b>25%</b> of the solar energy it receives, and uses the energy to heat water. Assume sunlight delivers energy onto the Earth's surface at <b>1 kW m⁻²</b>.<br>
+          If a bathtub of water is heated for <b>40 minutes</b>, how much energy is consumed for the heating process?
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q2-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Find the effective heating power of the panel</div>
+        <p>Total power received = Area × Solar intensity. Only 25% is captured.</p>
+        <div class="input-row">
+          <span>Effective Power = </span>
+          <input type="number" id="q2-p-input" placeholder="e.g. 100" step="any">
+          <span>W</span>
+          <button class="check-btn" onclick="checkQ2S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h1">
+          提示：1 kW m⁻² = 1000 W m⁻²。<br>
+          接收到的太陽總功率 = 0.5 m² × 1000 W m⁻² = 500 W。<br>
+          有效加熱功率 = 500 W × 25%。
+        </div>
+        <div class="feedback" id="q2-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q2-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Calculate total energy consumed (E = Pt)</div>
+        <div class="input-row">
+          <span>Energy E = </span>
+          <input type="number" id="q2-e-input" placeholder="e.g. 100" step="any">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ2S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h2">
+          提示：加熱時間 t = 40 分鐘 = 40 × 60 = 2400 秒。<br>
+          能量 E = 有效功率 × 時間 = 125 W × 2400 s。
+        </div>
+        <div class="feedback" id="q2-fb2"></div>
+      </div>
+    </div>
+
+    <!-- QUESTION 3 -->
+    <div class="q-panel" id="tab-2">
+      <div class="q-header">
+        <h2>Question 3 (P.59 Example 2.3)</h2>
+        <div class="q-desc">
+          A pot of tea is supplied with <b>30 kJ</b> of heat. The heat capacity of the tea is <b>7500 J °C⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q3-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Find the increase in temperature of the tea (ΔT)</div>
+        <div class="input-row">
+          <span>ΔT = </span>
+          <input type="number" id="q3-a-input" placeholder="e.g. 100" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ3S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h1">
+          提示：注意單位轉換，30 kJ = 30,000 J。<br>
+          熱容量公式：E = C ΔT  =>  ΔT = E / C = 30000 / 7500。
+        </div>
+        <div class="feedback" id="q3-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q3-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Determine the increase in internal energy when temp rises from 25 °C to 80 °C</div>
+        <div class="input-row">
+          <span>Energy Increase = </span>
+          <input type="number" id="q3-b-input" placeholder="e.g. 100" step="any">
+          <span>kJ</span>
+          <button class="check-btn" onclick="checkQ3S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h2">
+          提示：溫度變化 ΔT = 80 - 25 = 55 °C。<br>
+          內能增加量 E = C ΔT = 7500 × 55 J。最後除以 1000 換算成 kJ。
+        </div>
+        <div class="feedback" id="q3-fb2"></div>
+      </div>
+    </div>
+
+    <!-- QUESTION 4 -->
+    <div class="q-panel" id="tab-3">
+      <div class="q-header">
+        <h2>Question 4 (P.62 Example 2.4)</h2>
+        <div class="q-desc">
+          A wok of <b>700 g</b> oil is heated with <b>2.1 × 10⁵ J</b> of energy at <b>25 °C</b>. If the specific heat capacity of the oil is <b>2 kJ kg⁻¹ °C⁻¹</b>, what temperature is the oil heated to?
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q4-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate the temperature rise (ΔT)</div>
+        <div class="input-row">
+          <span>ΔT = </span>
+          <input type="number" id="q4-dt-input" placeholder="e.g. 100" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ4S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h1">
+          提示：注意單位換算！<br>
+          質量 m = 700 g = 0.7 kg。<br>
+          比熱容量 c = 2 kJ kg⁻¹ °C⁻¹ = 2000 J kg⁻¹ °C⁻¹。<br>
+          公式：E = mcΔT  =>  ΔT = E / (mc) = 210,000 / (0.7 × 2000)。
+        </div>
+        <div class="feedback" id="q4-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q4-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Find the final temperature (T)</div>
+        <div class="input-row">
+          <span>Final Temperature T = </span>
+          <input type="number" id="q4-t-input" placeholder="e.g. 100" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ4S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h2">
+          提示：最終溫度 T = 初溫 + 升高的溫度 = 25 °C + ΔT。
+        </div>
+        <div class="feedback" id="q4-fb2"></div>
+      </div>
+    </div>
+
+    <!-- QUESTION 5 -->
+    <div class="q-panel" id="tab-4">
+      <div class="q-header">
+        <h2>Question 5 (P.63 Example 2.5)</h2>
+        <div class="q-desc">
+          Francis is heating <b>0.8 kg</b> of water from <b>25 °C to 100 °C</b>. The kettle to be used requires <b>240 J</b> of energy to raise its temperature by 1 °C (C_kettle = 240 J °C⁻¹). Take c_water = 4200 J kg⁻¹ °C⁻¹.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q5-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Increase in internal energy of the kettle of water</div>
+        <p>Both water and kettle are heated together from 25 °C to 100 °C (ΔT = 75 °C).</p>
+        <div class="input-row">
+          <span>Internal Energy Increase = </span>
+          <input type="number" id="q5-a-input" placeholder="e.g. 100" step="any">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ5S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h1">
+          提示：E = (m_water × c_water + C_kettle) × ΔT<br>
+          = (0.8 × 4200 + 240) × (100 - 25) = (3360 + 240) × 75 = 3600 × 75 J。
+        </div>
+        <div class="feedback" id="q5-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q5-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Total energy required assuming 10% is lost to surroundings</div>
+        <div class="input-row">
+          <span>Total Energy = </span>
+          <input type="number" id="q5-b-input" placeholder="e.g. 100" step="any">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ5S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h2">
+          提示：若損耗 10%，則有效吸收的能量佔總能量的 90% (1 - 10%)。<br>
+          總能量 E_total = E / (1 - 0.10) = 270,000 / 0.9。
+        </div>
+        <div class="feedback" id="q5-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q5-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> (c) If the water boils in 2 minutes, what is the power of the kettle?</div>
+        <div class="input-row">
+          <span>Power = </span>
+          <input type="number" id="q5-c-input" placeholder="e.g. 100" step="any">
+          <span>W</span>
+          <button class="check-btn" onclick="checkQ5S3()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h3">
+          提示：時間 t = 2 分鐘 = 120 秒。<br>
+          P = E_total / t = 300,000 J / 120 s。
+        </div>
+        <div class="feedback" id="q5-fb3"></div>
+      </div>
+    </div>
+
+    <!-- QUESTION 6 -->
+    <div class="q-panel" id="tab-5">
+      <div class="q-header">
+        <h2>Question 6 (P.66 Example 2.6)</h2>
+        <div class="q-desc">
+          A student conducts Experiment 2.1 to find the specific heat capacity of water with the following data:<br>
+          • Mass of water = <b>220 g</b><br>
+          • Initial reading of joulemeter = <b>32 050 J</b><br>
+          • Final reading of joulemeter = <b>58 635 J</b><br>
+          • Initial temperature = <b>25 °C</b>, Final temperature = <b>55 °C</b>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q6-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Calculate the specific heat capacity of water</div>
+        <div class="input-row">
+          <span>c = </span>
+          <input type="number" id="q6-a-input" placeholder="e.g. 100" step="any">
+          <span>J kg⁻¹ °C⁻¹</span>
+          <button class="check-btn" onclick="checkQ6S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h1">
+          提示：<br>
+          供給能量 E = 58 635 - 32 050 = 26 585 J。<br>
+          質量 m = 220 g = 0.22 kg。<br>
+          升溫 ΔT = 55 - 25 = 30 °C。<br>
+          公式：c = E / (m ΔT) = 26585 / (0.22 × 30)。
+        </div>
+        <div class="feedback" id="q6-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q6-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) If the student mistakenly includes both the water and beaker in the mass:</div>
+        <p>Would the experimental value of c be larger or smaller than standard? Why?</p>
+        <div class="input-row">
+          <select id="q6-b-select">
+            <option value="">-- Select larger/smaller --</option>
+            <option value="smaller">Smaller (偏小)</option>
+            <option value="larger">Larger (偏大)</option>
+          </select>
+          <select id="q6-b-reason">
+            <option value="">-- Select reason --</option>
+            <option value="over">m is overestimated (分母質量偏大)</option>
+            <option value="under">m is underestimated (分母質量偏小)</option>
+          </select>
+          <button class="check-btn" onclick="checkQ6S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h2">
+          提示：根據 c = E / (m ΔT)，如果測量質量時包含了燒杯，所記錄的質量 m 就被高估了 (overestimated)。因為 m 在分母，計算出的 c 值就會偏小 (underestimated)。
+        </div>
+        <div class="feedback" id="q6-fb2"></div>
+      </div>
+    </div>
+
+    <!-- QUESTION 7 -->
+    <div class="q-panel" id="tab-6">
+      <div class="q-header">
+        <h2>Question 7 (P.66 Example 2.7)</h2>
+        <div class="q-desc">
+          A housewife fills a rice cooker with <b>2 kg</b> of <b>15 °C</b> water, and switches it on for <b>10 min</b>. The final temperature of the water is <b>85 °C</b>. Take c_water = <b>4.2 kJ kg⁻¹ °C⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q7-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) What is the useful output power of the cooker?</div>
+        <div class="input-row">
+          <span>Useful Power P = </span>
+          <input type="number" id="q7-a-input" placeholder="e.g. 100" step="any">
+          <span>W</span>
+          <button class="check-btn" onclick="checkQ7S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q7-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q7-h1">
+          提示：時間 t = 10 min = 600 s。<br>
+          比熱 c = 4.2 kJ kg⁻¹ °C⁻¹ = 4200 J kg⁻¹ °C⁻¹。<br>
+          溫差 ΔT = 85 - 15 = 70 °C。<br>
+          P = mcΔT / t = (2 × 4200 × 70) / 600。
+        </div>
+        <div class="feedback" id="q7-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q7-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Heat 2 kg congee from 25 °C to 55 °C (c = 4.9 kJ kg⁻¹ °C⁻¹) at the same power</div>
+        <p>Calculate the time needed for this process.</p>
+        <div class="input-row">
+          <span>Time needed = </span>
+          <input type="number" id="q7-b-input" placeholder="e.g. 100" step="any">
+          <span>seconds (s)</span>
+          <button class="check-btn" onclick="checkQ7S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q7-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q7-h2">
+          提示：使用第一步算出的輸出功率 P = 980 W。<br>
+          粥升溫需要的能量 E = mcΔT = 2 × 4900 × (55 - 25) = 294,000 J。<br>
+          時間 t = E / P = 294,000 / 980 秒 (即 5 分鐘)。
+        </div>
+        <div class="feedback" id="q7-fb2"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* --- Tab Navigation --- */
+  function switchTab(index) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.q-panel');
+    tabs.forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+      panels[i].classList.toggle('active', i === index);
+    });
+  }
+
+  /* --- Timer Functionality --- */
+  let seconds = 0;
+  let timerInterval = null;
+  let isRunning = false;
+
+  function updateTimerDisplay() {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('startPauseBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.innerText = 'Pause';
+      timerInterval = setInterval(() => {
+        seconds++;
+        updateTimerDisplay();
+      }, 1000);
+    } else {
+      isRunning = false;
+      btn.innerText = 'Start';
+      clearInterval(timerInterval);
+    }
+  }
+
+  function resetTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    updateTimerDisplay();
+    document.getElementById('startPauseBtn').innerText = 'Start';
+  }
+
+  /* --- Hint Toggle --- */
+  function toggleHint(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  /* --- Helper: Check tolerance --- */
+  function isClose(val, target, tolerance = 0.03) {
+    return Math.abs(val - target) <= Math.abs(target * tolerance);
+  }
+
+  function markStepSuccess(stepId, fbId, msg, nextStepId) {
+    const step = document.getElementById(stepId);
+    const fb = document.getElementById(fbId);
+    step.classList.add('completed');
+    fb.className = 'feedback success';
+    fb.innerHTML = '✅ ' + msg;
+    if (nextStepId) {
+      const next = document.getElementById(nextStepId);
+      next.classList.remove('locked');
+      next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function markStepError(fbId, msg) {
+    const fb = document.getElementById(fbId);
+    fb.className = 'feedback error';
+    fb.innerHTML = '❌ ' + msg;
+  }
+
+  /* --- Question 1 Logic --- */
+  function checkQ1S1() {
+    const val = parseFloat(document.getElementById('q1-a-input').value);
+    if (val === 2000 || val === 2) {
+      markStepSuccess('q1-s1', 'q1-fb1', 'Correct! P = 6.0 × 10⁵ / 300 = 2000 W (2 kW).', 'q1-s2');
+    } else {
+      markStepError('q1-fb1', 'Incorrect. Remember to convert 5 minutes into 300 seconds.');
+    }
+  }
+
+  function checkQ1S2() {
+    const val = parseFloat(document.getElementById('q1-b-input').value);
+    if (val === 1600 || val === 1.6) {
+      markStepSuccess('q1-s2', 'q1-fb2', 'Correct! P = 4.8 × 10⁵ / 300 = 1600 W (1.6 kW).', 'q1-s3');
+    } else {
+      markStepError('q1-fb2', 'Incorrect. Check: 480,000 J / 300 s.');
+    }
+  }
+
+  function checkQ1S3() {
+    const val = document.getElementById('q1-c-input').value;
+    if (val === 'A') {
+      markStepSuccess('q1-s3', 'q1-fb3', 'Correct! Kettle A has higher power (2 kW > 1.6 kW), delivering energy faster.', null);
+    } else {
+      markStepError('q1-fb3', 'Incorrect. Think about which kettle transfers heat at a faster rate.');
+    }
+  }
+
+  /* --- Question 2 Logic --- */
+  function checkQ2S1() {
+    const val = parseFloat(document.getElementById('q2-p-input').value);
+    if (val === 125) {
+      markStepSuccess('q2-s1', 'q2-fb1', 'Correct! P_effective = 0.5 × 1000 × 25% = 125 W.', 'q2-s2');
+    } else {
+      markStepError('q2-fb1', 'Incorrect. Solar power = 0.5 m² × 1000 W/m² = 500 W. Now calculate 25% of 500 W.');
+    }
+  }
+
+  function checkQ2S2() {
+    const val = parseFloat(document.getElementById('q2-e-input').value);
+    if (val === 300000 || val === 300) {
+      markStepSuccess('q2-s2', 'q2-fb2', 'Correct! E = Pt = 125 W × (40 × 60 s) = 3.0 × 10⁵ J (300 kJ).', null);
+    } else {
+      markStepError('q2-fb2', 'Incorrect. 40 minutes = 2400 seconds. E = 125 × 2400.');
+    }
+  }
+
+  /* --- Question 3 Logic --- */
+  function checkQ3S1() {
+    const val = parseFloat(document.getElementById('q3-a-input').value);
+    if (val === 4) {
+      markStepSuccess('q3-s1', 'q3-fb1', 'Correct! ΔT = E / C = 30 000 J / 7500 = 4 °C.', 'q3-s2');
+    } else {
+      markStepError('q3-fb1', 'Incorrect. Did you convert 30 kJ into 30,000 J?');
+    }
+  }
+
+  function checkQ3S2() {
+    const val = parseFloat(document.getElementById('q3-b-input').value);
+    if (val === 412.5 || val === 412500) {
+      markStepSuccess('q3-s2', 'q3-fb2', 'Correct! E = C ΔT = 7500 × (80 - 25) = 412 500 J = 412.5 kJ.', null);
+    } else {
+      markStepError('q3-fb2', 'Incorrect. ΔT = 80 - 25 = 55 °C. Multiply 7500 by 55 and convert to kJ.');
+    }
+  }
+
+  /* --- Question 4 Logic --- */
+  function checkQ4S1() {
+    const val = parseFloat(document.getElementById('q4-dt-input').value);
+    if (val === 150) {
+      markStepSuccess('q4-s1', 'q4-fb1', 'Correct! ΔT = 210,000 / (0.7 × 2000) = 150 °C.', 'q4-s2');
+    } else {
+      markStepError('q4-fb1', 'Incorrect. Check your units: 700 g = 0.7 kg, and 2 kJ kg⁻¹ °C⁻¹ = 2000 J kg⁻¹ °C⁻¹.');
+    }
+  }
+
+  function checkQ4S2() {
+    const val = parseFloat(document.getElementById('q4-t-input').value);
+    if (val === 175) {
+      markStepSuccess('q4-s2', 'q4-fb2', 'Correct! Final temperature T = 25 + 150 = 175 °C.', null);
+    } else {
+      markStepError('q4-fb2', 'Incorrect. The initial temperature is 25 °C, so add 150 °C to it.');
+    }
+  }
+
+  /* --- Question 5 Logic --- */
+  function checkQ5S1() {
+    const val = parseFloat(document.getElementById('q5-a-input').value);
+    if (val === 270000 || val === 270) {
+      markStepSuccess('q5-s1', 'q5-fb1', 'Correct! E = (0.8 × 4200 + 240) × (100 - 25) = 2.7 × 10⁵ J.', 'q5-s2');
+    } else {
+      markStepError('q5-fb1', 'Incorrect. Check: (3360 + 240) × 75 = 3600 × 75.');
+    }
+  }
+
+  function checkQ5S2() {
+    const val = parseFloat(document.getElementById('q5-b-input').value);
+    if (val === 300000 || val === 300) {
+      markStepSuccess('q5-s2', 'q5-fb2', 'Correct! Total energy = 2.7 × 10⁵ / (1 - 10%) = 3.0 × 10⁵ J.', 'q5-s3');
+    } else {
+      markStepError('q5-fb2', 'Incorrect. 270,000 J is 90% of total energy. Divide 270,000 by 0.9.');
+    }
+  }
+
+  function checkQ5S3() {
+    const val = parseFloat(document.getElementById('q5-c-input').value);
+    if (val === 2500 || val === 2.5) {
+      markStepSuccess('q5-s3', 'q5-fb3', 'Correct! P = 3.0 × 10⁵ / 120 = 2500 W (2.5 kW).', null);
+    } else {
+      markStepError('q5-fb3', 'Incorrect. 2 minutes = 120 seconds. P = 300,000 / 120.');
+    }
+  }
+
+  /* --- Question 6 Logic --- */
+  function checkQ6S1() {
+    const val = parseFloat(document.getElementById('q6-a-input').value);
+    if (isClose(val, 4030, 0.01) || isClose(val, 4028, 0.01)) {
+      markStepSuccess('q6-s1', 'q6-fb1', 'Correct! c = (58635 - 32050) / (0.22 × 30) = 4030 J kg⁻¹ °C⁻¹.', 'q6-s2');
+    } else {
+      markStepError('q6-fb1', 'Incorrect. ΔE = 26585 J, m = 0.22 kg, ΔT = 30 °C. Calculate 26585 / (0.22 × 30).');
+    }
+  }
+
+  function checkQ6S2() {
+    const sel = document.getElementById('q6-b-select').value;
+    const reason = document.getElementById('q6-b-reason').value;
+    if (sel === 'smaller' && reason === 'over') {
+      markStepSuccess('q6-s2', 'q6-fb2', 'Correct! Since m is overestimated (denominator is larger), c is underestimated (smaller).', null);
+    } else {
+      markStepError('q6-fb2', 'Incorrect. Notice that m is in the denominator: c = E / (m ΔT). If measured mass increases, what happens to c?');
+    }
+  }
+
+  /* --- Question 7 Logic --- */
+  function checkQ7S1() {
+    const val = parseFloat(document.getElementById('q7-a-input').value);
+    if (val === 980) {
+      markStepSuccess('q7-s1', 'q7-fb1', 'Correct! P = 2 × 4200 × (85 - 15) / 600 = 980 W.', 'q7-s2');
+    } else {
+      markStepError('q7-fb1', 'Incorrect. 10 minutes = 600 s. P = (2 × 4200 × 70) / 600.');
+    }
+  }
+
+  function checkQ7S2() {
+    const val = parseFloat(document.getElementById('q7-b-input').value);
+    if (val === 300 || val === 5) {
+      markStepSuccess('q7-s2', 'q7-fb2', 'Correct! t = 2 × 4900 × (55 - 25) / 980 = 300 s (5 minutes).', null);
+    } else {
+      markStepError('q7-fb2', 'Incorrect. E = 2 × 4900 × 30 = 294,000 J. Then t = 294,000 / 980.');
+    }
+  }
+</script>
+
+</body>
+</html>

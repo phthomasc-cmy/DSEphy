@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Writing Scaffold: Specific Heat Capacity</title>
+  <style>
+    :root {
+      --primary: #9e2a2b;
+      --primary-light: #fff3f2;
+      --secondary: #335c67;
+      --background: #f8f9fa;
+      --card-bg: #ffffff;
+      --border: #e0e0e0;
+      --text: #2b2d42;
+      --blank: #0d6efd;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    header {
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 12px;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 5px;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--secondary);
+      margin-top: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .badge {
+      background: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .word-bank {
+      background: #eef7f6;
+      border-left: 4px solid var(--secondary);
+      padding: 10px 14px;
+      margin: 12px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.9rem;
+    }
+
+    .word-bank strong {
+      color: var(--secondary);
+    }
+
+    .sentence-frame {
+      background: var(--primary-light);
+      border: 1px dashed var(--primary);
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      font-size: 0.95rem;
+    }
+
+    .blank {
+      color: var(--blank);
+      font-weight: 600;
+      text-decoration: underline;
+      padding: 0 4px;
+    }
+
+    /* Clean inline formula formatting */
+    .formula {
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-style: italic;
+    }
+    .formula span {
+      font-style: normal;
+    }
+
+    details {
+      margin-top: 15px;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+
+    summary {
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--secondary);
+    }
+
+    .model-answer {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      color: #333;
+    }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Structured Writing Guide: Heat Capacity</h1>
+    <div class="subtitle">Use these vocabulary banks and sentence frames to construct well-explained physics explanations.</div>
+  </header>
+
+  <!-- QUESTION 1 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="badge">Q1</span> High Specific Heat Capacity of Water
+    </div>
+    <p><em>Determine if each case can be explained by the high specific heat capacity of water (<span class="formula">c</span>), and justify your choice.</em></p>
+
+    <div class="word-bank">
+      <strong>Helpful Vocabulary:</strong> specific heat capacity (<span class="formula">c</span>), temperature change (&Delta;<span class="formula">T</span>), internal energy (<span class="formula">E</span>), thermal equilibrium, polar solvent.
+    </div>
+
+    <div class="sentence-frame">
+      <p><strong>Writing Frames:</strong></p>
+      <ul>
+        <li><strong>(a) Land &amp; Sea:</strong> <span class="blank">[Yes / No]</span>. Water has a <span class="blank">[much higher / lower]</span> specific heat capacity than land/rock. For the same rate of heat loss at night, the temperature drop (&Delta;<span class="formula">T</span>) of the sea is <span class="blank">[smaller / larger]</span> than that of the land.</li>
+        <li><strong>(b) Fried Noodles vs. Soup Noodles:</strong> <span class="blank">[Yes / No]</span>. Soup consists mainly of <span class="blank">[water]</span>, which has a very high <span class="blank">[specific heat capacity]</span>. It stores <span class="blank">[more / less]</span> energy and cools down much more <span class="blank">[slowly / rapidly]</span> than fried noodles.</li>
+        <li><strong>(c) Water as a Solvent:</strong> <span class="blank">[Yes / No]</span>. This is due to water’s chemical <span class="blank">[polarity / molecular structure]</span>, which is <span class="blank">[unrelated / related]</span> to its thermal properties.</li>
+        <li><strong>(d) Apple Pie Filling:</strong> <span class="blank">[Yes / No]</span>. The pie filling has a high <span class="blank">[water content]</span>, so it has a much higher heat capacity than the dry crust, storing <span class="blank">[more / less]</span> internal energy at the same temperature.</li>
+      </ul>
+    </div>
+
+    <details>
+      <summary>Click to check answers</summary>
+      <div class="model-answer">
+        <ul>
+          <li><strong>(a) Yes:</strong> Water's high specific heat capacity means it cools down more slowly than land for the same amount of heat lost.</li>
+          <li><strong>(b) Yes:</strong> The soup is mostly water with high specific heat capacity, retaining thermal energy much longer than dry noodles.</li>
+          <li><strong>(c) No:</strong> Water's solvent ability comes from its molecular polarity, not its thermal capacity.</li>
+          <li><strong>(d) Yes:</strong> The moist filling contains abundant water, giving it a much higher heat capacity and storing far more internal energy than the crust.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <!-- QUESTION 2 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="badge">Q2</span> Wet Sand vs. Dry Sand
+    </div>
+    <p><em>When walking along the beach on a sunny day, we find the wet sand cooler than the dry sand. Why?</em></p>
+
+    <div class="word-bank">
+      <strong>Helpful Vocabulary:</strong> solar radiation, specific heat capacity (<span class="formula">c</span>), temperature rise (&Delta;<span class="formula">T</span> = <span class="formula">Q / mc</span>), evaporation, latent heat of vaporization (<span class="formula">l<sub>v</sub></span>).
+    </div>
+
+    <div class="sentence-frame">
+      <p><strong>Writing Frame:</strong></p>
+      <ol>
+        <li>Wet sand contains water, which has a much <span class="blank">[higher / lower]</span> specific heat capacity than dry sand. For the same amount of solar radiation absorbed, wet sand has a <span class="blank">[smaller / larger]</span> temperature rise (&Delta;<span class="formula">T</span>).</li>
+        <li>In addition, water continually <span class="blank">[evaporates]</span> from the surface, absorbing <span class="blank">[latent heat of vaporization]</span> and providing an extra cooling effect.</li>
+      </ol>
+    </div>
+
+    <details>
+      <summary>Click to view model answer</summary>
+      <div class="model-answer">
+        <strong>Model Answer:</strong><br>
+        1. <strong>Higher specific heat capacity:</strong> Wet sand contains water, which has a much higher specific heat capacity (<span class="formula">c</span>) than dry sand. By &Delta;<span class="formula">T</span> = <span class="formula">Q / mc</span>, the temperature rise of wet sand is smaller for the same heat absorbed.<br>
+        2. <strong>Evaporative cooling:</strong> Water in wet sand evaporates, absorbing latent heat of vaporization from the sand and lowering its temperature.
+      </div>
+    </details>
+  </div>
+
+  <!-- QUESTION 3 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="badge">Q3</span> Hot Spoon vs. Hot Tea
+    </div>
+    <p><em>Charles puts a metal spoon in hot tea. They reach the same temperature. Why does the tea feel much hotter in the mouth than the spoon?</em></p>
+
+    <div class="word-bank">
+      <strong>Helpful Vocabulary:</strong> thermal equilibrium, temperature (<span class="formula">T</span>), heat capacity (<span class="formula">C = mc</span>), internal energy transfer (&Delta;<span class="formula">Q</span>).
+    </div>
+
+    <div class="sentence-frame">
+      <p><strong>Writing Frame:</strong></p>
+      <ul>
+        <li>Although both are at the same <span class="blank">[temperature]</span>, they have very different <span class="blank">[heat capacities (C = mc)]</span>.</li>
+        <li>The tea (mostly water) has a much higher <span class="blank">[specific heat capacity]</span> and mass than the metal spoon.</li>
+        <li>When touching the mouth, the tea transfers a significantly <span class="blank">[larger / smaller]</span> amount of internal energy to the tongue before its temperature drops, causing a stronger burning sensation.</li>
+      </ul>
+    </div>
+
+    <details>
+      <summary>Click to view model answer</summary>
+      <div class="model-answer">
+        <strong>Model Answer:</strong><br>
+        Even though both are at the same temperature, the tea (primarily water) has a far higher specific heat capacity and mass than the metal spoon, meaning its total heat capacity (<span class="formula">C = mc</span>) is much greater. When coming into contact with the mouth, the tea transfers a much larger amount of thermal energy before cooling down, raising the temperature of the mouth tissues significantly more.
+      </div>
+    </details>
+  </div>
+
+  <!-- QUESTION 4 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="badge">Q4</span> Cooling of Viscous Congee
+    </div>
+    <p><em>Why does hot viscous congee cool down very slowly? Give two reasons.</em></p>
+
+    <div class="word-bank">
+      <strong>Helpful Vocabulary:</strong> specific heat capacity (<span class="formula">c</span>), viscosity, convection currents, poor thermal conduction, surface film / evaporation.
+    </div>
+
+    <div class="sentence-frame">
+      <p><strong>Writing Frame:</strong></p>
+      <p><strong>Reason 1:</strong> Congee consists mainly of <span class="blank">[water]</span>, which has a very high <span class="blank">[specific heat capacity]</span>, meaning it stores a large amount of internal energy and releases it slowly.</p>
+      <p><strong>Reason 2:</strong> Congee is very viscous (thick), which suppresses internal <span class="blank">[convection]</span> currents. Heat can only transfer to the surface by slow <span class="blank">[conduction]</span>. <em>(Or: A starchy layer forms on top, reducing cooling by <span class="blank">[evaporation]</span>.)</em></p>
+    </div>
+
+    <details>
+      <summary>Click to view model answer</summary>
+      <div class="model-answer">
+        <strong>Model Answer (Any two reasons):</strong>
+        <ol>
+          <li><strong>High specific heat capacity:</strong> Congee contains a high percentage of water, which has a high specific heat capacity (<span class="formula">c</span>), so a large amount of energy must be lost for the temperature to fall.</li>
+          <li><strong>Suppressed convection:</strong> Because of its high viscosity, convection currents cannot readily form. Heat is transferred through the liquid primarily by slow conduction.</li>
+          <li><strong>Reduced evaporation:</strong> A starchy skin quickly forms on the surface of the congee, blocking heat loss via evaporation.</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+
+</body>
+</html>
