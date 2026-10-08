@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Ch.2 - Heat Capacity & Specific Heat Capacity</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-hover: #1e40af;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --hint-color: #0369a1;
+      --hint-bg: #f0f9ff;
+      --hint-border: #bae6fd;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-700: #334155;
+      --gray-800: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      padding: 20px 14px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    /* Top Bar & Timer */
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
+      border-radius: 6px;
+      gap: 10px;
+    }
+
+    .timer-display {
+      font-family: monospace;
+      font-size: 1.35rem;
+      font-weight: bold;
+      min-width: 65px;
+    }
+
+    .timer-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+
+    .timer-btn:hover {
+      background: #e0e7ff;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 12px 18px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--gray-200);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    /* Question Content */
+    .content-area {
+      padding: 24px;
+    }
+
+    .q-panel {
+      display: none;
+    }
+
+    .q-panel.active {
+      display: block;
+    }
+
+    .q-header {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--gray-200);
+    }
+
+    .q-header h2 {
+      font-size: 1.15rem;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+
+    .q-desc {
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      background: var(--gray-50);
+      padding: 14px;
+      border-left: 4px solid var(--primary);
+      border-radius: 4px;
+    }
+
+    /* Step Card */
+    .step-card {
+      margin-top: 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .step-card.locked {
+      opacity: 0.45;
+      pointer-events: none;
+      background: var(--gray-50);
+    }
+
+    .step-card.completed {
+      border-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .step-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"] {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      min-width: 140px;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    button.check-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    button.check-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    button.hint-btn {
+      background: #fff;
+      color: var(--hint-color);
+      border: 1px solid var(--hint-color);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    button.hint-btn:hover {
+      background: var(--hint-bg);
+    }
+
+    /* Formal Chinese Hint Box */
+    .hint-content {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--hint-bg);
+      border: 1px solid var(--hint-border);
+      border-left: 4px solid var(--hint-color);
+      border-radius: 6px;
+      font-size: 0.88rem;
+      color: #0c4a6e;
+    }
+
+    .hint-head {
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: var(--hint-color);
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .feedback.success {
+      display: block;
+      color: var(--success);
+    }
+
+    .feedback.error {
+      display: block;
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header with Timer -->
+  <header>
+    <div>
+      <h1>Physics Practice: Ch.2 Heat Capacity & Power</h1>
+      <p>Interactive progressive problem solving with step-by-step guidance</p>
+    </div>
+    <div class="timer-box">
+      <span>⏱️ Timer:</span>
+      <span class="timer-display" id="timerDisplay">00:00</span>
+      <button class="timer-btn" id="startPauseBtn" onclick="toggleTimer()">Start</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset</button>
+    </div>
+  </header>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">Question 1</button>
+    <button class="tab-btn" onclick="switchTab(1)">Question 2</button>
+    <button class="tab-btn" onclick="switchTab(2)">Question 3</button>
+    <button class="tab-btn" onclick="switchTab(3)">Question 4</button>
+    <button class="tab-btn" onclick="switchTab(4)">Question 5</button>
+    <button class="tab-btn" onclick="switchTab(5)">Question 6</button>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ================= QUESTION 1 ================= -->
+    <div class="q-panel active" id="tab-0">
+      <div class="q-header">
+        <h2>Question 1: A pot of tea</h2>
+        <div class="q-desc">
+          A pot of tea is supplied with <b>30 kJ</b> of heat. Its temperature rises by <b>5 °C</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q1-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Find the heat capacity of the tea (assume no heat loss)</div>
+        <div class="input-row">
+          <span>Heat capacity C = </span>
+          <input type="number" id="q1-a-input" placeholder="Enter value...">
+          <span>J °C⁻¹</span>
+          <button class="check-btn" onclick="checkQ1S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 題目給出吸收的熱量 <i>E</i> = 30 kJ 以及溫度變化 Δ<i>T</i> = 5 °C。<br>
+          2. 本問求的是「熱容量」(Heat capacity, <i>C</i>)，而非「比熱容量」(Specific heat capacity, <i>c</i>)，因此公式不涉及質量 <i>m</i>。<br>
+          3. 應用公式：<i>E</i> = <i>C</i>Δ<i>T</i> ⇒ <i>C</i> = <i>E</i> / Δ<i>T</i>。<br>
+          4. 需進行單位換算：將 30 kJ 轉換為國際標準單位 (30 000 J)。
+        </div>
+        <div class="feedback" id="q1-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q1-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Determine the increase in internal energy when temperature rises from 25 °C to 80 °C</div>
+        <div class="input-row">
+          <span>Energy increase = </span>
+          <input type="number" id="q1-b-input" placeholder="Enter value...">
+          <span>kJ</span>
+          <button class="check-btn" onclick="checkQ1S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 計算溫度變化量：Δ<i>T</i> = 80 °C - 25 °C = 55 °C。<br>
+          2. 利用 (a) 部計算所得之熱容量 <i>C</i>，代入公式 <i>E</i> = <i>C</i>Δ<i>T</i> 計算吸收的熱量。<br>
+          3. 題目要求以千焦耳 (kJ) 為單位，將計算結果 (J) 除以 1000 即可。
+        </div>
+        <div class="feedback" id="q1-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 2 ================= -->
+    <div class="q-panel" id="tab-1">
+      <div class="q-header">
+        <h2>Question 2: Wok of oil</h2>
+        <div class="q-desc">
+          A wok of <b>500 g</b> oil is heated from <b>20 °C to 170 °C</b>. If the specific heat capacity of the oil is <b>2 kJ kg⁻¹ °C⁻¹</b>, find the energy transferred to the oil.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q2-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate the temperature rise (ΔT)</div>
+        <div class="input-row">
+          <span>ΔT = </span>
+          <input type="number" id="q2-dt-input" placeholder="Enter value...">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ2S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 溫度變化量公式：Δ<i>T</i> = <i>T</i><sub>末</sub> - <i>T</i><sub>初</sub>。<br>
+          2. 代入數值：170 °C - 20 °C。
+        </div>
+        <div class="feedback" id="q2-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q2-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Calculate the energy transferred to the oil in kJ</div>
+        <div class="input-row">
+          <span>Energy transferred E = </span>
+          <input type="number" id="q2-e-input" placeholder="Enter value...">
+          <span>kJ</span>
+          <button class="check-btn" onclick="checkQ2S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 進行單位換算：質量 <i>m</i> = 500 g = 0.5 kg；比熱容量 <i>c</i> = 2 kJ kg⁻¹ °C⁻¹。<br>
+          2. 應用比熱容量公式：<i>E</i> = <i>mc</i>Δ<i>T</i>。<br>
+          3. 代入數據計算能量轉移量 <i>E</i>。
+        </div>
+        <div class="feedback" id="q2-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 3 ================= -->
+    <div class="q-panel" id="tab-2">
+      <div class="q-header">
+        <h2>Question 3: Rice Cooker</h2>
+        <div class="q-desc">
+          A housewife fills a rice cooker with <b>1 kg of water at 25 °C</b> and switches it on for <b>7 min</b>. The final temperature of the water is <b>85 °C</b>. (Take c<sub>water</sub> = <b>4.2 kJ kg⁻¹ °C⁻¹</b>).<br>
+          If the housewife uses the same cooker to heat <b>1.5 kg of congee from 25 °C to 73 °C in 7 min</b>, find the specific heat capacity of the congee. (Assume cooker power is unchanged).
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q3-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate the heat energy supplied to the water (J)</div>
+        <div class="input-row">
+          <span>Energy supplied to water = </span>
+          <input type="number" id="q3-ew-input" placeholder="Enter value...">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ3S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 加熱水過程的已知量：質量 <i>m</i> = 1 kg，比熱容量 <i>c</i> = 4200 J kg⁻¹ °C⁻¹。<br>
+          2. 水的升溫幅度：Δ<i>T</i> = 85 °C - 25 °C = 60 °C。<br>
+          3. 應用公式：<i>E</i> = <i>mc</i>Δ<i>T</i>。
+        </div>
+        <div class="feedback" id="q3-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q3-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Find the specific heat capacity of the congee</div>
+        <div class="input-row">
+          <span>c<sub>congee</sub> = </span>
+          <input type="number" id="q3-c-input" placeholder="Enter value...">
+          <span>J kg⁻¹ °C⁻¹</span>
+          <button class="check-btn" onclick="checkQ3S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 由於電飯煲功率維持不變，且兩次加熱時間皆為 7 分鐘，因此供應給粥的總能量與水相同（<i>E</i><sub>congee</sub> = <i>E</i><sub>water</sub>）。<br>
+          2. 粥的質量 <i>m</i> = 1.5 kg，溫差 Δ<i>T</i> = 73 °C - 25 °C = 48 °C。<br>
+          3. 建立能量方程：<i>E</i> = <i>m</i><sub>congee</sub> · <i>c</i><sub>congee</sub> · Δ<i>T</i><sub>congee</sub>，移項解出 <i>c</i><sub>congee</sub>。
+        </div>
+        <div class="feedback" id="q3-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 4 ================= -->
+    <div class="q-panel" id="tab-3">
+      <div class="q-header">
+        <h2>Question 4: Cooling Soup</h2>
+        <div class="q-desc">
+          A soup of mass <b>250 g</b> cools from <b>90 °C to 45 °C</b> in <b>24 min</b>. The specific heat capacity of the soup is <b>3900 J kg⁻¹ °C⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q4-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) How much energy is lost by the soup? (J)</div>
+        <div class="input-row">
+          <span>Energy lost = </span>
+          <input type="number" id="q4-e-input" placeholder="Enter value...">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ4S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 質量需換算為標準單位：<i>m</i> = 250 g = 0.25 kg。<br>
+          2. 溫度降幅：Δ<i>T</i> = 90 °C - 45 °C = 45 °C。<br>
+          3. 散失熱量公式：<i>E</i> = <i>mc</i>Δ<i>T</i>。
+        </div>
+        <div class="feedback" id="q4-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q4-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Find the average rate of energy lost by the soup</div>
+        <div class="input-row">
+          <span>Average rate (Power) = </span>
+          <input type="number" id="q4-p-input" placeholder="Enter value..." step="any">
+          <span>W</span>
+          <button class="check-btn" onclick="checkQ4S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 「能量散失速率」(Rate of energy lost) 即為平均功率 <i>P</i>。<br>
+          2. 功率定義式：<i>P</i> = <i>E</i> / <i>t</i>。<br>
+          3. 時間需換算為秒：<i>t</i> = 24 分鐘 = 24 × 60 秒 = 1440 s。
+        </div>
+        <div class="feedback" id="q4-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 5 ================= -->
+    <div class="q-panel" id="tab-4">
+      <div class="q-header">
+        <h2>Question 5: Air Conditioner</h2>
+        <div class="q-desc">
+          An air conditioner X is used to cool a room by removing energy of <b>3.5 kJ each second</b> from the room.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q5-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Office size: 10 m × 10 m × 2.5 m, air density = 1.2 kg m⁻³. Find the mass of air</div>
+        <div class="input-row">
+          <span>Mass of air = </span>
+          <input type="number" id="q5-m-input" placeholder="Enter value...">
+          <span>kg</span>
+          <button class="check-btn" onclick="checkQ5S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 計算辦公室空間體積：<i>V</i> = 長 × 寬 × 高 = 10 × 10 × 2.5 m³。<br>
+          2. 應用質量與密度關係式：<i>m</i> = 體積 × 密度 = <i>V</i> × ρ。
+        </div>
+        <div class="feedback" id="q5-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q5-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Energy removed to cool room from 30 °C to 22 °C (c<sub>air</sub> = 1 kJ kg⁻¹ °C⁻¹)</div>
+        <div class="input-row">
+          <span>Energy removed = </span>
+          <input type="number" id="q5-e-input" placeholder="Enter value..." step="any">
+          <span>MJ</span>
+          <button class="check-btn" onclick="checkQ5S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 溫差計算：Δ<i>T</i> = 30 °C - 22 °C = 8 °C。<br>
+          2. 代入熱量公式：<i>E</i> = <i>mc</i>Δ<i>T</i>，其中 <i>m</i> 為 (a) 部計算所得質量。<br>
+          3. 題目要求以百萬焦耳 (MJ) 為單位作答，注意 1 MJ = 10⁶ J。
+        </div>
+        <div class="feedback" id="q5-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q5-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> (c) Time taken for the air conditioner to cool down the office</div>
+        <div class="input-row">
+          <span>Time taken = </span>
+          <input type="number" id="q5-t-input" placeholder="Enter value..." step="any">
+          <span>s</span>
+          <button class="check-btn" onclick="checkQ5S3()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h3">
+          <div class="hint-head">【解題提示】</div>
+          1. 冷氣機每秒移走 3.5 kJ，即冷卻功率 <i>P</i> = 3.5 kW = 3500 W。<br>
+          2. 由 <i>E</i> = <i>Pt</i> 可得冷卻時間公式：<i>t</i> = <i>E</i> / <i>P</i>。<br>
+          3. 將 (b) 部所得之總能量（單位轉為 J）除以 3500 W，取最接近之整數。
+        </div>
+        <div class="feedback" id="q5-fb3"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 6 ================= -->
+    <div class="q-panel" id="tab-5">
+      <div class="q-header">
+        <h2>Question 6: Electric Kettle with Heat Loss</h2>
+        <div class="q-desc">
+          When an <b>1 kW</b> electric kettle is running, <b>40% of energy consumed is lost</b> to the surroundings. The kettle heats <b>1 kg of water from 20 °C to 100 °C</b> in time <i>t</i>. Heat capacity of the kettle is <b>250 J °C⁻¹</b> and specific heat capacity of water is <b>4.2 kJ kg⁻¹ °C⁻¹</b>. Find <i>t</i>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q6-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate total thermal energy needed to heat water and kettle (J)</div>
+        <div class="input-row">
+          <span>Total energy E = </span>
+          <input type="number" id="q6-e-input" placeholder="Enter value...">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ6S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 水與水煲為一整體系統，共同升溫：Δ<i>T</i> = 100 °C - 20 °C = 80 °C。<br>
+          2. 吸收的總能量包括兩部分：<br>
+             &nbsp;&nbsp;• 水吸收的熱量：<i>E</i><sub>water</sub> = <i>m</i><sub>water</sub> · <i>c</i><sub>water</sub> · Δ<i>T</i><br>
+             &nbsp;&nbsp;• 水煲吸收的熱量：<i>E</i><sub>kettle</sub> = <i>C</i><sub>kettle</sub> · Δ<i>T</i><br>
+          3. 總熱量需求：<i>E</i> = <i>E</i><sub>water</sub> + <i>E</i><sub>kettle</sub>。
+        </div>
+        <div class="feedback" id="q6-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q6-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Calculate the effective output power of the kettle (W)</div>
+        <div class="input-row">
+          <span>Effective power = </span>
+          <input type="number" id="q6-p-input" placeholder="Enter value...">
+          <span>W</span>
+          <button class="check-btn" onclick="checkQ6S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 水煲總功率：<i>P</i><sub>total</sub> = 1 kW = 1000 W。<br>
+          2. 若散失率為 40%，則有效加熱的能量佔比為 (1 - 40%) = 60%。<br>
+          3. 有效輸出功率：<i>P</i><sub>effective</sub> = 1000 W × (1 - 0.40)。
+        </div>
+        <div class="feedback" id="q6-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q6-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> Calculate the heating time t (s)</div>
+        <div class="input-row">
+          <span>Time t = </span>
+          <input type="number" id="q6-t-input" placeholder="Enter value..." step="any">
+          <span>s</span>
+          <button class="check-btn" onclick="checkQ6S3()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h3">
+          <div class="hint-head">【解題提示】</div>
+          1. 應用功率公式：<i>t</i> = <i>E</i> / <i>P</i><sub>effective</sub>。<br>
+          2. 將第 1 步求得的總能量除以第 2 步求得的有效輸出功率，即可獲得加熱秒數（取至整數）。
+        </div>
+        <div class="feedback" id="q6-fb3"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* --- Tab Switch --- */
+  function switchTab(index) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.q-panel');
+    tabs.forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+      panels[i].classList.toggle('active', i === index);
+    });
+  }
+
+  /* --- Timer Function --- */
+  let seconds = 0;
+  let timerInterval = null;
+  let isRunning = false;
+
+  function updateTimerDisplay() {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('startPauseBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.innerText = 'Pause';
+      timerInterval = setInterval(() => {
+        seconds++;
+        updateTimerDisplay();
+      }, 1000);
+    } else {
+      isRunning = false;
+      btn.innerText = 'Start';
+      clearInterval(timerInterval);
+    }
+  }
+
+  function resetTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    updateTimerDisplay();
+    document.getElementById('startPauseBtn').innerText = 'Start';
+  }
+
+  /* --- Hint Toggle --- */
+  function toggleHint(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  /* --- Validation Helpers --- */
+  function isClose(val, target, tolerance = 0.02) {
+    return Math.abs(val - target) <= Math.abs(target * tolerance);
+  }
+
+  function stepPassed(stepId, fbId, msg, nextStepId) {
+    const step = document.getElementById(stepId);
+    const fb = document.getElementById(fbId);
+    step.classList.add('completed');
+    fb.className = 'feedback success';
+    fb.innerHTML = '✓ Correct. ' + msg;
+    if (nextStepId) {
+      const next = document.getElementById(nextStepId);
+      next.classList.remove('locked');
+      next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function stepFailed(fbId, msg) {
+    const fb = document.getElementById(fbId);
+    fb.className = 'feedback error';
+    fb.innerHTML = '✗ Incorrect. ' + msg;
+  }
+
+  /* --- Q1 Checks --- */
+  function checkQ1S1() {
+    const val = parseFloat(document.getElementById('q1-a-input').value);
+    if (val === 6000) {
+      stepPassed('q1-s1', 'q1-fb1', 'C = 30000 J / 5 °C = 6000 J °C⁻¹.', 'q1-s2');
+    } else {
+      stepFailed('q1-fb1', 'Check your calculation: convert 30 kJ to 30 000 J and divide by 5.');
+    }
+  }
+
+  function checkQ1S2() {
+    const val = parseFloat(document.getElementById('q1-b-input').value);
+    if (val === 330 || val === 330000) {
+      stepPassed('q1-s2', 'q1-fb2', 'ΔT = 55 °C; E = 6000 × 55 = 330 000 J = 330 kJ.', null);
+    } else {
+      stepFailed('q1-fb2', 'ΔT = 80 - 25 = 55 °C. E = CΔT. Express final answer in kJ.');
+    }
+  }
+
+  /* --- Q2 Checks --- */
+  function checkQ2S1() {
+    const val = parseFloat(document.getElementById('q2-dt-input').value);
+    if (val === 150) {
+      stepPassed('q2-s1', 'q2-fb1', 'ΔT = 170 °C - 20 °C = 150 °C.', 'q2-s2');
+    } else {
+      stepFailed('q2-fb1', 'Calculate the temperature difference: 170 - 20.');
+    }
+  }
+
+  function checkQ2S2() {
+    const val = parseFloat(document.getElementById('q2-e-input').value);
+    if (val === 150 || val === 150000) {
+      stepPassed('q2-s2', 'q2-fb2', 'E = 0.5 kg × 2000 J kg⁻¹ °C⁻¹ × 150 °C = 150 kJ.', null);
+    } else {
+      stepFailed('q2-fb2', 'Check units: m = 0.5 kg, c = 2 kJ kg⁻¹ °C⁻¹. E = 0.5 × 2 × 150.');
+    }
+  }
+
+  /* --- Q3 Checks --- */
+  function checkQ3S1() {
+    const val = parseFloat(document.getElementById('q3-ew-input').value);
+    if (val === 252000 || val === 252) {
+      stepPassed('q3-s1', 'q3-fb1', 'E = 1 × 4200 × (85 - 25) = 252 000 J.', 'q3-s2');
+    } else {
+      stepFailed('q3-fb1', 'ΔT = 60 °C, c = 4200 J kg⁻¹ °C⁻¹. E = 1 × 4200 × 60.');
+    }
+  }
+
+  function checkQ3S2() {
+    const val = parseFloat(document.getElementById('q3-c-input').value);
+    if (val === 3500) {
+      stepPassed('q3-s2', 'q3-fb2', 'c = 252 000 / (1.5 × 48) = 3500 J kg⁻¹ °C⁻¹.', null);
+    } else {
+      stepFailed('q3-fb2', 'E = 252 000 J, m = 1.5 kg, ΔT = 48 °C. c = 252000 / (1.5 × 48).');
+    }
+  }
+
+  /* --- Q4 Checks --- */
+  function checkQ4S1() {
+    const val = parseFloat(document.getElementById('q4-e-input').value);
+    if (val === 43875 || val === 43900 || isClose(val, 43875, 0.01)) {
+      stepPassed('q4-s1', 'q4-fb1', 'E = 0.25 × 3900 × (90 - 45) = 43 900 J.', 'q4-s2');
+    } else {
+      stepFailed('q4-fb1', 'Convert 250 g to 0.25 kg. E = 0.25 × 3900 × 45.');
+    }
+  }
+
+  function checkQ4S2() {
+    const val = parseFloat(document.getElementById('q4-p-input').value);
+    if (isClose(val, 30.5, 0.03)) {
+      stepPassed('q4-s2', 'q4-fb2', 'P = 43 900 J / (24 × 60 s) ≈ 30.5 W.', null);
+    } else {
+      stepFailed('q4-fb2', 'Time in seconds = 24 × 60 = 1440 s. P = 43900 / 1440.');
+    }
+  }
+
+  /* --- Q5 Checks --- */
+  function checkQ5S1() {
+    const val = parseFloat(document.getElementById('q5-m-input').value);
+    if (val === 300) {
+      stepPassed('q5-s1', 'q5-fb1', 'Volume = 250 m³, mass = 250 × 1.2 = 300 kg.', 'q5-s2');
+    } else {
+      stepFailed('q5-fb1', 'Volume = 10 × 10 × 2.5 = 250 m³. Mass = Volume × Density.');
+    }
+  }
+
+  function checkQ5S2() {
+    const val = parseFloat(document.getElementById('q5-e-input').value);
+    if (val === 2.4 || val === 2400000 || val === 2400) {
+      stepPassed('q5-s2', 'q5-fb2', 'E = 300 × 1000 × (30 - 22) = 2.4 × 10⁶ J = 2.4 MJ.', 'q5-s3');
+    } else {
+      stepFailed('q5-fb2', 'ΔT = 8 °C. E = 300 kg × 1000 J kg⁻¹ °C⁻¹ × 8 °C = 2.4 MJ.');
+    }
+  }
+
+  function checkQ5S3() {
+    const val = parseFloat(document.getElementById('q5-t-input').value);
+    if (isClose(val, 686, 0.02)) {
+      stepPassed('q5-s3', 'q5-fb3', 't = 2.4 × 10⁶ J / 3500 W ≈ 686 s.', null);
+    } else {
+      stepFailed('q5-fb3', 'Rate P = 3500 W. t = 2 400 000 / 3500.');
+    }
+  }
+
+  /* --- Q6 Checks --- */
+  function checkQ6S1() {
+    const val = parseFloat(document.getElementById('q6-e-input').value);
+    if (val === 356000) {
+      stepPassed('q6-s1', 'q6-fb1', 'E = (1 × 4200 × 80) + (250 × 80) = 356 000 J.', 'q6-s2');
+    } else {
+      stepFailed('q6-fb1', 'ΔT = 80 °C. Total energy = (1 × 4200 × 80) + (250 × 80).');
+    }
+  }
+
+  function checkQ6S2() {
+    const val = parseFloat(document.getElementById('q6-p-input').value);
+    if (val === 600) {
+      stepPassed('q6-s2', 'q6-fb2', 'Effective power = 1000 × (1 - 0.40) = 600 W.', 'q6-s3');
+    } else {
+      stepFailed('q6-fb2', '40% is lost, so 60% is useful. 1000 W × 0.60 = ?');
+    }
+  }
+
+  function checkQ6S3() {
+    const val = parseFloat(document.getElementById('q6-t-input').value);
+    if (isClose(val, 593, 0.02)) {
+      stepPassed('q6-s3', 'q6-fb3', 't = 356 000 J / 600 W ≈ 593 s. All steps completed!', null);
+    } else {
+      stepFailed('q6-fb3', 'Divide the total energy (356 000 J) by the effective power (600 W).');
+    }
+  }
+</script>
+
+</body>
+</html>
