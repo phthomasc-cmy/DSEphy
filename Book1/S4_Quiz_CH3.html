@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S4 Physics: Evaporation, Boiling & Phase Changes Quiz</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --border: #cbd5e1;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; line-height: 1.6; }
+    .container { max-width: 820px; margin: 0 auto; }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 26px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
+    }
+
+    h1 { font-size: 1.45rem; text-align: center; color: #1e3a8a; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: var(--muted); margin-bottom: 20px; font-size: 0.95rem; }
+
+    /* Top Stats Bar */
+    .top-bar {
+      position: sticky;
+      top: 10px;
+      z-index: 50;
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      padding: 12px 18px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .timer { color: #dc2626; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+
+    /* Question Box */
+    .q-badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .q-text {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 24px;
+      line-height: 2.2;
+    }
+
+    /* Pull-Down Menu Styling */
+    select.blank-select {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      background-color: #f0f7ff;
+      color: #1e3a8a;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 0 4px;
+      outline: none;
+      vertical-align: middle;
+      max-width: 100%;
+    }
+    select.blank-select.correct-select {
+      border-color: var(--success) !important;
+      background-color: var(--success-bg) !important;
+      color: var(--success) !important;
+    }
+    select.blank-select.wrong-select {
+      border-color: var(--danger) !important;
+      background-color: var(--danger-bg) !important;
+      color: var(--danger) !important;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+      display: inline-block;
+      width: 100%;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 13px 20px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-action:hover { background: var(--primary-hover); }
+
+    /* Quick Preset Buttons */
+    .preset-btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .preset-btn {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+      transition: all 0.15s ease;
+    }
+    .preset-btn:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    /* Explanation Area */
+    .explanation-box {
+      display: none;
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--primary);
+    }
+    .exp-title { font-weight: 800; font-size: 1.05rem; margin-bottom: 6px; }
+    .exp-en { color: #334155; margin-bottom: 6px; font-size: 0.95rem; }
+    .exp-zh { color: #0f172a; border-top: 1px dashed var(--border); padding-top: 6px; font-size: 0.95rem; }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.95rem; }
+    input[type="text"], input[type="email"], input[type="number"], select.input-select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      background: #fff;
+    }
+    input:focus, select.input-select:focus { outline: 2px solid var(--primary); }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SCREEN 1: Setup Screen -->
+  <div id="start-screen" class="card">
+    <h1>S4 Physics Fill-in-the-Blank Quiz</h1>
+    <p class="subtitle">Evaporation, Boiling, Condensation & Phase Changes (Sections A – D)</p>
+
+    <div class="form-group">
+      <label for="student-name">Student Full Name (學生姓名) *:</label>
+      <input type="text" id="student-name" placeholder="e.g. Chan Tai Man" required>
+    </div>
+
+    <div class="form-group">
+      <label for="student-class">Class & Class No. (班別及學號) *:</label>
+      <input type="text" id="student-class" placeholder="e.g. 4B (12)" required>
+    </div>
+
+    <div class="form-group">
+      <label for="student-email">Email Address (學生/家長電郵 - 選填接收成績):</label>
+      <input type="email" id="student-email" placeholder="e.g. student@school.edu.hk">
+      <small style="color: var(--muted);">If provided, an email with your quiz result will be sent upon completion.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="question-count">Number of Questions (題數自由選擇 1 – 18 題):</label>
+      <input type="number" id="question-count" min="1" max="18" value="18" placeholder="Enter any number (1 - 18)">
+      <div class="preset-btn-group">
+        <button type="button" class="preset-btn" onclick="setQuestionCount(5)">5 Questions</button>
+        <button type="button" class="preset-btn" onclick="setQuestionCount(10)">10 Questions</button>
+        <button type="button" class="preset-btn" onclick="setQuestionCount(15)">15 Questions</button>
+        <button type="button" class="preset-btn" onclick="setQuestionCount(18)">All (18 Questions)</button>
+      </div>
+      <small style="color: var(--muted); display: block; margin-top: 4px;">You can type any number you want between 1 and 18.</small>
+    </div>
+
+    <button class="btn-action" style="margin-top: 10px;" onclick="startQuiz()">Start Quiz (開始測驗)</button>
+  </div>
+
+  <!-- SCREEN 2: Question-by-Question Quiz Screen -->
+  <div id="quiz-screen" class="hidden">
+    <div class="top-bar">
+      <div>Question: <span id="current-q-num">1</span> / <span id="total-q-num">18</span></div>
+      <div>Score: <span id="current-score">0</span> / <span id="total-blanks-display">0</span></div>
+      <div class="timer">⏱️ <span id="timer-display">00:00</span></div>
+    </div>
+
+    <div class="card">
+      <div id="quiz-section-badge" class="q-badge">Section</div>
+
+      <div class="q-text" id="question-template">
+        <!-- Dynamic sentence with <select> dropdowns rendered here -->
+      </div>
+
+      <!-- Action Button Area -->
+      <button id="submit-ans-btn" class="btn-action" onclick="submitCurrentAnswer()">Submit Answer (提交答案)</button>
+      <button id="next-q-btn" class="btn-action hidden" style="margin-top: 14px; background: #059669;" onclick="nextQuestion()">Next Question (下一題) ➔</button>
+
+      <!-- Explanation Feedback Card -->
+      <div id="explanation-box" class="explanation-box">
+        <div id="feedback-badge" class="exp-title"></div>
+        <div id="exp-en" class="exp-en"></div>
+        <div id="exp-zh" class="exp-zh"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Results Screen -->
+  <div id="result-screen" class="card hidden">
+    <h1>Quiz Completed (測驗完成)!</h1>
+    <p class="subtitle" id="final-student-title"></p>
+
+    <div style="text-align: center; margin: 26px 0;">
+      <div style="font-size: 3.4rem; font-weight: 800; color: var(--primary);" id="final-score">0 / 0</div>
+      <div style="font-size: 1.25rem; color: var(--muted);" id="final-percent">0%</div>
+      <div style="margin-top: 10px; font-weight: 600;">Time Elapsed: <span id="final-time">00:00</span></div>
+    </div>
+
+    <div id="submission-status" style="text-align: center; font-weight: 700; margin: 18px 0; color: #d97706;">
+      Submitting results & sending email...
+    </div>
+
+    <button class="btn-action" onclick="location.reload()">Take Quiz Again (重新測驗)</button>
+  </div>
+
+</div>
+
+<script>
+  /*************************************************************
+   * 1. GOOGLE SHEET WEB APP URL
+   *************************************************************/
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0kerhI74F5a5OSyNVI14KFh8JGDqB-Qyui9g1zEp350RbujgdI8yvzfj2ZXs6M39nIA/exec";
+
+  /*************************************************************
+   * 2. COMPLETE QUESTION POOL (18 QUESTIONS / 27 BLANKS)
+   *************************************************************/
+  const allQuestionsPool = [
+    // --- Section A: General Concepts & Evaporation ---
+   {
+      section: "Section A: General Concepts & Evaporation",
+      sentence: "1. Matter exists in three common states: (1) {b0}, (2) {b1}, and (3) {b2}.",
+      allowAnyOrder: true,
+      validSet: ["solid", "liquid", "gas"],
+      blanks: [
+        { answer: "solid", options: ["solid", "liquid", "gas", "plasma", "vapour"] },
+        { answer: "liquid", options: ["solid", "liquid", "gas", "plasma", "vapour"] },
+        { answer: "gas", options: ["solid", "liquid", "gas", "plasma", "vapour"] }
+      ],
+      exp_en: "Matter exists commonly in three physical states: solid, liquid, and gas (in any order).",
+      exp_zh: "物質一般存在三種常見狀態：固態 (solid)、液態 (liquid) 和氣態 (gas)（次序不拘）。"
+    },
+    {
+      section: "Section A: General Concepts & Evaporation",
+      sentence: "2. Evaporation is a change of state from a liquid to a gas that takes place only at the (4) {b0} of the liquid.",
+      blanks: [
+        { answer: "surface", options: ["surface", "bottom", "interior", "boundary", "depth"] }
+      ],
+      exp_en: "Evaporation occurs only at the surface of a liquid, unlike boiling which occurs throughout.",
+      exp_zh: "蒸發 (evaporation) 只在液體的「表面」(surface) 發生，這與在液體內部進行的沸騰不同。"
+    },
+    {
+      section: "Section A: General Concepts & Evaporation",
+      sentence: "3. Water vapour is (5) {b0} in color, whereas white fumes over boiling water are actually tiny (6) {b1} condensed in air.",
+      blanks: [
+        { answer: "colourless", options: ["colourless", "white", "transparent", "opaque", "light blue"] },
+        { answer: "water droplets", options: ["water droplets", "vapour molecules", "smoke particles", "ice crystals", "air bubbles"] }
+      ],
+      exp_en: "Water vapour is invisible and colourless. The visible 'white fumes/mist' are tiny liquid water droplets.",
+      exp_zh: "水蒸氣是「無色」(colourless) 的；沸水上方看到的白煙實際上是水蒸氣遇冷凝結成的微細「小水滴」(water droplets)。"
+    },
+    {
+      section: "Section A: General Concepts & Evaporation",
+      sentence: "4. During evaporation, fast-moving molecules with higher (7) {b0} energy escape from the liquid surface by breaking free from intermolecular (8) {b1}.",
+      blanks: [
+        { answer: "kinetic (KE)", options: ["kinetic (KE)", "potential (PE)", "chemical", "thermal", "internal"] },
+        { answer: "attraction", options: ["attraction", "repulsion", "friction", "collisions", "gravity"] }
+      ],
+      exp_en: "Molecules with higher kinetic energy (KE) overcome attractive intermolecular forces and escape.",
+      exp_zh: "蒸發時，具備較高「動能」(kinetic energy) 的分子能克服分子間的「引力」(attraction/bonds) 並逃離液面。"
+    },
+    {
+      section: "Section A: General Concepts & Evaporation",
+      sentence: "5. Because high-KE molecules escape during evaporation, the remaining molecules have a lower average KE, causing the remaining liquid to undergo a (9) {b0} effect.",
+      blanks: [
+        { answer: "cooling", options: ["cooling", "warming", "heating", "neutral", "boiling"] }
+      ],
+      exp_en: "The loss of high-KE molecules lowers the average KE of the remaining molecules, resulting in a cooling effect.",
+      exp_zh: "高動能分子逃逸後，餘下分子的平均動能下降，使殘餘液體產生「冷卻」(cooling) 效應。"
+    },
+
+    // --- Section B: Net Evaporation, Condensation, & Enhancing Factors ---
+    {
+      section: "Section B: Net Evaporation & Condensation",
+      sentence: "1. As molecules escape into the air, the (10) {b0} density increases, raising the rate at which molecules hit the surface and return to the liquid.",
+      blanks: [
+        { answer: "vapour", options: ["vapour", "liquid", "air", "energy", "mass"] }
+      ],
+      exp_en: "As more molecules enter the air layer above, the vapour density rises, accelerating condensation back into the liquid.",
+      exp_zh: "分子蒸發到空氣中會令「蒸汽」(vapour) 密度增加，加速分子撞擊表面並返回液體的速率。"
+    },
+    {
+      section: "Section B: Net Evaporation & Condensation",
+      sentence: "2. Net evaporation stops when the rate of escape is exactly (11) {b0} to the rate of return.",
+      blanks: [
+        { answer: "equal", options: ["equal", "opposite", "greater", "proportional", "negligible"] }
+      ],
+      exp_en: "When the rate of escape equals the rate of return, a dynamic equilibrium is reached and net evaporation ceases.",
+      exp_zh: "當蒸發逃逸速率與凝結返回速率完全「相等」(equal) 時，達到動態平衡，淨蒸發停止。"
+    },
+    {
+      section: "Section B: Net Evaporation & Condensation",
+      sentence: "3. Condensation is the change of state from a (12) {b0} to a (13) {b1}.",
+      blanks: [
+        { answer: "gas", options: ["gas", "liquid", "solid", "vapour", "plasma"] },
+        { answer: "liquid", options: ["liquid", "gas", "solid", "vapour", "fluid"] }
+      ],
+      exp_en: "Condensation is the physical transition from gas (vapour) to liquid.",
+      exp_zh: "凝結 (condensation) 是物質由「氣態」(gas) 轉變為「液態」(liquid) 的相變過程。"
+    },
+    {
+      section: "Section B: Net Evaporation & Condensation",
+      sentence: "4. Condensation is a (14) {b0} process because forming bonds between molecules releases energy.",
+      blanks: [
+        { answer: "warming", options: ["warming", "cooling", "freezing", "neutral", "boiling"] }
+      ],
+      exp_en: "Bond formation releases latent heat into the surroundings, making condensation a warming process.",
+      exp_zh: "分子間形成分子鍵時會釋放潛熱，因此凝結過程是一種「致暖」(warming) 過程。"
+    },
+    {
+      section: "Section B: Factors Affecting Rate of Evaporation",
+      sentence: "5. The four main factors that increase the rate of evaporation are:<br>• High (15) {b0}<br>• Large (16) {b1} area<br>• Low (17) {b2}<br>• High (18) {b3} / open area",
+      blanks: [
+        { answer: "temperature", options: ["temperature", "pressure", "density", "volume", "mass"] },
+        { answer: "surface", options: ["surface", "cross-sectional", "bottom", "contact", "internal"] },
+        { answer: "humidity", options: ["humidity", "pressure", "altitude", "wind speed", "density"] },
+        { answer: "wind speed (windy)", options: ["wind speed (windy)", "air density", "atmospheric pressure", "gravity", "humidity"] }
+      ],
+      exp_en: "Evaporation rate increases with: higher temperature, larger surface area, lower humidity, and higher wind speed.",
+      exp_zh: "促進蒸發速率的四大因素：高「溫度」(temperature)、大「表面積」(surface area)、低「濕度」(humidity) 以及高「風速」(wind speed)。"
+    },
+
+    // --- Section C: Evaporation vs. Boiling ---
+    {
+      section: "Section C: Evaporation vs. Boiling",
+      sentence: "1. A liquid (19) {b0} when it turns into a gas.",
+      blanks: [
+        { answer: "vaporizes", options: ["vaporizes", "condenses", "solidifies", "sublimes", "melts"] }
+      ],
+      exp_en: "Vaporization is the general term for a liquid turning into a gas (includes evaporation and boiling).",
+      exp_zh: "液體轉變成氣體時稱為「汽化」(vaporizes)。"
+    },
+    {
+      section: "Section C: Evaporation vs. Boiling",
+      sentence: "2. Boiling takes place throughout the liquid at a fixed temperature known as the (20) {b0}.",
+      blanks: [
+        { answer: "boiling point", options: ["boiling point", "melting point", "freezing point", "critical point", "fixed point"] }
+      ],
+      exp_en: "Boiling occurs throughout the liquid at a definite, fixed temperature called the boiling point.",
+      exp_zh: "沸騰在特定固定溫度下於整杯液體內部同時發生，該溫度稱為「沸點」(boiling point)。"
+    },
+    {
+      section: "Section C: Evaporation vs. Boiling",
+      sentence: "3. Unlike boiling, evaporation can take place at (21) {b0} temperature below the boiling point.",
+      blanks: [
+        { answer: "any", options: ["any", "fixed", "high", "room", "extreme"] }
+      ],
+      exp_en: "Boiling requires a fixed temperature, whereas evaporation occurs at any temperature below the boiling point.",
+      exp_zh: "與沸騰不同，蒸發可在沸點以下的「任何」(any) 溫度下進行。"
+    },
+    {
+      section: "Section C: Evaporation vs. Boiling",
+      sentence: "4. During boiling, (22) {b0} bubbles are formed rapidly inside the liquid and rise to the surface.",
+      blanks: [
+        { answer: "vapour", options: ["vapour", "air", "oxygen", "vacuum", "nitrogen"] }
+      ],
+      exp_en: "The bubbles formed during boiling consist of pure water vapour, not air or other trapped gases.",
+      exp_zh: "沸騰時液體內部迅速產生的氣泡是「蒸汽」(vapour) 氣泡，並會浮升至液面。"
+    },
+
+    // --- Section D: Energy Changes, Melting, & Freezing ---
+    {
+      section: "Section D: Energy Changes, Melting, & Freezing",
+      sentence: "1. Boiling water stays at 100 °C because energy must be continuously supplied to (23) {b0} bonds between molecules rather than raising temperature.",
+      blanks: [
+        { answer: "break", options: ["break", "form", "strengthen", "vibrate", "compress"] }
+      ],
+      exp_en: "During boiling, heat absorbed is used as latent heat to break intermolecular bonds, not to increase molecular KE.",
+      exp_zh: "沸水保持在 100 °C 是因為持續吸收的能量用於「拆開」(break) 分子間引力鍵，而非提升動能升溫。"
+    },
+    {
+      section: "Section D: Energy Changes, Melting, & Freezing",
+      sentence: "2. During melting, adding heat energy causes molecules in a solid to break bonds rather than moving (24) {b0}.",
+      blanks: [
+        { answer: "faster", options: ["faster", "slower", "closer", "statically", "irregularly"] }
+      ],
+      exp_en: "At melting point, heat weakens intermolecular bonds; molecular speed (KE) remains constant, so temperature doesn't rise.",
+      exp_zh: "熔化期間，輸入的熱量用於破壞鍵結而非使分子移動得「更快」(faster)，因此溫度保持恆定。"
+    },
+    {
+      section: "Section D: Energy Changes, Melting, & Freezing",
+      sentence: "3. The temperature at which a liquid freezes is called the (25) {b0}, which is equal to the melting point of the solid.",
+      blanks: [
+        { answer: "freezing point", options: ["freezing point", "boiling point", "condensation point", "dew point", "absolute zero"] }
+      ],
+      exp_en: "For a pure substance, the freezing point of liquid is numerically equal to the melting point of its solid form.",
+      exp_zh: "液體凝固的溫度稱為「凝固點」(freezing point)，其數值與該固體的熔點相同。"
+    },
+    {
+      section: "Section D: Energy Changes, Melting, & Freezing",
+      sentence: "4. Process summary:<br>• Breaking bonds (melting and vaporization) (26) {b0} energy.<br>• Forming bonds (condensation and freezing) (27) {b1} energy.",
+      blanks: [
+        { answer: "absorbs", options: ["absorbs", "releases", "destroys", "generates", "neutralizes"] },
+        { answer: "releases", options: ["releases", "absorbs", "consumes", "stores", "blocks"] }
+      ],
+      exp_en: "Breaking bonds absorbs latent energy (endothermic); forming bonds releases latent energy (exothermic).",
+      exp_zh: "拆鍵過程（熔化與汽化）「吸收」(absorbs) 能量；成鍵過程（凝結與凝固）「釋放」(releases) 能量。"
+    }
+  ];
+
+  /*************************************************************
+   * 3. SHUFFLE & OPTION RENDERING (ENSURING ANSWER IS NOT FIRST)
+   *************************************************************/
+  function shuffleArray(arr) {
+    const array = arr.slice();
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  // Prepares options so that the correct answer is NEVER the first option in the dropdown
+  function getNonFirstShuffledOptions(optionsList, correctAnswer) {
+    let shuffled = shuffleArray(optionsList);
+    // If correct answer happens to be at index 0, swap it with another index
+    if (shuffled[0] === correctAnswer && shuffled.length > 1) {
+      const swapIndex = 1 + Math.floor(Math.random() * (shuffled.length - 1));
+      const temp = shuffled[0];
+      shuffled[0] = shuffled[swapIndex];
+      shuffled[swapIndex] = temp;
+    }
+    return shuffled;
+  }
+
+  /*************************************************************
+   * 4. QUIZ STATE & CONTROLLERS
+   *************************************************************/
+  let activeQuestions = [];
+  let currentQIndex = 0;
+  let totalScore = 0;
+  let totalBlanksCount = 0;
+  let studentName = "";
+  let studentClass = "";
+  let studentEmail = "";
+  let selectedCountSetting = "";
+  let startTime = null;
+  let timerInterval = null;
+  const answersLog = [];
+
+  function setQuestionCount(num) {
+    document.getElementById("question-count").value = num;
+  }
+
+  function startQuiz() {
+    studentName = document.getElementById("student-name").value.trim();
+    studentClass = document.getElementById("student-class").value.trim();
+    studentEmail = document.getElementById("student-email").value.trim();
+    const countInput = document.getElementById("question-count");
+    let chosenNum = parseInt(countInput.value, 10);
+
+    if (!studentName || !studentClass) {
+      alert("Please fill in your Name and Class. (請先填寫姓名及班別)");
+      return;
+    }
+
+    if (isNaN(chosenNum) || chosenNum < 1) {
+      alert("Please enter a valid number of questions (at least 1).");
+      countInput.value = 5;
+      return;
+    }
+
+    // Cap to the maximum available questions in the pool
+    if (chosenNum > allQuestionsPool.length) {
+      chosenNum = allQuestionsPool.length;
+      countInput.value = chosenNum;
+    }
+
+    selectedCountSetting = `${chosenNum} Questions`;
+
+    // 1. Shuffle all questions randomly
+    const shuffledPool = shuffleArray(allQuestionsPool);
+
+    // 2. Slice to the student's chosen quantity
+    activeQuestions = shuffledPool.slice(0, chosenNum);
+
+    // 3. Count total blanks
+    totalBlanksCount = 0;
+    activeQuestions.forEach(q => { totalBlanksCount += q.blanks.length; });
+
+    document.getElementById("start-screen").classList.add("hidden");
+    document.getElementById("quiz-screen").classList.remove("hidden");
+    document.getElementById("total-q-num").innerText = activeQuestions.length;
+    document.getElementById("total-blanks-display").innerText = totalBlanksCount;
+
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+
+    renderQuestion();
+  }
+
+  function updateTimerDisplay() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    document.getElementById("timer-display").innerText = `${m}:${s}`;
+  }
+
+  function renderQuestion() {
+    const qData = activeQuestions[currentQIndex];
+
+    document.getElementById("current-q-num").innerText = currentQIndex + 1;
+    document.getElementById("quiz-section-badge").innerText = qData.section;
+
+    document.getElementById("submit-ans-btn").classList.remove("hidden");
+    document.getElementById("next-q-btn").classList.add("hidden");
+    document.getElementById("explanation-box").style.display = "none";
+
+    let renderedSentence = qData.sentence;
+
+    qData.blanks.forEach((blank, idx) => {
+      // Get options where the correct answer is guaranteed NOT at index 0
+      const randomizedOptions = getNonFirstShuffledOptions(blank.options, blank.answer);
+
+      let selectHtml = `<select class="blank-select" id="blank_select_${idx}">`;
+      selectHtml += `<option value="">-- Select / 選擇 --</option>`;
+      randomizedOptions.forEach(opt => {
+        selectHtml += `<option value="${opt}">${opt}</option>`;
+      });
+      selectHtml += `</select>`;
+
+      renderedSentence = renderedSentence.replace(`{b${idx}}`, selectHtml);
+    });
+
+    document.getElementById("question-template").innerHTML = renderedSentence;
+  }
+
+  function submitCurrentAnswer() {
+    const qData = activeQuestions[currentQIndex];
+    let allSelected = true;
+
+    // Collect choices and verify all blanks have been selected
+    const userChoices = [];
+    qData.blanks.forEach((_, idx) => {
+      const sel = document.getElementById(`blank_select_${idx}`);
+      if (!sel.value) allSelected = false;
+      userChoices.push(sel.value);
+    });
+
+    if (!allSelected) {
+      alert("Please choose an answer from each pull-down menu before submitting! (請先完成所有下拉選單)");
+      return;
+    }
+
+    let allCorrectOnThisCard = true;
+
+    if (qData.allowAnyOrder && qData.validSet) {
+      // Logic for any-sequence questions (e.g. solid, liquid, gas in any order without repetition)
+      const targetSet = qData.validSet;
+      const chosenSet = new Set(userChoices);
+      const isSetExactMatch = (chosenSet.size === targetSet.length) && targetSet.every(item => chosenSet.has(item));
+
+      qData.blanks.forEach((blank, idx) => {
+        const sel = document.getElementById(`blank_select_${idx}`);
+        const userChoice = userChoices[idx];
+        sel.disabled = true;
+
+        // If the whole set is an exact match (all valid and distinct), mark every blank correct
+        // Otherwise, mark correct only if it is in validSet and appears only once up to this blank
+        const occurrencesBefore = userChoices.slice(0, idx).filter(c => c === userChoice).length;
+        const isIndividuallyCorrect = isSetExactMatch || (targetSet.includes(userChoice) && occurrencesBefore === 0);
+
+        if (isIndividuallyCorrect && isSetExactMatch) {
+          totalScore++;
+          sel.classList.add("correct-select");
+        } else {
+          allCorrectOnThisCard = false;
+          sel.classList.add("wrong-select");
+        }
+
+        answersLog.push({
+          questionSeq: currentQIndex + 1,
+          questionPrompt: qData.sentence,
+          blankIndex: idx + 1,
+          userChoice: userChoice,
+          correctAnswer: targetSet.join(" / "),
+          isCorrect: isSetExactMatch
+        });
+      });
+
+    } else {
+      // Standard matching logic for other questions
+      qData.blanks.forEach((blank, idx) => {
+        const sel = document.getElementById(`blank_select_${idx}`);
+        const userChoice = sel.value;
+        const isCorrect = (userChoice === blank.answer);
+
+        sel.disabled = true;
+
+        if (isCorrect) {
+          totalScore++;
+          sel.classList.add("correct-select");
+        } else {
+          allCorrectOnThisCard = false;
+          sel.classList.add("wrong-select");
+        }
+
+        answersLog.push({
+          questionSeq: currentQIndex + 1,
+          questionPrompt: qData.sentence,
+          blankIndex: idx + 1,
+          userChoice: userChoice,
+          correctAnswer: blank.answer,
+          isCorrect: isCorrect
+        });
+      });
+    }
+
+    document.getElementById("current-score").innerText = totalScore;
+
+    const feedbackBadge = document.getElementById("feedback-badge");
+    if (allCorrectOnThisCard) {
+      feedbackBadge.innerText = "✅ Correct! (答對了！)";
+      feedbackBadge.style.color = "var(--success)";
+    } else {
+      feedbackBadge.innerText = "❌ Incorrect! Check the explanation below: (答錯了，請參考解析)";
+      feedbackBadge.style.color = "var(--danger)";
+    }
+
+    document.getElementById("exp-en").innerText = qData.exp_en;
+    document.getElementById("exp-zh").innerText = qData.exp_zh;
+    document.getElementById("explanation-box").style.display = "block";
+
+    document.getElementById("submit-ans-btn").classList.add("hidden");
+    const nextBtn = document.getElementById("next-q-btn");
+    nextBtn.classList.remove("hidden");
+
+    if (currentQIndex === activeQuestions.length - 1) {
+      nextBtn.innerText = "Finish & Submit Results (完成並提交) ➔";
+    }
+  }
+
+  function nextQuestion() {
+    currentQIndex++;
+    if (currentQIndex < activeQuestions.length) {
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
+  function finishQuiz() {
+    clearInterval(timerInterval);
+    const totalSec = Math.floor((Date.now() - startTime) / 1000);
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    const timeFormatted = `${m}:${s}`;
+    const percentage = ((totalScore / totalBlanksCount) * 100).toFixed(1);
+
+    document.getElementById("quiz-screen").classList.add("hidden");
+    document.getElementById("result-screen").classList.remove("hidden");
+
+    document.getElementById("final-student-title").innerText = `${studentName} — Class: ${studentClass} (${selectedCountSetting})`;
+    document.getElementById("final-score").innerText = `${totalScore} / ${totalBlanksCount}`;
+    document.getElementById("final-percent").innerText = `${percentage}%`;
+    document.getElementById("final-time").innerText = timeFormatted;
+
+    sendToGoogleSheet(totalSec, timeFormatted, percentage);
+  }
+
+// Add the secret key matching the one in Apps Script
+const API_SECRET = "S4_PHYSICS_SECURE_TOKEN_2024_xyz";
+
+function sendToGoogleSheet(totalSec, timeFormatted, percentage) {
+  const statusEl = document.getElementById("submission-status");
+
+  const payload = {
+    apiKey: API_SECRET, // <--- Sent to verify legitimacy
+    timestamp: new Date().toLocaleString(),
+    name: studentName,
+    classInfo: studentClass,
+    studentEmail: studentEmail,
+    selectedQuestionCount: selectedCountSetting,
+    score: totalScore,
+    total: totalBlanksCount,
+    percentage: percentage,
+    timeTakenSeconds: totalSec,
+    timeTakenFormatted: timeFormatted,
+    answersLog: answersLog
+  };
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    statusEl.innerText = "✅ Successfully submitted to Google Sheet!";
+    statusEl.style.color = "var(--success)";
+  })
+  .catch(err => {
+    statusEl.innerText = "⚠️ Submission error. Please inform your teacher.";
+    statusEl.style.color = "var(--danger)";
+  });
+}
+</script>
+
+</body>
+</html>
