@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Ch.3 - Specific Latent Heat (II) Practice & Helper</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-hover: #1e40af;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --hint-color: #0369a1;
+      --hint-bg: #f0f9ff;
+      --hint-border: #bae6fd;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-700: #334155;
+      --gray-800: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      padding: 20px 14px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
+      border-radius: 6px;
+      gap: 10px;
+    }
+
+    .timer-display {
+      font-family: monospace;
+      font-size: 1.35rem;
+      font-weight: bold;
+      min-width: 65px;
+    }
+
+    .timer-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+
+    .timer-btn:hover {
+      background: #e0e7ff;
+    }
+
+    .constants-banner {
+      background-color: #eff6ff;
+      border-bottom: 1px solid #bfdbfe;
+      padding: 10px 24px;
+      font-size: 0.86rem;
+      color: #1e40af;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    .constants-banner b {
+      color: #1e3a8a;
+    }
+
+    .tabs-nav {
+      display: flex;
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 12px 18px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--gray-200);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    .content-area {
+      padding: 24px;
+    }
+
+    .q-panel {
+      display: none;
+    }
+
+    .q-panel.active {
+      display: block;
+    }
+
+    .q-header {
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--gray-200);
+    }
+
+    .q-header h2 {
+      font-size: 1.15rem;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+
+    .q-desc {
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      background: var(--gray-50);
+      padding: 14px;
+      border-left: 4px solid var(--primary);
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+
+    .diagram-container {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+      background: #ffffff;
+      padding: 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+    }
+
+    .step-card {
+      margin-top: 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .step-card.locked {
+      opacity: 0.45;
+      pointer-events: none;
+      background: var(--gray-50);
+    }
+
+    .step-card.completed {
+      border-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .step-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.98rem;
+    }
+
+    .step-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"], select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      min-width: 140px;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    button.check-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    button.check-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    button.hint-btn {
+      background: #fff;
+      color: var(--hint-color);
+      border: 1px solid var(--hint-color);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    button.hint-btn:hover {
+      background: var(--hint-bg);
+    }
+
+    .hint-content {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--hint-bg);
+      border: 1px solid var(--hint-border);
+      border-left: 4px solid var(--hint-color);
+      border-radius: 6px;
+      font-size: 0.88rem;
+      color: #0c4a6e;
+      line-height: 1.7;
+    }
+
+    .hint-head {
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: var(--hint-color);
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .feedback.success {
+      display: block;
+      color: var(--success);
+    }
+
+    .feedback.error {
+      display: block;
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header with Timer -->
+  <header>
+    <div>
+      <h1>Physics Practice: Ch.3 Specific Latent Heat (II)</h1>
+      <p>Multi-stage phase changes, energy conservation & thermal mixtures</p>
+    </div>
+    <div class="timer-box">
+      <span>⏱️ Timer:</span>
+      <span class="timer-display" id="timerDisplay">00:00</span>
+      <button class="timer-btn" id="startPauseBtn" onclick="toggleTimer()">Start</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset</button>
+    </div>
+  </header>
+
+  <!-- Default Constants Banner -->
+  <div class="constants-banner">
+    <span><b>c<sub>water</sub></b> = 4200 J kg⁻¹ °C⁻¹ (4.2 kJ kg⁻¹ °C⁻¹)</span>
+    <span><b>ℓ<sub>f (ice)</sub></b> = 334 kJ kg⁻¹</span>
+    <span><b>ℓ<sub>v (water)</sub></b> = 2260 kJ kg⁻¹</span>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">Q1 Ice to Steam</button>
+    <button class="tab-btn" onclick="switchTab(1)">Q2 Melting Gold</button>
+    <button class="tab-btn" onclick="switchTab(2)">Q3 Freezer Cooling</button>
+    <button class="tab-btn" onclick="switchTab(3)">Q4 Ice in Water</button>
+    <button class="tab-btn" onclick="switchTab(4)">Q5 Copper in Ice</button>
+    <button class="tab-btn" onclick="switchTab(5)">Q6 Steaming Fish</button>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ================= QUESTION 1 ================= -->
+    <div class="q-panel active" id="tab-0">
+      <div class="q-header">
+        <h2>Question 1: Melting Ice to Steam</h2>
+        <div class="q-desc">
+          How much energy is required to completely convert <b>200 g (0.2 kg)</b> of melting ice at <b>0 °C</b> to steam at <b>100 °C</b>?
+        </div>
+      </div>
+
+      <!-- Flow SVG Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 650 110" width="100%" height="auto" style="max-width:620px; display:block;">
+          <defs>
+            <marker id="arrowhead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+            </marker>
+          </defs>
+          <!-- Stage 1 Block -->
+          <rect x="15" y="25" width="115" height="55" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.8"/>
+          <text x="72" y="50" font-size="12" font-weight="bold" fill="#0369a1" text-anchor="middle">0 °C ice</text>
+          <text x="72" y="66" font-size="10" fill="#64748b" text-anchor="middle">(solid)</text>
+
+          <!-- Arrow E1 -->
+          <line x1="135" y1="52" x2="195" y2="52" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowhead)"/>
+          <text x="165" y="42" font-size="12" font-weight="bold" fill="#2563eb" text-anchor="middle">E₁ (mℓ_f)</text>
+
+          <!-- Stage 2 Block -->
+          <rect x="205" y="25" width="115" height="55" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+          <text x="262" y="50" font-size="12" font-weight="bold" fill="#1d4ed8" text-anchor="middle">0 °C water</text>
+          <text x="262" y="66" font-size="10" fill="#64748b" text-anchor="middle">(liquid)</text>
+
+          <!-- Arrow E2 -->
+          <line x1="325" y1="52" x2="385" y2="52" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowhead)"/>
+          <text x="355" y="42" font-size="12" font-weight="bold" fill="#2563eb" text-anchor="middle">E₂ (mcΔT)</text>
+
+          <!-- Stage 3 Block -->
+          <rect x="395" y="25" width="115" height="55" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.8"/>
+          <text x="452" y="50" font-size="12" font-weight="bold" fill="#b91c1c" text-anchor="middle">100 °C water</text>
+          <text x="452" y="66" font-size="10" fill="#64748b" text-anchor="middle">(boiling)</text>
+
+          <!-- Arrow E3 -->
+          <line x1="515" y1="52" x2="555" y2="52" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowhead)"/>
+          <text x="535" y="42" font-size="12" font-weight="bold" fill="#2563eb" text-anchor="middle">E₃ (mℓ_v)</text>
+
+          <!-- Stage 4 Block -->
+          <rect x="565" y="25" width="75" height="55" rx="6" fill="#faf5ff" stroke="#9333ea" stroke-width="1.8"/>
+          <text x="602" y="50" font-size="11" font-weight="bold" fill="#7e22ce" text-anchor="middle">100 °C</text>
+          <text x="602" y="65" font-size="11" font-weight="bold" fill="#7e22ce" text-anchor="middle">steam</text>
+        </svg>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q1-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate energy for each of the three stages (kJ)</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:10px;">
+          <div>
+            <label>E₁: Melting 0 °C ice → 0 °C water</label>
+            <div class="input-row"><input type="number" id="q1-e1-input" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label>E₂: Heating 0 °C water → 100 °C water</label>
+            <div class="input-row"><input type="number" id="q1-e2-input" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label>E₃: Boiling 100 °C water → steam</label>
+            <div class="input-row"><input type="number" id="q1-e3-input" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+        </div>
+        <div class="input-row" style="margin-top:14px;">
+          <button class="check-btn" onclick="checkQ1S1()">Check Stages</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h1">
+          <div class="hint-head">【階段計算提示】</div>
+          1. <b>E₁ (熔化)</b>: <i>E</i>₁ = <i>m</i>ℓ<sub>f</sub> = 0.2 kg × 334 kJ kg⁻¹ = <b>66.8 kJ</b>。<br>
+          2. <b>E₂ (升溫)</b>: <i>E</i>₂ = <i>mc</i>Δ<i>T</i> = 0.2 kg × 4.2 kJ kg⁻¹ °C⁻¹ × (100 − 0) °C = <b>84 kJ</b>。<br>
+          3. <b>E₃ (汽化)</b>: <i>E</i>₃ = <i>m</i>ℓ<sub>v</sub> = 0.2 kg × 2260 kJ kg⁻¹ = <b>452 kJ</b>。
+        </div>
+        <div class="feedback" id="q1-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q1-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Find the total energy required E (kJ)</div>
+        <div class="input-row">
+          <span>Total Energy <i>E</i> = </span>
+          <input type="number" id="q1-tot-input" placeholder="Total kJ" step="any">
+          <span>kJ</span>
+          <button class="check-btn" onclick="checkQ1S2()">Check Total</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h2">
+          <div class="hint-head">【解題提示】</div>
+          <i>E</i><sub>total</sub> = <i>E</i>₁ + <i>E</i>₂ + <i>E</i>₃ = 66.8 + 84 + 452 = <b>602.8 kJ</b> (即 602 800 J)。
+        </div>
+        <div class="feedback" id="q1-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 2 ================= -->
+    <div class="q-panel" id="tab-1">
+      <div class="q-header">
+        <h2>Question 2: Melting a Piece of Gold</h2>
+        <div class="q-desc">
+          Properties of gold: Melting point = <b>1060 °C</b>, Specific heat capacity <i>c</i> = <b>130 J kg⁻¹ °C⁻¹</b>, Latent heat of fusion ℓ<sub>f</sub> = <b>6700 J kg⁻¹</b>.<br>
+          Find the minimum energy required to completely melt <b>0.6 kg</b> of gold originally at <b>20 °C</b>.
+        </div>
+      </div>
+
+      <!-- Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 540 100" width="100%" height="auto" style="max-width:500px; display:block;">
+          <defs>
+            <marker id="arrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706" />
+            </marker>
+          </defs>
+          <rect x="20" y="20" width="120" height="55" rx="6" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.8"/>
+          <text x="80" y="45" font-size="12" font-weight="bold" fill="#b45309" text-anchor="middle">20 °C gold</text>
+          <text x="80" y="62" font-size="10" fill="#64748b" text-anchor="middle">(solid)</text>
+
+          <line x1="145" y1="47" x2="225" y2="47" stroke="#d97706" stroke-width="2" marker-end="url(#arrowGold)"/>
+          <text x="185" y="38" font-size="11" font-weight="bold" fill="#d97706" text-anchor="middle">E₁ (mcΔT)</text>
+
+          <rect x="235" y="20" width="130" height="55" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+          <text x="300" y="45" font-size="12" font-weight="bold" fill="#b45309" text-anchor="middle">1060 °C gold</text>
+          <text x="300" y="62" font-size="10" fill="#64748b" text-anchor="middle">(solid at m.p.)</text>
+
+          <line x1="370" y1="47" x2="435" y2="47" stroke="#d97706" stroke-width="2" marker-end="url(#arrowGold)"/>
+          <text x="402" y="38" font-size="11" font-weight="bold" fill="#d97706" text-anchor="middle">E₂ (mℓ_f)</text>
+
+          <rect x="445" y="20" width="85" height="55" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="1.8"/>
+          <text x="487" y="45" font-size="11" font-weight="bold" fill="#c2410c" text-anchor="middle">1060 °C</text>
+          <text x="487" y="62" font-size="10" fill="#64748b" text-anchor="middle">molten gold</text>
+        </svg>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q2-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate energy required to heat solid gold from 20 °C to 1060 °C (J)</div>
+        <div class="input-row">
+          <span><i>E</i>₁ = </span>
+          <input type="number" id="q2-e1-input" placeholder="e.g. 81120">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ2S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 溫差：Δ<i>T</i> = 1060 − 20 = 1040 °C。<br>
+          2. 應用比熱容量公式：<i>E</i>₁ = <i>mc</i>Δ<i>T</i> = 0.6 kg × 130 J kg⁻¹ °C⁻¹ × 1040 °C = <b>81 120 J</b>。
+        </div>
+        <div class="feedback" id="q2-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q2-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Calculate latent heat required to melt the gold at 1060 °C (J)</div>
+        <div class="input-row">
+          <span><i>E</i>₂ = </span>
+          <input type="number" id="q2-e2-input" placeholder="e.g. 4020">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ2S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h2">
+          <div class="hint-head">【解題提示】</div>
+          熔化所需潛熱：<i>E</i>₂ = <i>m</i>ℓ<sub>f</sub> = 0.6 kg × 6700 J kg⁻¹ = <b>4020 J</b>。
+        </div>
+        <div class="feedback" id="q2-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q2-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> Calculate total minimum energy required E (J)</div>
+        <div class="input-row">
+          <span>Total <i>E</i> = </span>
+          <input type="number" id="q2-tot-input" placeholder="e.g. 85140">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ2S3()">Check Total</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h3">
+          <div class="hint-head">【解題提示】</div>
+          總能量：<i>E</i> = <i>E</i>₁ + <i>E</i>₂ = 81 120 + 4020 = <b>85 140 J</b>。
+        </div>
+        <div class="feedback" id="q2-fb3"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 3 ================= -->
+    <div class="q-panel" id="tab-2">
+      <div class="q-header">
+        <h2>Question 3: Cup of Water in a Freezer</h2>
+        <div class="q-desc">
+          A cup of water of mass <b>0.4 kg</b> (volume 400 cm³) initially at <b>25 °C</b> is put into a freezer and turns into ice at <b>−18 °C</b>.<br>
+          Take: <i>c</i><sub>water</sub> = <b>4.2 kJ kg⁻¹ °C⁻¹</b>, ℓ<sub>f</sub> = <b>334 kJ kg⁻¹</b>, <i>c</i><sub>ice</sub> = <b>2.1 kJ kg⁻¹ °C⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q3-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Calculate the total energy released (kJ)</div>
+        <p>Divide the cooling process into 3 stages: cooling water to 0 °C, freezing water to ice at 0 °C, and cooling ice to −18 °C.</p>
+        <div class="input-row">
+          <span>Total Energy Released <i>E</i> = </span>
+          <input type="number" id="q3-e-input" placeholder="e.g. 191" step="any">
+          <span>kJ</span>
+          <button class="check-btn" onclick="checkQ3S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h1">
+          <div class="hint-head">【3 個階段放熱提示】</div>
+          1. 水由 25 °C 降至 0 °C: 0.4 × 4.2 × (25 − 0) = <b>42 kJ</b>。<br>
+          2. 0 °C 水凝固成 0 °C 冰: 0.4 × 334 = <b>133.6 kJ</b>。<br>
+          3. 0 °C 冰降至 −18 °C: 0.4 × 2.1 × [0 − (−18)] = 0.4 × 2.1 × 18 = <b>15.12 kJ</b>。<br>
+          • 總放熱 <i>E</i> = 42 + 133.6 + 15.12 = <b>190.72 kJ ≈ 191 kJ</b> (即 190 720 J)。
+        </div>
+        <div class="feedback" id="q3-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q3-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Estimate average rate of energy released (power in W)</div>
+        <p>The whole cooling process takes <b>900 s</b> (15 minutes).</p>
+        <div class="input-row">
+          <span>Average Power <i>P</i> = </span>
+          <input type="number" id="q3-p-input" placeholder="e.g. 212" step="any">
+          <span>W</span>
+          <button class="check-btn" onclick="checkQ3S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 應用功率公式：<i>E</i> = <i>Pt</i> ⇒ <i>P</i> = <i>E</i> / <i>t</i>。<br>
+          2. 代入焦耳單位：<i>P</i> = 190 720 J / 900 s ≈ <b>211.9 W ≈ 212 W</b> (若用 191 000 J 則約為 212.2 W)。
+        </div>
+        <div class="feedback" id="q3-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 4 ================= -->
+    <div class="q-panel" id="tab-3">
+      <div class="q-header">
+        <h2>Question 4: Melting Ice Mixed with Hot Water</h2>
+        <div class="q-desc">
+          A block of melting ice of <b>500 g (0.5 kg)</b> at <b>0 °C</b> is placed into a bucket containing <b>2 kg</b> of water at <b>80 °C</b>.<br>
+          Estimate the final equilibrium temperature of the mixture. (Take <i>c</i><sub>water</sub> = 4.2 kJ kg⁻¹ °C⁻¹, ℓ<sub>f</sub> = 334 kJ kg⁻¹).
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q4-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Set up heat exchange equation & solve for T (°C)</div>
+        <p>Energy absorbed by melting ice and warming up = Energy released by cooling hot water.</p>
+        <div class="input-row">
+          <span>Final Temperature <i>T</i> = </span>
+          <input type="number" id="q4-t-input" placeholder="e.g. 48.1" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ4S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h1">
+          <div class="hint-head">【熱平衡方程提示】</div>
+          1. 冰吸收能量：<i>E</i><sub>abs</sub> = <i>m</i><sub>ice</sub>ℓ<sub>f</sub> + <i>m</i><sub>ice</sub><i>c</i>(<i>T</i> − 0)<br>
+             &nbsp;&nbsp;= 0.5 × 334 + 0.5 × 4.2 × <i>T</i> = 167 + 2.1<i>T</i> (kJ)。<br>
+          2. 熱水放出能量：<i>E</i><sub>rel</sub> = <i>m</i><sub>water</sub><i>c</i>(80 − <i>T</i>)<br>
+             &nbsp;&nbsp;= 2 × 4.2 × (80 − <i>T</i>) = 8.4 × (80 − <i>T</i>) = 672 − 8.4<i>T</i> (kJ)。<br>
+          3. 列出等式：167 + 2.1<i>T</i> = 672 − 8.4<i>T</i><br>
+             &nbsp;&nbsp;10.5<i>T</i> = 505 ⇒ <b><i>T</i> = 505 / 10.5 ≈ 48.1 °C</b>。
+        </div>
+        <div class="feedback" id="q4-fb1"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 5 ================= -->
+    <div class="q-panel" id="tab-4">
+      <div class="q-header">
+        <h2>Question 5: Hot Copper Block in Melting Ice</h2>
+        <div class="q-desc">
+          A copper block of mass <b>1.7 kg</b> at <b>300 °C</b> is immersed into <b>0.3 kg</b> of melting ice at <b>0 °C</b>.<br>
+          Given: Melting point of copper = 1080 °C, <i>c</i><sub>copper</sub> = <b>390 J kg⁻¹ °C⁻¹</b>, ℓ<sub>f</sub> = <b>3.34 × 10⁵ J kg⁻¹</b>, <i>c</i><sub>water</sub> = <b>4200 J kg⁻¹ °C⁻¹</b>.<br>
+          Estimate the final equilibrium temperature of the copper block.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q5-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Solve for final equilibrium temperature T (°C)</div>
+        <p>Energy released by cooling copper = Energy absorbed by melting ice and warming resulting water.</p>
+        <div class="input-row">
+          <span>Final Temperature <i>T</i> = </span>
+          <input type="number" id="q5-t-input" placeholder="e.g. 51.3" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ5S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 銅塊降溫放熱：<i>m</i><sub>Cu</sub><i>c</i><sub>Cu</sub>(300 − <i>T</i>) = 1.7 × 390 × (300 − <i>T</i>) = 663 × (300 − <i>T</i>) = 198 900 − 663<i>T</i>。<br>
+          2. 冰吸熱融化並升溫：<i>m</i><sub>ice</sub>ℓ<sub>f</sub> + <i>m</i><sub>ice</sub><i>c</i><sub>water</sub>(<i>T</i> − 0)<br>
+             &nbsp;&nbsp;= 0.3 × 334 000 + 0.3 × 4200 × <i>T</i> = 100 200 + 1260<i>T</i>。<br>
+          3. 能量守恆：198 900 − 663<i>T</i> = 100 200 + 1260<i>T</i><br>
+             &nbsp;&nbsp;1923<i>T</i> = 98 700 ⇒ <b><i>T</i> = 98 700 / 1923 ≈ 51.3 °C</b>。
+        </div>
+        <div class="feedback" id="q5-fb1"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 6 ================= -->
+    <div class="q-panel" id="tab-5">
+      <div class="q-header">
+        <h2>Question 6: Steaming a Fish</h2>
+        <div class="q-desc">
+          Steam at <b>120 °C</b> is used to cook a fish of mass <b>600 g</b> initially at <b>15 °C</b>. The final temperature of the fish is <b>88 °C</b>.<br>
+          Given: Heat capacity of fish <i>C</i><sub>fish</sub> = <b>2100 J °C⁻¹</b>, <i>c</i><sub>steam</sub> = <b>1900 J kg⁻¹ °C⁻¹</b>, ℓ<sub>v</sub> = <b>2.26 × 10⁶ J kg⁻¹</b>, <i>c</i><sub>water</sub> = <b>4200 J kg⁻¹ °C⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q6-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> Calculate energy absorbed by the fish (J)</div>
+        <p>The fish temperature rises from 15 °C to 88 °C (using its heat capacity <i>C</i><sub>fish</sub>).</p>
+        <div class="input-row">
+          <span><i>E</i><sub>fish</sub> = </span>
+          <input type="number" id="q6-efish-input" placeholder="e.g. 153300">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ6S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 溫升：Δ<i>T</i> = 88 − 15 = 73 °C。<br>
+          2. 已知魚的熱容量 <i>C</i><sub>fish</sub> = 2100 J °C⁻¹ (注意是熱容量 <i>C</i>，不需再乘質量)。<br>
+          3. 吸收熱量：<i>E</i> = <i>C</i><sub>fish</sub>Δ<i>T</i> = 2100 × 73 = <b>153 300 J</b>。
+        </div>
+        <div class="feedback" id="q6-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q6-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> Estimate the mass of steam used (kg)</div>
+        <p>Steam cools from 120 °C → 100 °C, condenses into water at 100 °C, and condensed water cools from 100 °C → 88 °C.</p>
+        <div class="input-row">
+          <span>Mass of steam <i>m</i><sub>steam</sub> = </span>
+          <input type="number" id="q6-msteam-input" placeholder="e.g. 0.0653" step="any">
+          <span>kg</span>
+          <button class="check-btn" onclick="checkQ6S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h2">
+          <div class="hint-head">【蒸汽三段放熱提示】</div>
+          設所需蒸汽質量為 <i>m</i>：<br>
+          1. 蒸汽由 120 °C 降至 100 °C: <i>m</i> × 1900 × (120 − 100) = 38 000<i>m</i> J。<br>
+          2. 蒸汽在 100 °C 凝結: <i>m</i> × (2.26 × 10⁶) = 2 260 000<i>m</i> J。<br>
+          3. 凝結水由 100 °C 降至 88 °C: <i>m</i> × 4200 × (100 − 88) = 50 400<i>m</i> J。<br>
+          • 蒸汽總放熱 = (38 000 + 2 260 000 + 50 400)<i>m</i> = 2 348 400<i>m</i> J。<br>
+          • 列方程：2 348 400<i>m</i> = 153 300 ⇒ <b><i>m</i> ≈ 0.0653 kg (約 65.3 g)</b>。
+        </div>
+        <div class="feedback" id="q6-fb2"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* --- Tab Navigation --- */
+  function switchTab(index) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.q-panel');
+    tabs.forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+      panels[i].classList.toggle('active', i === index);
+    });
+  }
+
+  /* --- Stopwatch Timer --- */
+  let seconds = 0;
+  let timerInterval = null;
+  let isRunning = false;
+
+  function updateTimerDisplay() {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('startPauseBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.innerText = 'Pause';
+      timerInterval = setInterval(() => {
+        seconds++;
+        updateTimerDisplay();
+      }, 1000);
+    } else {
+      isRunning = false;
+      btn.innerText = 'Start';
+      clearInterval(timerInterval);
+    }
+  }
+
+  function resetTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    updateTimerDisplay();
+    document.getElementById('startPauseBtn').innerText = 'Start';
+  }
+
+  /* --- Hint Toggle --- */
+  function toggleHint(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  /* --- Helper Comparison Functions --- */
+  function isClose(val, target, tolerance = 0.02) {
+    if (isNaN(val)) return false;
+    return Math.abs(val - target) <= Math.max(Math.abs(target * tolerance), 0.05);
+  }
+
+  function stepPassed(stepId, fbId, msg, nextStepId) {
+    const step = document.getElementById(stepId);
+    const fb = document.getElementById(fbId);
+    step.classList.add('completed');
+    fb.className = 'feedback success';
+    fb.innerHTML = '✓ Correct! ' + msg;
+    if (nextStepId) {
+      const next = document.getElementById(nextStepId);
+      next.classList.remove('locked');
+      next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function stepFailed(fbId, msg) {
+    const fb = document.getElementById(fbId);
+    fb.className = 'feedback error';
+    fb.innerHTML = '✗ Incorrect. ' + msg;
+  }
+
+  /* ================= Question 1 Logic ================= */
+  function checkQ1S1() {
+    const e1 = parseFloat(document.getElementById('q1-e1-input').value);
+    const e2 = parseFloat(document.getElementById('q1-e2-input').value);
+    const e3 = parseFloat(document.getElementById('q1-e3-input').value);
+
+    const c1 = isClose(e1, 66.8, 0.02) || isClose(e1, 66800, 0.02);
+    const c2 = isClose(e2, 84, 0.02) || isClose(e2, 84000, 0.02);
+    const c3 = isClose(e3, 452, 0.02) || isClose(e3, 452000, 0.02);
+
+    if (c1 && c2 && c3) {
+      stepPassed('q1-s1', 'q1-fb1', 'E₁ = 66.8 kJ, E₂ = 84 kJ, E₃ = 452 kJ.', 'q1-s2');
+    } else {
+      stepFailed('q1-fb1', 'Check calculations: E₁ = 0.2 × 334; E₂ = 0.2 × 4.2 × 100; E₃ = 0.2 × 2260.');
+    }
+  }
+
+  function checkQ1S2() {
+    const val = parseFloat(document.getElementById('q1-tot-input').value);
+    if (isClose(val, 602.8, 0.01) || isClose(val, 602800, 0.01)) {
+      stepPassed('q1-s2', 'q1-fb2', 'Total energy required = 602.8 kJ (602 800 J).', null);
+    } else {
+      stepFailed('q1-fb2', 'Add all three stages: 66.8 + 84 + 452 = 602.8 kJ.');
+    }
+  }
+
+  /* ================= Question 2 Logic ================= */
+  function checkQ2S1() {
+    const val = parseFloat(document.getElementById('q2-e1-input').value);
+    if (isClose(val, 81120, 0.01) || isClose(val, 81.12, 0.02)) {
+      stepPassed('q2-s1', 'q2-fb1', 'E₁ = 0.6 × 130 × (1060 - 20) = 81 120 J.', 'q2-s2');
+    } else {
+      stepFailed('q2-fb1', 'Formula: mcΔT = 0.6 × 130 × 1040.');
+    }
+  }
+
+  function checkQ2S2() {
+    const val = parseFloat(document.getElementById('q2-e2-input').value);
+    if (isClose(val, 4020, 0.01) || isClose(val, 4.02, 0.02)) {
+      stepPassed('q2-s2', 'q2-fb2', 'E₂ = mℓ_f = 0.6 × 6700 = 4020 J.', 'q2-s3');
+    } else {
+      stepFailed('q2-fb2', 'Formula: mℓ_f = 0.6 × 6700.');
+    }
+  }
+
+  function checkQ2S3() {
+    const val = parseFloat(document.getElementById('q2-tot-input').value);
+    if (isClose(val, 85140, 0.01) || isClose(val, 85.14, 0.02)) {
+      stepPassed('q2-s3', 'q2-fb3', 'Total energy = 81 120 + 4020 = 85 140 J.', null);
+    } else {
+      stepFailed('q2-fb3', 'Add E₁ and E₂: 81 120 + 4020 = 85 140 J.');
+    }
+  }
+
+  /* ================= Question 3 Logic ================= */
+  function checkQ3S1() {
+    const val = parseFloat(document.getElementById('q3-e-input').value);
+    if (isClose(val, 191, 0.02) || isClose(val, 190.72, 0.01) || isClose(val, 190720, 0.01)) {
+      stepPassed('q3-s1', 'q3-fb1', 'E = 42 + 133.6 + 15.12 = 190.72 kJ ≈ 191 kJ.', 'q3-s2');
+    } else {
+      stepFailed('q3-fb1', 'Check: water cooling (42 kJ) + freezing (133.6 kJ) + ice cooling (15.12 kJ) = 190.72 kJ.');
+    }
+  }
+
+  function checkQ3S2() {
+    const val = parseFloat(document.getElementById('q3-p-input').value);
+    if (isClose(val, 212, 0.02) || isClose(val, 211.9, 0.02)) {
+      stepPassed('q3-s2', 'q3-fb2', 'Power P = 190 720 J / 900 s ≈ 212 W.', null);
+    } else {
+      stepFailed('q3-fb2', 'Calculate P = E / t = 190 720 / 900.');
+    }
+  }
+
+  /* ================= Question 4 Logic ================= */
+  function checkQ4S1() {
+    const val = parseFloat(document.getElementById('q4-t-input').value);
+    if (isClose(val, 48.1, 0.02) || isClose(val, 48.095, 0.02)) {
+      stepPassed('q4-s1', 'q4-fb1', 'T = 505 / 10.5 ≈ 48.1 °C.', null);
+    } else {
+      stepFailed('q4-fb1', 'Equation: 0.5×334 + 0.5×4.2×T = 2×4.2×(80 - T) ⇒ 167 + 2.1T = 672 - 8.4T.');
+    }
+  }
+
+  /* ================= Question 5 Logic ================= */
+  function checkQ5S1() {
+    const val = parseFloat(document.getElementById('q5-t-input').value);
+    if (isClose(val, 51.3, 0.02) || isClose(val, 51.33, 0.02)) {
+      stepPassed('q5-s1', 'q5-fb1', 'T = 98 700 / 1923 ≈ 51.3 °C.', null);
+    } else {
+      stepFailed('q5-fb1', 'Equation: 1.7×390×(300 - T) = 0.3×334 000 + 0.3×4200×T ⇒ 198 900 - 663T = 100 200 + 1260T.');
+    }
+  }
+
+  /* ================= Question 6 Logic ================= */
+  function checkQ6S1() {
+    const val = parseFloat(document.getElementById('q6-efish-input').value);
+    if (isClose(val, 153300, 0.01) || isClose(val, 153.3, 0.02)) {
+      stepPassed('q6-s1', 'q6-fb1', 'E_fish = C_fish × ΔT = 2100 × (88 - 15) = 153 300 J.', 'q6-s2');
+    } else {
+      stepFailed('q6-fb1', 'Fish heat capacity is already C = 2100 J °C⁻¹. Calculate 2100 × (88 - 15).');
+    }
+  }
+
+  function checkQ6S2() {
+    const val = parseFloat(document.getElementById('q6-msteam-input').value);
+    if (isClose(val, 0.0653, 0.03) || isClose(val, 65.3, 0.03)) {
+      stepPassed('q6-s2', 'q6-fb2', 'm_steam = 153 300 / 2 348 400 ≈ 0.0653 kg (65.3 g).', null);
+    } else {
+      stepFailed('q6-fb2', 'Total steam energy released per kg = 38 000 + 2 260 000 + 50 400 = 2 348 400 J. Divide 153 300 by 2 348 400.');
+    }
+  }
+</script>
+
+</body>
+</html>

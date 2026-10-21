@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Ch.3 - Specific Latent Heat Practice & Helper</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-hover: #1e40af;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --hint-color: #0369a1;
+      --hint-bg: #f0f9ff;
+      --hint-border: #bae6fd;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-700: #334155;
+      --gray-800: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      padding: 20px 14px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
+      border-radius: 6px;
+      gap: 10px;
+    }
+
+    .timer-display {
+      font-family: monospace;
+      font-size: 1.35rem;
+      font-weight: bold;
+      min-width: 65px;
+    }
+
+    .timer-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+
+    .timer-btn:hover {
+      background: #e0e7ff;
+    }
+
+    .tabs-nav {
+      display: flex;
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 12px 18px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--gray-200);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    .content-area {
+      padding: 24px;
+    }
+
+    .q-panel {
+      display: none;
+    }
+
+    .q-panel.active {
+      display: block;
+    }
+
+    .q-header {
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--gray-200);
+    }
+
+    .q-header h2 {
+      font-size: 1.15rem;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+
+    .q-desc {
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      background: var(--gray-50);
+      padding: 14px;
+      border-left: 4px solid var(--primary);
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+
+    .prop-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+
+    .prop-table th, .prop-table td {
+      border: 1px solid var(--gray-200);
+      padding: 7px 12px;
+      text-align: left;
+    }
+
+    .prop-table th {
+      background-color: #f1f5f9;
+      color: #1e3a8a;
+    }
+
+    .graph-container {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+      background: #ffffff;
+      padding: 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+    }
+
+    .step-card {
+      margin-top: 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .step-card.locked {
+      opacity: 0.45;
+      pointer-events: none;
+      background: var(--gray-50);
+    }
+
+    .step-card.completed {
+      border-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .step-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.98rem;
+    }
+
+    .step-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"], select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      min-width: 140px;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    button.check-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    button.check-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    button.hint-btn {
+      background: #fff;
+      color: var(--hint-color);
+      border: 1px solid var(--hint-color);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    button.hint-btn:hover {
+      background: var(--hint-bg);
+    }
+
+    .hint-content {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--hint-bg);
+      border: 1px solid var(--hint-border);
+      border-left: 4px solid var(--hint-color);
+      border-radius: 6px;
+      font-size: 0.88rem;
+      color: #0c4a6e;
+      line-height: 1.7;
+    }
+
+    .hint-head {
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: var(--hint-color);
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .feedback.success {
+      display: block;
+      color: var(--success);
+    }
+
+    .feedback.error {
+      display: block;
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header with Timer -->
+  <header>
+    <div>
+      <h1>Physics Practice: Ch.3 Specific Latent Heat (I)</h1>
+      <p>Interactive step-by-step problem solver with graphical and experimental analysis</p>
+    </div>
+    <div class="timer-box">
+      <span>⏱️ Timer:</span>
+      <span class="timer-display" id="timerDisplay">00:00</span>
+      <button class="timer-btn" id="startPauseBtn" onclick="toggleTimer()">Start</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(0)">Q1 Heating Curve</button>
+    <button class="tab-btn" onclick="switchTab(1)">Q2 Ice Fusion Exp</button>
+    <button class="tab-btn" onclick="switchTab(2)">Q3 Vaporization Exp</button>
+    <button class="tab-btn" onclick="switchTab(3)">Q4 Evaporative Cooler</button>
+    <button class="tab-btn" onclick="switchTab(4)">Q5 Alcohol Phase Change</button>
+    <button class="tab-btn" onclick="switchTab(5)">Q6 Thermal Equilibrium</button>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ================= QUESTION 1 ================= -->
+    <div class="q-panel active" id="tab-0">
+      <div class="q-header">
+        <h2>Question 1 (P.109 Example 3.1): Heating Curve of a Substance</h2>
+        <div class="q-desc">
+          Suppose <b>500 g (0.5 kg)</b> of a substance is heated uniformly at a constant rate of <b>300 W</b> and changes from a solid to a gas.<br>
+          The specific heat capacity of the solid state is <b><i>c</i><sub>solid</sub> = 7700 J kg⁻¹ °C⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Graph rendered as precise SVG with clear margins -->
+      <div class="graph-container">
+        <svg viewBox="0 0 620 280" width="100%" height="auto" style="max-width:580px; display:block;">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#334155" />
+            </marker>
+            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e2e8f0" stroke-width="0.8"/>
+            </pattern>
+          </defs>
+
+          <!-- Grid background -->
+          <rect x="95" y="25" width="400" height="205" fill="url(#grid)" />
+
+          <!-- Axes -->
+          <line x1="95" y1="230" x2="525" y2="230" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+          <line x1="95" y1="230" x2="95" y2="22" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+          
+          <!-- Axis labels -->
+          <text x="95" y="14" font-size="13" fill="#334155" font-weight="700" text-anchor="middle">Temperature / °C</text>
+          <text x="535" y="234" font-size="12" fill="#334155" font-weight="600">time / min</text>
+
+          <!-- Time tick labels -->
+          <text x="95" y="246" font-size="11" fill="#475569" text-anchor="middle">0</text>
+          <text x="145" y="246" font-size="11" fill="#475569" text-anchor="middle">5</text>
+          <text x="195" y="246" font-size="11" fill="#475569" text-anchor="middle">10</text>
+          <text x="245" y="246" font-size="11" fill="#475569" text-anchor="middle">15</text>
+          <text x="295" y="246" font-size="11" fill="#475569" text-anchor="middle">20</text>
+          <text x="345" y="246" font-size="11" fill="#475569" text-anchor="middle">25</text>
+          <text x="395" y="246" font-size="11" fill="#475569" text-anchor="middle">30</text>
+          <text x="445" y="246" font-size="11" fill="#475569" text-anchor="middle">35</text>
+          <text x="495" y="246" font-size="11" fill="#475569" text-anchor="middle">40</text>
+
+          <!-- T1 & T2 labels & guide lines -->
+          <text x="82" y="174" font-size="13" fill="#1e3a8a" font-weight="bold" font-style="italic" text-anchor="end">T₁</text>
+          <line x1="91" y1="170" x2="95" y2="170" stroke="#1e3a8a" stroke-width="1.5"/>
+          <line x1="95" y1="170" x2="245" y2="170" stroke="#94a3b8" stroke-dasharray="3,3"/>
+
+          <text x="82" y="74" font-size="13" fill="#b91c1c" font-weight="bold" font-style="italic" text-anchor="end">T₂</text>
+          <line x1="91" y1="70" x2="95" y2="70" stroke="#b91c1c" stroke-width="1.5"/>
+          <line x1="95" y1="70" x2="445" y2="70" stroke="#94a3b8" stroke-dasharray="3,3"/>
+
+          <!-- Heating Curve -->
+          <polyline points="95,230 155,170 245,170 315,70 445,70 495,30" 
+                    fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          
+          <!-- Key Points -->
+          <circle cx="155" cy="170" r="3.5" fill="#2563eb" />
+          <circle cx="245" cy="170" r="3.5" fill="#2563eb" />
+          <circle cx="315" cy="70" r="3.5" fill="#2563eb" />
+          <circle cx="445" cy="70" r="3.5" fill="#2563eb" />
+        </svg>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q1-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a)(i) Find the melting point T₁ (°C)</div>
+        <p>The solid state is heated from <i>t</i> = 0 to <i>t</i> = 6 min to reach its melting point <i>T</i>₁.</p>
+        <div class="input-row">
+          <span>Melting Point <i>T</i>₁ = </span>
+          <input type="number" id="q1-t1-input" placeholder="e.g. 28.1" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ1S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 固體受熱時間為 0 至 6 分鐘：<i>t</i> = 6 min = 6 × 60 = 360 s。<br>
+          2. 輸入電能：<i>E</i> = <i>Pt</i> = 300 × 360 = 108 000 J。<br>
+          3. 應用吸熱公式：<i>Pt</i> = <i>mc</i><sub>solid</sub>Δ<i>T</i> ⇒ 108 000 = 0.5 × 7700 × (<i>T</i>₁ − 0)。<br>
+          4. 解得 <i>T</i>₁ = 108 000 / 3850 ≈ 28.05 °C (約 28.1 °C)。
+        </div>
+        <div class="feedback" id="q1-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q1-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (a)(ii) Find the specific latent heat of fusion ℓ<sub>f</sub> (kJ kg⁻¹)</div>
+        <p>Melting occurs along the first horizontal plateau (from <i>t</i> = 6 min to 15 min).</p>
+        <div class="input-row">
+          <span>ℓ<sub>f</sub> = </span>
+          <input type="number" id="q1-lf-input" placeholder="Enter value in kJ kg⁻¹" step="any">
+          <span>kJ kg⁻¹</span>
+          <button class="check-btn" onclick="checkQ1S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 熔化階段時間：Δ<i>t</i> = 15 − 6 = 9 min = 9 × 60 = 540 s。<br>
+          2. 熔化吸收能量：<i>E</i> = <i>P</i>Δ<i>t</i> = 300 × 540 = 162 000 J = 162 kJ。<br>
+          3. 應用潛熱公式：<i>Pt</i> = <i>m</i>ℓ<sub>f</sub> ⇒ ℓ<sub>f</sub> = 162 000 / 0.5 = 324 000 J kg⁻¹ = 324 kJ kg⁻¹。
+        </div>
+        <div class="feedback" id="q1-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q1-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> (a)(iii) Find the specific latent heat of vaporization ℓ<sub>v</sub> (kJ kg⁻¹)</div>
+        <p>Boiling occurs along the second horizontal plateau (from <i>t</i> = 22 min to 35 min).</p>
+        <div class="input-row">
+          <span>ℓ<sub>v</sub> = </span>
+          <input type="number" id="q1-lv-input" placeholder="Enter value in kJ kg⁻¹" step="any">
+          <span>kJ kg⁻¹</span>
+          <button class="check-btn" onclick="checkQ1S3()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h3">
+          <div class="hint-head">【解題提示】</div>
+          1. 汽化階段時間：Δ<i>t</i> = 35 − 22 = 13 min = 13 × 60 = 780 s。<br>
+          2. 汽化吸收能量：<i>E</i> = <i>P</i>Δ<i>t</i> = 300 × 780 = 234 000 J = 234 kJ。<br>
+          3. 應用公式：<i>Pt</i> = <i>m</i>ℓ<sub>v</sub> ⇒ ℓ<sub>v</sub> = 234 000 / 0.5 = 468 000 J kg⁻¹ = 468 kJ kg⁻¹。
+        </div>
+        <div class="feedback" id="q1-fb3"></div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-card locked" id="q1-s4">
+        <div class="step-title"><span class="step-badge">Step 4</span> (b) Find the specific heat capacity in liquid state <i>c</i><sub>liquid</sub> (J kg⁻¹ °C⁻¹)</div>
+        <p>If the boiling point <i>T</i>₂ is 80 °C, and the liquid heats up between <i>t</i> = 15 min and 22 min.</p>
+        <div class="input-row">
+          <span><i>c</i><sub>liquid</sub> = </span>
+          <input type="number" id="q1-cl-input" placeholder="Enter value in J kg⁻¹ °C⁻¹" step="any">
+          <span>J kg⁻¹ °C⁻¹</span>
+          <button class="check-btn" onclick="checkQ1S4()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q1-h4')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q1-h4">
+          <div class="hint-head">【解題提示】</div>
+          1. 液體升溫時間：Δ<i>t</i> = 22 − 15 = 7 min = 7 × 60 = 420 s。<br>
+          2. 提供能量：<i>E</i> = <i>Pt</i> = 300 × 420 = 126 000 J。<br>
+          3. 溫度變化量：Δ<i>T</i> = 80 − 28.05 = 51.95 °C（若以 28.1 °C 計算則為 51.9 °C）。<br>
+          4. 應用公式：<i>Pt</i> = <i>mc</i>Δ<i>T</i> ⇒ 126 000 = 0.5 × <i>c</i> × 51.95 ⇒ <i>c</i> ≈ 4850 J kg⁻¹ °C⁻¹。
+        </div>
+        <div class="feedback" id="q1-fb4"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 2 ================= -->
+    <div class="q-panel" id="tab-1">
+      <div class="q-header">
+        <h2>Question 2 (P.112 Example 3.2): Latent Heat of Fusion of Ice Experiment</h2>
+        <div class="q-desc">
+          To measure ℓ<sub>f</sub> of ice, Sam puts 0 °C crushed ice in both funnels (Experimental setup with heater turned on vs. Control setup without power) and switches on the immersion heater after dripping rates equalize.<br>
+          <b>Data:</b> Mass in beaker A (experimental) = <b>0.084 kg</b>; Mass in beaker B (control) = <b>0.013 kg</b>.<br>
+          Initial joulemeter reading = <b>20 485 J</b>; Final joulemeter reading = <b>41 785 J</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q2-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Calculate the specific latent heat of fusion ℓ<sub>f</sub> (kJ kg⁻¹)</div>
+        <p>Determine net electrical energy supplied and net mass of ice melted solely by the heater.</p>
+        <div class="input-row">
+          <span>ℓ<sub>f</sub> = </span>
+          <input type="number" id="q2-lf-input" placeholder="e.g. 300" step="any">
+          <span>kJ kg⁻¹</span>
+          <button class="check-btn" onclick="checkQ2S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 電能提供：<i>E</i> = 41 785 − 20 485 = 21 300 J。<br>
+          2. 僅由加熱器熔化的淨冰質量：<i>m</i> = <i>m</i><sub>A</sub> − <i>m</i><sub>B</sub> = 0.084 − 0.013 = 0.071 kg。<br>
+          3. 應用公式：ℓ<sub>f</sub> = <i>E</i> / <i>m</i> = 21 300 / 0.071 = 300 000 J kg⁻¹ = 300 kJ kg⁻¹。
+        </div>
+        <div class="feedback" id="q2-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q2-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Systematic Error Analysis (Larger or Smaller?)</div>
+        <p>Predict whether the experimental value would be <b>larger</b> or <b>smaller</b> than the standard value in each case:</p>
+        
+        <div style="margin-top:12px; display:flex; flex-direction:column; gap:12px;">
+          <div class="input-row">
+            <span>(i) Ice cubes are used instead of crushed ice:</span>
+            <select id="q2-err1">
+              <option value="">-- Choose --</option>
+              <option value="larger">Larger</option>
+              <option value="smaller">Smaller</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <span>(ii) Less ice in the control than the experimental apparatus:</span>
+            <select id="q2-err2">
+              <option value="">-- Choose --</option>
+              <option value="larger">Larger</option>
+              <option value="smaller">Smaller</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <span>(iii) There is no control apparatus used:</span>
+            <select id="q2-err3">
+              <option value="">-- Choose --</option>
+              <option value="larger">Larger</option>
+              <option value="smaller">Smaller</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <span>(iv) The heating coil is not immersed into the ice completely:</span>
+            <select id="q2-err4">
+              <option value="">-- Choose --</option>
+              <option value="larger">Larger</option>
+              <option value="smaller">Smaller</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:16px;">
+          <button class="check-btn" onclick="checkQ2S2()">Check All Errors</button>
+          <button class="hint-btn" onclick="toggleHint('q2-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q2-h2">
+          <div class="hint-head">【系統誤差分析提示】</div>
+          公式：ℓ<sub>f</sub> = <i>E</i> / <i>m</i>。<br>
+          • <b>(i) 冰塊接觸不良</b>：冰粒間有空隙，熱量向周圍散失，熔化相同冰所需 <i>E</i> 偏大（overestimated）⇒ ℓ<sub>f</sub> <b>Larger</b>。<br>
+          • <b>(ii) 對照組冰過少</b>：對照組熔化的水偏少，扣除的 <i>m</i><sub>B</sub> 偏小，導致計算淨質量 <i>m</i> 偏大 ⇒ ℓ<sub>f</sub> <b>Smaller</b>。<br>
+          • <b>(iii) 沒有對照組</b>：直接把環境熱量熔化的冰都算進去，質量 <i>m</i> 被嚴重高估 ⇒ ℓ<sub>f</sub> <b>Smaller</b>。<br>
+          • <b>(iv) 加熱器外露</b>：部分熱量直接散失至空氣中，計入電表的 <i>E</i> 比真正融冰的能量多 ⇒ ℓ<sub>f</sub> <b>Larger</b>。
+        </div>
+        <div class="feedback" id="q2-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 3 ================= -->
+    <div class="q-panel" id="tab-2">
+      <div class="q-header">
+        <h2>Question 3 (P.113 Example 3.3): Latent Heat of Vaporization Experiment</h2>
+        <div class="q-desc">
+          Mandy uses a kilowatt-hour meter to measure the energy consumed to boil water.<br>
+          <b>Initial mass of water</b> = 0.550 kg &nbsp;|&nbsp; <b>Final mass of water</b> = 0.374 kg<br>
+          <b>Meter specification</b> = 300 rev / kWh &nbsp;|&nbsp; <b>Revolutions counted</b> = 38 rev
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q3-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Total electrical energy consumed (kJ)</div>
+        <div class="input-row">
+          <span>Total energy <i>E</i> = </span>
+          <input type="number" id="q3-e-input" placeholder="e.g. 456">
+          <span>kJ</span>
+          <button class="check-btn" onclick="checkQ3S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 1 kWh = 1000 W × 3600 s = 3.6 × 10⁶ J = 3600 kJ。<br>
+          2. 每千瓦小時 300 轉，轉動 38 轉耗電：<i>E</i> = (38 / 300) × 3.6 × 10⁶ J = 456 000 J = 456 kJ。
+        </div>
+        <div class="feedback" id="q3-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q3-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Calculate the specific latent heat of vaporization ℓ<sub>v</sub> (kJ kg⁻¹)</div>
+        <div class="input-row">
+          <span>ℓ<sub>v</sub> = </span>
+          <input type="number" id="q3-lv-input" placeholder="e.g. 2590" step="any">
+          <span>kJ kg⁻¹</span>
+          <button class="check-btn" onclick="checkQ3S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 汽化（蒸發）的水質量：<i>m</i> = 0.550 − 0.374 = 0.176 kg。<br>
+          2. 應用公式：<i>E</i> = <i>m</i>ℓ<sub>v</sub> ⇒ 456 000 = 0.176 × ℓ<sub>v</sub>。<br>
+          3. ℓ<sub>v</sub> = 456 000 / 0.176 ≈ 2.59 × 10⁶ J kg⁻¹ = 2590 kJ kg⁻¹。
+        </div>
+        <div class="feedback" id="q3-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q3-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> (c) Evaluate Experimental Improvements (Yes / No)</div>
+        <p>Will each measure improve accuracy? Select Yes or No:</p>
+        <div style="margin-top:12px; display:flex; flex-direction:column; gap:12px;">
+          <div class="input-row">
+            <span>(i) Completely immersing heating part of heater in water:</span>
+            <select id="q3-c1">
+              <option value="">-- Choose --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <span>(ii) Replacing the glass beaker with a polystyrene cup:</span>
+            <select id="q3-c2">
+              <option value="">-- Choose --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <span>(iii) Omitting the tare mass of the beaker during measurements:</span>
+            <select id="q3-c3">
+              <option value="">-- Choose --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <span>(iv) Wiping out condensed water droplets formed on the inner beaker wall:</span>
+            <select id="q3-c4">
+              <option value="">-- Choose --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:16px;">
+          <button class="check-btn" onclick="checkQ3S3()">Check Measures</button>
+          <button class="hint-btn" onclick="toggleHint('q3-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q3-h3">
+          <div class="hint-head">【改進措施分析】</div>
+          • <b>(i) 浸沒發熱部分</b>：<b>Yes</b>。防止發熱絲直接把熱量散失到空氣中。<br>
+          • <b>(ii) 改用發泡膠杯</b>：<b>Yes</b>。發泡膠是優良絕熱體，減少杯壁散熱。<br>
+          • <b>(iii) 不理會燒杯質量</b>：<b>No</b>。我們計算的是質量差 (<i>m</i><sub>initial</sub> − <i>m</i><sub>final</sub>)，燒杯自重在相減時抵消，不會提高準確度。<br>
+          • <b>(iv) 抹去壁面冷凝水珠</b>：<b>Yes</b>。防止已蒸發的蒸汽在杯壁冷凝後滴回杯中，導致測得的汽化質量偏小。
+        </div>
+        <div class="feedback" id="q3-fb3"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 4 ================= -->
+    <div class="q-panel" id="tab-3">
+      <div class="q-header">
+        <h2>Question 4 (P.116 Example 3.4): Evaporative Cooler</h2>
+        <div class="q-desc">
+          An evaporative cooler cools air through the evaporation of water in a room measuring <b>15 m × 12 m × 5 m</b> filled with air at <b>27 °C</b>.<br>
+          The cooler operates for <b>20 minutes</b> with a useful power output of <b>5.8 kW</b>.<br>
+          Take: Air density = <b>1.2 kg m⁻³</b>, <i>c</i><sub>air</sub> = <b>1.005 kJ kg⁻¹ °C⁻¹</b>, and ℓ<sub>v</sub> = <b>2260 kJ kg⁻¹</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q4-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Total energy taken away from room air (J)</div>
+        <div class="input-row">
+          <span><i>E</i> = </span>
+          <input type="number" id="q4-e-input" placeholder="e.g. 6.96e6 or 6960000" step="any">
+          <span>J</span>
+          <button class="check-btn" onclick="checkQ4S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 功率 <i>P</i> = 5.8 kW = 5800 W。<br>
+          2. 時間 <i>t</i> = 20 min = 20 × 60 = 1200 s。<br>
+          3. 公式：<i>E</i> = <i>Pt</i> = 5.8 × 10³ × 1200 = 6.96 × 10⁶ J (或 6960 kJ)。
+        </div>
+        <div class="feedback" id="q4-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q4-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Mass of water evaporated (kg)</div>
+        <div class="input-row">
+          <span>Mass <i>m</i> = </span>
+          <input type="number" id="q4-m-input" placeholder="e.g. 3.1" step="any">
+          <span>kg</span>
+          <button class="check-btn" onclick="checkQ4S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 應用公式：<i>E</i> = <i>m</i>ℓ<sub>v</sub>。<br>
+          2. 6.96 × 10⁶ J = <i>m</i> × (2260 × 10³ J kg⁻¹)。<br>
+          3. <i>m</i> = 6.96 × 10⁶ / 2.26 × 10⁶ ≈ 3.08 kg (約 3.1 kg)。
+        </div>
+        <div class="feedback" id="q4-fb2"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card locked" id="q4-s3">
+        <div class="step-title"><span class="step-badge">Step 3</span> (c) Resulting temperature in the room (°C)</div>
+        <div class="input-row">
+          <span>Room temperature <i>T</i> = </span>
+          <input type="number" id="q4-t-input" placeholder="e.g. 20.6" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ4S3()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q4-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q4-h3">
+          <div class="hint-head">【解題提示】</div>
+          1. 房間空氣質量：<i>m</i><sub>air</sub> = 體積 × 密度 = (15 × 12 × 5) × 1.2 = 900 × 1.2 = 1080 kg。<br>
+          2. 空氣熱容量：<i>m</i><i>c</i> = 1080 × 1005 J °C⁻¹ = 1 085 400 J °C⁻¹。<br>
+          3. 降溫幅度：Δ<i>T</i> = <i>E</i> / (<i>m</i><i>c</i>) = 6.96 × 10⁶ / 1 085 400 ≈ 6.41 °C。<br>
+          4. 最終室溫：<i>T</i> = 27 − 6.41 = 20.59 °C ≈ 20.6 °C。
+        </div>
+        <div class="feedback" id="q4-fb3"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 5 ================= -->
+    <div class="q-panel" id="tab-4">
+      <div class="q-header">
+        <h2>Question 5 (P.117 Example 3.5): Multi-stage Cooling of Ethyl Alcohol</h2>
+        <div class="q-desc">
+          Thermal properties of <b>ethyl alcohol</b> (assume no energy loss to surroundings):
+          <table class="prop-table">
+            <tr><th>Boiling point</th><td>78 °C</td><th>Melting point</th><td>−115 °C</td></tr>
+            <tr><th>ℓ<sub>f</sub> (fusion)</th><td>108 kJ kg⁻¹</td><th>ℓ<sub>v</sub> (vaporization)</th><td>846 kJ kg⁻¹</td></tr>
+            <tr><th><i>c</i><sub>gas</sub></th><td>0.95 kJ kg⁻¹ °C⁻¹</td><th><i>c</i><sub>liquid</sub></th><td>2.3 kJ kg⁻¹ °C⁻¹</td></tr>
+            <tr><th><i>c</i><sub>solid</sub></th><td>0.97 kJ kg⁻¹ °C⁻¹</td><td colspan="2"></td></tr>
+          </table>
+          Consider cooling <b>1 kg</b> of ethyl alcohol from <b>100 °C (gas)</b> to <b>−125 °C (solid)</b>.
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-card" id="q5-s1">
+        <div class="step-title"><span class="step-badge">Step 1</span> (a) Account for energy released at each stage (kJ)</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:10px;">
+          <div>
+            <label>1. Gas cooling (100 °C → 78 °C):</label>
+            <div class="input-row"><input type="number" id="q5-e1" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label>2. Condensation at 78 °C:</label>
+            <div class="input-row"><input type="number" id="q5-e2" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label>3. Liquid cooling (78 °C → −115 °C):</label>
+            <div class="input-row"><input type="number" id="q5-e3" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label>4. Freezing at −115 °C:</label>
+            <div class="input-row"><input type="number" id="q5-e4" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label>5. Solid cooling (−115 °C → −125 °C):</label>
+            <div class="input-row"><input type="number" id="q5-e5" placeholder="kJ" step="any"> <span>kJ</span></div>
+          </div>
+          <div>
+            <label><b>Total Energy Released:</b></label>
+            <div class="input-row"><input type="number" id="q5-etot" placeholder="Total kJ" step="any"> <span>kJ</span></div>
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:16px;">
+          <button class="check-btn" onclick="checkQ5S1()">Check All Stages</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h1">
+          <div class="hint-head">【5 個階段計算提示】</div>
+          1. 氣體降溫：<i>mc</i><sub>gas</sub>Δ<i>T</i> = 1 × 0.95 × (100 − 78) = <b>20.9 kJ</b><br>
+          2. 氣體凝結：<i>m</i>ℓ<sub>v</sub> = 1 × 846 = <b>846 kJ</b><br>
+          3. 液體降溫：<i>mc</i><sub>liq</sub>Δ<i>T</i> = 1 × 2.3 × [78 − (−115)] = 1 × 2.3 × 193 = <b>443.9 kJ</b><br>
+          4. 液體凝固：<i>m</i>ℓ<sub>f</sub> = 1 × 108 = <b>108 kJ</b><br>
+          5. 固體降溫：<i>mc</i><sub>solid</sub>Δ<i>T</i> = 1 × 0.97 × [−115 − (−125)] = 1 × 0.97 × 10 = <b>9.7 kJ</b><br>
+          • 總釋放熱量 = 20.9 + 846 + 443.9 + 108 + 9.7 = <b>1428.5 kJ</b>
+        </div>
+        <div class="feedback" id="q5-fb1"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card locked" id="q5-s2">
+        <div class="step-title"><span class="step-badge">Step 2</span> (b) Calculate the time required if cooling power is 3 kW (min)</div>
+        <div class="input-row">
+          <span>Total time = </span>
+          <input type="number" id="q5-t-input" placeholder="e.g. 7.9" step="any">
+          <span>minutes</span>
+          <button class="check-btn" onclick="checkQ5S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q5-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q5-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 總能量：<i>E</i> = 1428.5 kJ = 1 428 500 J。<br>
+          2. 製冷功率：<i>P</i> = 3 kW = 3000 W。<br>
+          3. 秒數：<i>t</i> = 1 428 500 / 3000 ≈ 476.17 s。<br>
+          4. 換算成分鐘：476.17 / 60 ≈ 7.94 min (約 7.9 min)。
+        </div>
+        <div class="feedback" id="q5-fb2"></div>
+      </div>
+    </div>
+
+    <!-- ================= QUESTION 6 ================= -->
+    <div class="q-panel" id="tab-5">
+      <div class="q-header">
+        <h2>Question 6 (P.118 Example 3.6): Thermal Equilibrium & Mixtures</h2>
+        <div class="q-desc">
+          <b>Thermal constants for Water:</b><br>
+          ℓ<sub>f</sub> = 334 kJ kg⁻¹ &nbsp;|&nbsp; ℓ<sub>v</sub> = 2260 kJ kg⁻¹ &nbsp;|&nbsp; <i>c</i><sub>ice</sub> = 2.1 kJ kg⁻¹ °C⁻¹ &nbsp;|&nbsp; <i>c</i><sub>water</sub> = 4.2 kJ kg⁻¹ °C⁻¹
+        </div>
+      </div>
+
+      <!-- Part A - Ice in juice -->
+      <div class="step-card" id="q6-s1">
+        <div class="step-title"><span class="step-badge">Part A</span> (a)(i) Ice into juice: 500 g juice at 25 °C (c = 4.0 kJ kg⁻¹ °C⁻¹), add 30 g ice at 0 °C</div>
+        <p>Find final equilibrium temperature <i>T</i> of the drink (°C):</p>
+        <div class="input-row">
+          <span>Final Temperature <i>T</i> = </span>
+          <input type="number" id="q6-tjuice-input" placeholder="e.g. 18.8" step="any">
+          <span>°C</span>
+          <button class="check-btn" onclick="checkQ6S1()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h1')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h1">
+          <div class="hint-head">【解題提示】</div>
+          1. 冰吸收能量（熔化成 0 °C 水，再升溫至 <i>T</i>）：<br>
+             <i>E</i><sub>abs</sub> = <i>m</i><sub>ice</sub>ℓ<sub>f</sub> + <i>m</i><sub>ice</sub><i>c</i><sub>w</sub>(<i>T</i> − 0) = 0.03 × 334 + 0.03 × 4.2 × <i>T</i> = 10.02 + 0.126<i>T</i>。<br>
+          2. 果汁釋放能量（由 25 °C 降至 <i>T</i>）：<br>
+             <i>E</i><sub>rel</sub> = 0.5 × 4.0 × (25 − <i>T</i>) = 50 − 2<i>T</i>。<br>
+          3. 能量守恆：10.02 + 0.126<i>T</i> = 50 − 2<i>T</i> ⇒ 2.126<i>T</i> = 39.98 ⇒ <i>T</i> ≈ 18.8 °C。
+        </div>
+        <div class="feedback" id="q6-fb1"></div>
+      </div>
+
+      <!-- Part A(ii) -->
+      <div class="step-card locked" id="q6-s2">
+        <div class="step-title"><span class="step-badge">Part A</span> (a)(ii) Least amount of 0 °C ice needed to lower juice to 15 °C</div>
+        <div class="input-row">
+          <span>Mass of ice <i>m</i> = </span>
+          <input type="number" id="q6-mice-input" placeholder="e.g. 0.05" step="any">
+          <span>kg</span>
+          <button class="check-btn" onclick="checkQ6S2()">Check</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h2')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h2">
+          <div class="hint-head">【解題提示】</div>
+          1. 設需加入 <i>m</i> kg 冰。冰熔化並升溫至 15 °C 吸收能量：<br>
+             <i>m</i> × 334 + <i>m</i> × 4.2 × 15 = <i>m</i>(334 + 63) = 397<i>m</i> kJ。<br>
+          2. 果汁由 25 °C 降至 15 °C 釋放能量：<br>
+             0.5 × 4.0 × (25 − 15) = 20 kJ。<br>
+          3. 列式：397<i>m</i> = 20 ⇒ <i>m</i> = 20 / 397 ≈ 0.0504 kg ≈ 0.05 kg (50 g)。
+        </div>
+        <div class="feedback" id="q6-fb2"></div>
+      </div>
+
+      <!-- Part B - Steam into ice -->
+      <div class="step-card locked" id="q6-s3">
+        <div class="step-title"><span class="step-badge">Part B</span> (b) 0.2 kg steam at 100 °C pumped into 5 kg ice at 0 °C</div>
+        <p>Analyze if all ice melts and find the final mixture state:</p>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+          <div class="input-row">
+            <span>(i) Energy required if ALL 5 kg ice melts = </span>
+            <input type="number" id="q6-b1-input" placeholder="kJ">
+            <span>kJ</span>
+          </div>
+          <div class="input-row">
+            <span>(ii) Energy released if ALL 0.2 kg steam condenses = </span>
+            <input type="number" id="q6-b2-input" placeholder="kJ">
+            <span>kJ</span>
+          </div>
+          <div class="input-row">
+            <span>(iii) What is the final equilibrium temperature <i>T</i> of the mixture?</span>
+            <input type="number" id="q6-b3-input" placeholder="°C">
+            <span>°C</span>
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-top:16px;">
+          <button class="check-btn" onclick="checkQ6S3()">Check Mixture State</button>
+          <button class="hint-btn" onclick="toggleHint('q6-h3')">💡 提示 (Hint)</button>
+        </div>
+        <div class="hint-content" id="q6-h3">
+          <div class="hint-head">【混合物狀態分析】</div>
+          1. 融化全部冰所需熱量：<i>E</i> = <i>m</i>ℓ<sub>f</sub> = 5 × 334 = <b>1670 kJ</b>。<br>
+          2. 0.2 kg 蒸汽完全凝結釋放熱量：<i>E</i> = <i>m</i>ℓ<sub>v</sub> = 0.2 × 2260 = <b>452 kJ</b>。<br>
+          3. 凝結後的 0.2 kg 100 °C 水降溫至 0 °C 額外釋放：0.2 × 4.2 × 100 = 84 kJ。<br>
+          4. 蒸汽降至 0 °C 水最大總放熱為 452 + 84 = 536 kJ。<br>
+          5. 由於 536 kJ 遠小於融化全部冰所需的 1670 kJ，故<b>只有一部分冰熔化</b>，冰水共存，最終溫度必為 <b>0 °C</b>。
+        </div>
+        <div class="feedback" id="q6-fb3"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* --- Tab Navigation --- */
+  function switchTab(index) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.q-panel');
+    tabs.forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+      panels[i].classList.toggle('active', i === index);
+    });
+  }
+
+  /* --- Stopwatch Timer --- */
+  let seconds = 0;
+  let timerInterval = null;
+  let isRunning = false;
+
+  function updateTimerDisplay() {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('startPauseBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.innerText = 'Pause';
+      timerInterval = setInterval(() => {
+        seconds++;
+        updateTimerDisplay();
+      }, 1000);
+    } else {
+      isRunning = false;
+      btn.innerText = 'Start';
+      clearInterval(timerInterval);
+    }
+  }
+
+  function resetTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    updateTimerDisplay();
+    document.getElementById('startPauseBtn').innerText = 'Start';
+  }
+
+  /* --- Hint Toggle --- */
+  function toggleHint(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  /* --- Helper Comparison Functions --- */
+  function isClose(val, target, tolerance = 0.03) {
+    if (isNaN(val)) return false;
+    return Math.abs(val - target) <= Math.max(Math.abs(target * tolerance), 0.05);
+  }
+
+  function stepPassed(stepId, fbId, msg, nextStepId) {
+    const step = document.getElementById(stepId);
+    const fb = document.getElementById(fbId);
+    step.classList.add('completed');
+    fb.className = 'feedback success';
+    fb.innerHTML = '✓ Correct! ' + msg;
+    if (nextStepId) {
+      const next = document.getElementById(nextStepId);
+      next.classList.remove('locked');
+      next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function stepFailed(fbId, msg) {
+    const fb = document.getElementById(fbId);
+    fb.className = 'feedback error';
+    fb.innerHTML = '✗ Incorrect. ' + msg;
+  }
+
+  /* ================= Question 1 Logic ================= */
+  function checkQ1S1() {
+    const val = parseFloat(document.getElementById('q1-t1-input').value);
+    if (isClose(val, 28.1, 0.02) || isClose(val, 28.05, 0.02)) {
+      stepPassed('q1-s1', 'q1-fb1', 'Melting point T₁ = 28.1 °C (from Pt = mcΔT with t = 6 min).', 'q1-s2');
+    } else {
+      stepFailed('q1-fb1', 'Check: 300 W × 6 × 60 s = 0.5 kg × 7700 × (T₁ - 0).');
+    }
+  }
+
+  function checkQ1S2() {
+    const val = parseFloat(document.getElementById('q1-lf-input').value);
+    if (isClose(val, 324, 0.02) || isClose(val, 324000, 0.02)) {
+      stepPassed('q1-s2', 'q1-fb2', 'ℓ_f = 324 kJ kg⁻¹ (time = 15 - 6 = 9 min).', 'q1-s3');
+    } else {
+      stepFailed('q1-fb2', 'Melting duration is 15 - 6 = 9 min. Calculate: 300 × (9 × 60) / 0.5 in kJ kg⁻¹.');
+    }
+  }
+
+  function checkQ1S3() {
+    const val = parseFloat(document.getElementById('q1-lv-input').value);
+    if (isClose(val, 468, 0.02) || isClose(val, 468000, 0.02)) {
+      stepPassed('q1-s3', 'q1-fb3', 'ℓ_v = 468 kJ kg⁻¹ (boiling duration = 35 - 22 = 13 min).', 'q1-s4');
+    } else {
+      stepFailed('q1-fb3', 'Boiling duration is 35 - 22 = 13 min. Calculate: 300 × (13 × 60) / 0.5 in kJ kg⁻¹.');
+    }
+  }
+
+  function checkQ1S4() {
+    const val = parseFloat(document.getElementById('q1-cl-input').value);
+    if (isClose(val, 4850, 0.03) || isClose(val, 4855, 0.03)) {
+      stepPassed('q1-s4', 'q1-fb4', 'c_liquid ≈ 4850 J kg⁻¹ °C⁻¹ (heating time = 7 min, ΔT = 80 - 28.05 = 51.95 °C).', null);
+    } else {
+      stepFailed('q1-fb4', 'From 15 to 22 min (7 min): 300 × 7 × 60 = 0.5 × c × (80 - 28.05).');
+    }
+  }
+
+  /* ================= Question 2 Logic ================= */
+  function checkQ2S1() {
+    const val = parseFloat(document.getElementById('q2-lf-input').value);
+    if (isClose(val, 300, 0.02) || isClose(val, 300000, 0.02)) {
+      stepPassed('q2-s1', 'q2-fb1', 'ℓ_f = (41785 - 20485) / (0.084 - 0.013) = 21300 / 0.071 = 300 kJ kg⁻¹.', 'q2-s2');
+    } else {
+      stepFailed('q2-fb1', 'Divide ΔE = (41785 - 20485) by Δm = (0.084 - 0.013).');
+    }
+  }
+
+  function checkQ2S2() {
+    const a1 = document.getElementById('q2-err1').value;
+    const a2 = document.getElementById('q2-err2').value;
+    const a3 = document.getElementById('q2-err3').value;
+    const a4 = document.getElementById('q2-err4').value;
+
+    if (a1 === 'larger' && a2 === 'smaller' && a3 === 'smaller' && a4 === 'larger') {
+      stepPassed('q2-s2', 'q2-fb2', 'All systematic error classifications are correct!', null);
+    } else {
+      stepFailed('q2-fb2', 'Review the errors: (i) Larger (poor contact/heat loss); (ii) Smaller (m overestimated); (iii) Smaller (m overestimated); (iv) Larger (energy loss to air).');
+    }
+  }
+
+  /* ================= Question 3 Logic ================= */
+  function checkQ3S1() {
+    const val = parseFloat(document.getElementById('q3-e-input').value);
+    if (val === 456 || val === 456000) {
+      stepPassed('q3-s1', 'q3-fb1', 'E = (38 / 300) × 3.6 × 10⁶ J = 456 kJ.', 'q3-s2');
+    } else {
+      stepFailed('q3-fb1', 'Remember 1 kWh = 3.6 × 10⁶ J. Multiply (38 / 300) by 3600 kJ.');
+    }
+  }
+
+  function checkQ3S2() {
+    const val = parseFloat(document.getElementById('q3-lv-input').value);
+    if (isClose(val, 2590, 0.02) || isClose(val, 2590909, 0.02)) {
+      stepPassed('q3-s2', 'q3-fb2', 'ℓ_v = 456 000 J / (0.550 - 0.374 kg) ≈ 2590 kJ kg⁻¹.', 'q3-s3');
+    } else {
+      stepFailed('q3-fb2', 'Calculate 456 kJ / (0.550 - 0.374) kg.');
+    }
+  }
+
+  function checkQ3S3() {
+    const c1 = document.getElementById('q3-c1').value;
+    const c2 = document.getElementById('q3-c2').value;
+    const c3 = document.getElementById('q3-c3').value;
+    const c4 = document.getElementById('q3-c4').value;
+
+    if (c1 === 'Yes' && c2 === 'Yes' && c3 === 'No' && c4 === 'Yes') {
+      stepPassed('q3-s3', 'q3-fb3', 'All experimental measures correctly answered!', null);
+    } else {
+      stepFailed('q3-fb3', 'Remember: Omitting tare mass has no effect because mass difference cancels the beaker mass.');
+    }
+  }
+
+  /* ================= Question 4 Logic ================= */
+  function checkQ4S1() {
+    const val = parseFloat(document.getElementById('q4-e-input').value);
+    if (isClose(val, 6.96e6, 0.01) || isClose(val, 6960000, 0.01) || isClose(val, 6960, 0.01)) {
+      stepPassed('q4-s1', 'q4-fb1', 'E = Pt = 5.8 × 10³ W × 1200 s = 6.96 × 10⁶ J.', 'q4-s2');
+    } else {
+      stepFailed('q4-fb1', 'Convert 20 minutes to 1200 seconds: 5800 W × 1200 s.');
+    }
+  }
+
+  function checkQ4S2() {
+    const val = parseFloat(document.getElementById('q4-m-input').value);
+    if (isClose(val, 3.1, 0.03) || isClose(val, 3.08, 0.03)) {
+      stepPassed('q4-s2', 'q4-fb2', 'm = 6.96 × 10⁶ / (2260 × 10³) ≈ 3.1 kg.', 'q4-s3');
+    } else {
+      stepFailed('q4-fb2', 'Divide 6.96 × 10⁶ J by 2 260 000 J kg⁻¹.');
+    }
+  }
+
+  function checkQ4S3() {
+    const val = parseFloat(document.getElementById('q4-t-input').value);
+    if (isClose(val, 20.6, 0.02) || isClose(val, 20.59, 0.02)) {
+      stepPassed('q4-s3', 'q4-fb3', 'T = 27 - 6.41 = 20.6 °C.', null);
+    } else {
+      stepFailed('q4-fb3', 'Air mass = 900 × 1.2 = 1080 kg. ΔT = 6.96e6 / (1080 × 1005) ≈ 6.41 °C. T = 27 - ΔT.');
+    }
+  }
+
+  /* ================= Question 5 Logic ================= */
+  function checkQ5S1() {
+    const e1 = parseFloat(document.getElementById('q5-e1').value);
+    const e2 = parseFloat(document.getElementById('q5-e2').value);
+    const e3 = parseFloat(document.getElementById('q5-e3').value);
+    const e4 = parseFloat(document.getElementById('q5-e4').value);
+    const e5 = parseFloat(document.getElementById('q5-e5').value);
+    const tot = parseFloat(document.getElementById('q5-etot').value);
+
+    const c1 = isClose(e1, 20.9, 0.02);
+    const c2 = isClose(e2, 846, 0.02);
+    const c3 = isClose(e3, 443.9, 0.02);
+    const c4 = isClose(e4, 108, 0.02);
+    const c5 = isClose(e5, 9.7, 0.02);
+    const cTot = isClose(tot, 1428.5, 0.02);
+
+    if (c1 && c2 && c3 && c4 && c5 && cTot) {
+      stepPassed('q5-s1', 'q5-fb1', 'All 5 stage calculations and total heat (1428.5 kJ) are accurate!', 'q5-s2');
+    } else {
+      stepFailed('q5-fb1', 'Check individual stages: Gas (20.9), Condensation (846), Liquid (443.9), Freezing (108), Solid (9.7). Total = 1428.5 kJ.');
+    }
+  }
+
+  function checkQ5S2() {
+    const val = parseFloat(document.getElementById('q5-t-input').value);
+    if (isClose(val, 7.9, 0.03) || isClose(val, 7.94, 0.03) || isClose(val, 476, 0.02)) {
+      stepPassed('q5-s2', 'q5-fb2', 'Time = 1428.5 kJ / 3 kW = 476 s ≈ 7.9 min.', null);
+    } else {
+      stepFailed('q5-fb2', 't = 1428.5 × 1000 / 3000 = 476.2 seconds. Divide by 60 for minutes.');
+    }
+  }
+
+  /* ================= Question 6 Logic ================= */
+  function checkQ6S1() {
+    const val = parseFloat(document.getElementById('q6-tjuice-input').value);
+    if (isClose(val, 18.8, 0.02)) {
+      stepPassed('q6-s1', 'q6-fb1', '0.03 × 334 + 0.03 × 4.2 × T = 0.5 × 4 × (25 - T) ⇒ T = 18.8 °C.', 'q6-s2');
+    } else {
+      stepFailed('q6-fb1', 'Check heat balance: 0.03×334 + 0.03×4.2×T = 0.5×4.0×(25 - T).');
+    }
+  }
+
+  function checkQ6S2() {
+    const val = parseFloat(document.getElementById('q6-mice-input').value);
+    if (isClose(val, 0.05, 0.03) || isClose(val, 0.0504, 0.03) || isClose(val, 50, 0.03)) {
+      stepPassed('q6-s2', 'q6-fb2', 'm(334 + 4.2 × 15) = 0.5 × 4 × (25 - 15) ⇒ m = 0.05 kg (50 g).', 'q6-s3');
+    } else {
+      stepFailed('q6-fb2', 'm × (334 + 63) = 20 ⇒ m = 20 / 397 ≈ 0.05 kg.');
+    }
+  }
+
+  function checkQ6S3() {
+    const b1 = parseFloat(document.getElementById('q6-b1-input').value);
+    const b2 = parseFloat(document.getElementById('q6-b2-input').value);
+    const b3 = parseFloat(document.getElementById('q6-b3-input').value);
+
+    const c1 = (b1 === 1670);
+    const c2 = (b2 === 452);
+    const c3 = (b3 === 0);
+
+    if (c1 && c2 && c3) {
+      stepPassed('q6-s3', 'q6-fb3', 'Correct! Since 1670 kJ > energy released, only part of the ice melts, maintaining 0 °C.', null);
+    } else {
+      stepFailed('q6-fb3', '(i) 5 × 334 = 1670 kJ; (ii) 0.2 × 2260 = 452 kJ; (iii) Final temp = 0 °C (ice and water coexist).');
+    }
+  }
+</script>
+
+</body>
+</html>
