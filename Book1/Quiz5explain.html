@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S4 Physics Ch.1 Quiz 5 - Interactive Explanations</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-bg: #eff6ff;
+            --success: #15803d;
+            --success-bg: #f0fdf4;
+            --text-main: #1f2937;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --card-bg: #ffffff;
+            --body-bg: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Microsoft JhengHei", Arial, sans-serif;
+            line-height: 1.65;
+            color: var(--text-main);
+            background-color: var(--body-bg);
+            margin: 0;
+            padding: 24px 16px 80px 16px;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+        }
+
+        /* Top Bar */
+        .toolbar {
+            position: sticky;
+            top: 12px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .legend {
+            font-size: 0.85rem;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .global-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-global {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-global:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Highlights */
+        mark.hl-data {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid #fde68a;
+        }
+
+        mark.hl-term {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid #bae6fd;
+        }
+
+        /* Question Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .q-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Per-Question Toggle Button */
+        .btn-toggle-zh {
+            background-color: #f1f5f9;
+            color: var(--primary);
+            border: 1.5px solid #bfdbfe;
+            padding: 5px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-toggle-zh:hover {
+            background-color: var(--primary-bg);
+            border-color: var(--primary);
+        }
+        .btn-toggle-zh.active {
+            background-color: #334155;
+            color: #ffffff;
+            border-color: #334155;
+        }
+
+        .ans-badge {
+            background: var(--success-bg);
+            color: var(--success);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Chinese Explanation Blocks (Hidden by default) */
+        .zh-block {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 14px;
+            background-color: #f8fafc;
+            border-left: 3px solid #94a3b8;
+            border-radius: 0 6px 6px 0;
+            color: #334155;
+            font-size: 0.95rem;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        /* Show Chinese when card has active class */
+        .card.show-zh .zh-block {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Math & Calculation display */
+        .calc-box {
+            background-color: var(--primary-bg);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            border-radius: 4px;
+            margin: 16px 0;
+            font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Custom Fraction formatting */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+            font-size: 0.92em;
+        }
+        .fraction > .num {
+            border-bottom: 1.5px solid currentColor;
+            padding-bottom: 1px;
+            line-height: 1.1;
+        }
+        .fraction > .den {
+            padding-top: 1px;
+            line-height: 1.1;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        .opt-item {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .opt-item.correct {
+            border-color: var(--success);
+            background-color: var(--success-bg);
+            font-weight: 600;
+        }
+
+        table.quiz-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 0.95rem;
+        }
+        table.quiz-table th, table.quiz-table td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: center;
+        }
+        table.quiz-table th {
+            background: #f1f5f9;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            color: #475569;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Top Interactive Toolbar -->
+    <div class="toolbar">
+        <div class="legend">
+            <span><strong>Highlights:</strong></span>
+            <mark class="hl-data">Data / 數據</mark>
+            <mark class="hl-term">Key Term / 關鍵詞</mark>
+        </div>
+        <div class="global-actions">
+            <button class="btn-global" onclick="setAllChinese(true)">Show All Chinese / 展開全部</button>
+            <button class="btn-global" onclick="setAllChinese(false)">Hide All / 隱藏全部</button>
+        </div>
+    </div>
+
+    <!-- Question 1 -->
+    <div class="card" id="q1">
+        <div class="q-header">
+            <span class="q-title">Question 1 (Multiple Choice)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">Answer: C</span>
+            </div>
+        </div>
+
+        <div class="question-text">
+            On a sunny day, a wall of <mark class="hl-data">5.0 m<sup>2</sup></mark> absorbs energy at a rate of <mark class="hl-data">350 W</mark> on every <mark class="hl-data">1 m<sup>2</sup></mark>. Find the <mark class="hl-term">energy absorbed</mark> by the wall in <mark class="hl-data">1.5 hours</mark>.
+        </div>
+        <div class="zh-block">
+            <strong>題目：</strong>晴天時，一幅面積為 <mark class="hl-data">5.0 m<sup>2</sup></mark> 的牆壁每 <mark class="hl-data">1 m<sup>2</sup> 以 350 W 的速率</mark>吸收能量。求該牆在 <mark class="hl-data">1.5 小時</mark>內<mark class="hl-term">吸收的能量</mark>。
+        </div>
+
+        <div class="calc-box">
+            • Total Rate of Energy (Power, P) = 350 W m⁻² &times; 5.0 m² = <strong>1750 W</strong> (J s⁻¹)<br>
+            • Time (t) = 1.5 h = 1.5 &times; 3600 s = <strong>5400 s</strong><br>
+            • Energy Absorbed (E) = P &times; t = 1750 W &times; 5400 s = 9,450,000 J = <strong>9.45 MJ</strong>
+        </div>
+
+        <div class="zh-block">
+            <span class="tag">解析</span> 功率為每秒轉移的能量 (<i>P</i> = <i>E</i> / <i>t</i>)。計算關鍵是<strong>時間單位換算</strong>：必須先把 1.5 小時換算成秒 (1.5 &times; 3600 = 5400 s)，再代入 <i>E</i> = <i>P</i> &times; <i>t</i> 計算焦耳，最後轉成兆焦耳 (9.45 MJ)。
+        </div>
+    </div>
+
+    <!-- Question 2 -->
+    <div class="card" id="q2">
+        <div class="q-header">
+            <span class="q-title">Question 2 (Multiple Choice)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">Answer: B</span>
+            </div>
+        </div>
+
+        <div class="question-text">
+            <mark class="hl-data">16500 J</mark> of energy is supplied to a metal block of mass <mark class="hl-data">0.6 kg</mark> and its <mark class="hl-term">rise in temperature</mark> is <mark class="hl-data">57 &deg;C</mark>. The <mark class="hl-term">specific heat capacity</mark> of the metal is:
+        </div>
+        <div class="zh-block">
+            <strong>題目：</strong>將 <mark class="hl-data">16500 J</mark> 的能量提供給質量為 <mark class="hl-data">0.6 kg</mark> 的金屬塊，其<mark class="hl-term">溫度上升</mark>了 <mark class="hl-data">57 &deg;C</mark>。該金屬的<mark class="hl-term">比熱容量</mark>為：
+        </div>
+
+        <div class="options-grid">
+            <div class="opt-item">A. <span class="fraction"><span class="num">16500 &times; 0.6</span><span class="den">57</span></span> J kg<sup>-1</sup> &deg;C<sup>-1</sup></div>
+            <div class="opt-item correct">B. <span class="fraction"><span class="num">16500</span><span class="den">57 &times; 0.6</span></span> J kg<sup>-1</sup> &deg;C<sup>-1</sup> &nbsp;&#x2713;</div>
+            <div class="opt-item">C. <span class="fraction"><span class="num">16500 &times; 57</span><span class="den">0.6</span></span> J kg<sup>-1</sup> &deg;C<sup>-1</sup></div>
+            <div class="opt-item">D. [<span class="fraction"><span class="num">16500</span><span class="den">0.6</span></span> &minus; 57] J kg<sup>-1</sup> &deg;C<sup>-1</sup></div>
+        </div>
+
+        <div class="calc-box">
+            Formula: E = m &middot; c &middot; &Delta;T<br>
+            Rearranging for specific heat capacity (c):<br>
+            c = <span class="fraction"><span class="num">E</span><span class="den">m &times; &Delta;T</span></span> = <strong><span class="fraction"><span class="num">16500</span><span class="den">57 &times; 0.6</span></span> J kg<sup>-1</sup> &deg;C<sup>-1</sup></strong>
+        </div>
+
+        <div class="zh-block">
+            <span class="tag">解析</span> 公式為 <i>E</i> = <i>mc</i>&Delta;<i>T</i>。求比熱容量 <i>c</i> 時，將質量 <i>m</i> (0.6 kg) 與溫度變化 &Delta;<i>T</i> (57 &deg;C) 移至等號另一邊的分母相乘，故選項 B 正確。
+        </div>
+    </div>
+
+    <!-- Question 3 -->
+    <div class="card" id="q3">
+        <div class="q-header">
+            <span class="q-title">Question 3 (Multiple Choice)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">Answer: C</span>
+            </div>
+        </div>
+
+        <div class="question-text">
+            An <mark class="hl-term">equal amount of energy</mark> is supplied to each of the following substances. Which one of them will have the <mark class="hl-term">smallest rise in temperature</mark>?
+        </div>
+        <div class="zh-block">
+            <strong>題目：</strong>將<mark class="hl-term">相同分量的能量</mark>提供給下列各物質。哪一種物質的<mark class="hl-term">溫度升幅最小</mark>？
+        </div>
+
+        <table class="quiz-table">
+            <thead>
+                <tr>
+                    <th>Substance 物質</th>
+                    <th>Mass 質量 (kg)</th>
+                    <th>Specific Heat Capacity 比熱容量 (J kg<sup>-1</sup> &deg;C<sup>-1</sup>)</th>
+                    <th>Total Heat Capacity C = m &times; c (J &deg;C<sup>-1</sup>)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>A. P</td><td>1</td><td>4200</td><td>1 &times; 4200 = 4200</td></tr>
+                <tr><td>B. Q</td><td>2</td><td>2300</td><td>2 &times; 2300 = 4600</td></tr>
+                <tr style="background-color: var(--success-bg); font-weight:bold;">
+                    <td>C. R</td><td>3</td><td>2200</td><td>3 &times; 2200 = <strong>6600 (Largest C) &#x2713;</strong></td>
+                </tr>
+                <tr><td>D. S</td><td>4</td><td>900</td><td>4 &times; 900 = 3600</td></tr>
+            </tbody>
+        </table>
+
+        <div class="calc-box">
+            Formula: &Delta;T = E / (m &middot; c) = E / C (Heat Capacity)<br>
+            • To get the <strong>SMALLEST &Delta;T</strong> for a given E, we require the <strong>LARGEST Heat Capacity (C = m &times; c)</strong>.<br>
+            • Substance R has the largest C (6600 J &deg;C⁻¹), so it requires the most energy per 1 &deg;C increase, meaning it will experience the smallest temperature rise.
+        </div>
+
+        <div class="zh-block">
+            <span class="tag">解析</span> 由 &Delta;<i>T</i> = <i>E</i> / (<i>mc</i>) 可知，在能量 <i>E</i> 相同時，總熱容量 <i>C</i> = <i>mc</i> 越大的物質，溫度升幅 &Delta;<i>T</i> 越小。物質 R 的總熱容量最高 (6600 J &deg;C⁻¹)，因此升溫幅度最小。
+        </div>
+    </div>
+
+    <!-- Question 4 -->
+    <div class="card" id="q4">
+        <div class="q-header">
+            <span class="q-title">Question 4 (Multiple Choice)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">Answer: C [(2) and (3) only]</span>
+            </div>
+        </div>
+
+        <div class="question-text">
+            The apparatus on the right is used to find the <mark class="hl-term">specific heat capacity</mark> of a liquid. Which of the following can <mark class="hl-term">improve the accuracy</mark> of the experiment?
+            <ol style="margin-top: 8px;">
+                <li>Taking the final temperature of the liquid immediately after switching off the power supply.</li>
+                <li>Covering the cup with a lid.</li>
+                <li>Stirring the liquid throughout the experiment.</li>
+            </ol>
+        </div>
+        <div class="zh-block">
+            <strong>題目：</strong>右圖裝置用於量度液體的<mark class="hl-term">比熱容量</mark>。下列哪項／些措施可以<mark class="hl-term">提高實驗的準確度</mark>？
+            <ol style="margin-top: 4px;">
+                <li>關掉電源後立即讀取液體的最後溫度。</li>
+                <li>為杯子加上蓋子。</li>
+                <li>在整個實驗過程中不斷攪拌液體。</li>
+            </ol>
+        </div>
+
+        <div class="calc-box">
+            • Statement (1) is <strong>WRONG</strong>: The immersion heater retains heat even after being powered off. You must continue stirring until the thermometer reaches the <em>maximum steady reading</em>.<br>
+            • Statement (2) is <strong>CORRECT</strong>: Adding a lid prevents heat loss via convection and evaporation.<br>
+            • Statement (3) is <strong>CORRECT</strong>: Continuous stirring distributes thermal energy evenly throughout the liquid.
+        </div>
+
+        <div class="zh-block">
+            <span class="tag">解析</span>
+            (1) 錯誤：發熱器斷電後仍存有餘熱，應持續攪拌直至溫度計達到<strong>最高讀數</strong>；<br>
+            (2) 正確：加蓋能有效減少蒸發及對流流失熱量；<br>
+            (3) 正確：攪拌可確保整杯液體溫度均勻。故只有 (2) 和 (3) 正確。
+        </div>
+    </div>
+
+    <!-- Question 5 -->
+    <div class="card" id="q5">
+        <div class="q-header">
+            <span class="q-title">Question 5 (Structured Question)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">4 Marks Total</span>
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px;">
+            <div class="question-text">
+                <strong>[Scenario]:</strong> A solar water heating system has a solar panel of area <mark class="hl-data">0.64 m<sup>2</sup></mark>. The panel captures <mark class="hl-data">55%</mark> of the solar energy it receives, and uses the energy to heat water. Assume sunlight delivers energy onto the Earth's surface at <mark class="hl-data">1 kW m<sup>-2</sup></mark>.<br>
+                Given that <mark class="hl-data">6.3 &times; 10<sup>5</sup> J</mark> of energy is required to heat up a bathtub of water.
+            </div>
+            <div class="zh-block">
+                <strong>【背景資料】：</strong>一個太陽能熱水系統配有面積為 <mark class="hl-data">0.64 m<sup>2</sup></mark> 的太陽能板。該板能吸收其接收到的 <mark class="hl-data">55%</mark> 太陽能，並將能量用於加熱水。假設陽光照射到地球表面的能量速率為 <mark class="hl-data">1 kW m<sup>-2</sup></mark>。<br>
+                已知加熱一浴缸水需要 <mark class="hl-data">6.3 &times; 10<sup>5</sup> J</mark> 的能量。
+            </div>
+        </div>
+
+        <!-- Part (a) -->
+        <div style="margin-top: 16px;">
+            <p><strong>a) How many minutes will it take for the heating process? [3 marks]</strong></p>
+            <div class="zh-block">
+                <strong>(a) 加熱過程需要多少分鐘？ [3分]</strong>
+            </div>
+            <div class="calc-box">
+                1. Total incident solar power:<br>
+                &nbsp;&nbsp;&nbsp;P_total = 1 kW m⁻² &times; 0.64 m² = 1000 W m⁻² &times; 0.64 m² = <strong>640 W</strong><br><br>
+                2. Useful heating power absorbed (55% efficiency):<br>
+                &nbsp;&nbsp;&nbsp;P_useful = 640 W &times; 55% = <strong>352 W</strong> (J s⁻¹)<br><br>
+                3. Time required in seconds:<br>
+                &nbsp;&nbsp;&nbsp;t = E / P_useful = (6.3 &times; 10⁵ J) / 352 W &approx; <strong>1789.77 s</strong><br><br>
+                4. Convert time into minutes:<br>
+                &nbsp;&nbsp;&nbsp;Time = 1789.77 / 60 &approx; <strong>29.8 minutes</strong> (accept 29.8 ~ 30 mins)
+            </div>
+        </div>
+
+        <!-- Part (b) -->
+        <div style="margin-top: 16px;">
+            <p><strong>b) The water is not as hot as expected. State ONE possible reason. [1 mark]</strong></p>
+            <div class="zh-block">
+                <strong>(b) 水溫沒有預期中那麼熱。試提出一個可能的原因。[1分]</strong>
+            </div>
+            <div class="calc-box">
+                <strong>Any ONE of the following reasons:</strong><br>
+                1. Heat energy was lost from the water, pipes, or bathtub to the surroundings.<br>
+                2. Some thermal energy was absorbed by the water pipes or the bathtub container itself.<br>
+                3. Sunlight intensity was lower than 1 kW m⁻² (due to cloud cover, low sun angle, or dust on the panel).
+            </div>
+            <div class="zh-block">
+                <span class="tag">接受以下任一答案</span><br>
+                1. 水、管道或浴缸散失了熱量到周圍環境中。<br>
+                2. 部分熱能被水管或浴缸本身吸收，而非全部進入水中。<br>
+                3. 實際光照強度低於 1 kW m⁻²（如遇雲層遮擋、太陽入射角度傾斜或面板積塵）。
+            </div>
+        </div>
+    </div>
+
+    <!-- Question 6 -->
+    <div class="card" id="q6">
+        <div class="q-header">
+            <span class="q-title">Question 6 (Calculation)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">3 Marks</span>
+            </div>
+        </div>
+
+        <div class="question-text">
+            An electric kettle has consumed <mark class="hl-data">7.2 &times; 10<sup>5</sup> J</mark> in <mark class="hl-data">12 minutes</mark>. What is the <mark class="hl-term">power</mark> of the kettle?
+        </div>
+        <div class="zh-block">
+            <strong>題目：</strong>一個電熱水煲在 <mark class="hl-data">12 分鐘</mark>內消耗了 <mark class="hl-data">7.2 &times; 10<sup>5</sup> J</mark> 的能量。電熱水煲的<mark class="hl-term">功率</mark>是多少？
+        </div>
+
+        <div class="calc-box">
+            • Energy consumed (E) = 7.2 &times; 10⁵ J<br>
+            • Time in seconds (t) = 12 min = 12 &times; 60 s = <strong>720 s</strong><br>
+            • Power (P) = E / t<br>
+            &nbsp;&nbsp;P = (7.2 &times; 10⁵ J) / 720 s = <strong>1000 W</strong> (or <strong>1 kW</strong>)
+        </div>
+
+        <div class="zh-block">
+            <span class="tag">解析</span> 代入公式 <i>P</i> = <i>E</i> / <i>t</i> 前，必須將 12 分鐘化為標準秒數 (12 &times; 60 = 720 s)，計算得出功率為 1000 W (或 1 kW)。
+        </div>
+    </div>
+
+    <!-- Question 7 -->
+    <div class="card" id="q7">
+        <div class="q-header">
+            <span class="q-title">Question 7 (Calculation)</span>
+            <div class="header-actions">
+                <button class="btn-toggle-zh" onclick="toggleCardZh(this)">🌐 顯示中文 / Show Chinese</button>
+                <span class="ans-badge">3 Marks</span>
+            </div>
+        </div>
+
+        <div class="question-text">
+            An immersion heater of <mark class="hl-term">power</mark> <mark class="hl-data">100 W</mark> is used to heat <mark class="hl-data">0.3 kg</mark> of a liquid with <mark class="hl-term">specific heat capacity</mark> <mark class="hl-data">2000 J kg<sup>-1</sup> &deg;C<sup>-1</sup></mark>. If the <mark class="hl-term">initial temperature</mark> of the liquid is <mark class="hl-data">23 &deg;C</mark>, find its <mark class="hl-term">temperature after 2 minutes</mark>. Assume all energy is absorbed by the liquid.
+        </div>
+        <div class="zh-block">
+            <strong>題目：</strong>一個<mark class="hl-term">功率</mark>為 <mark class="hl-data">100 W</mark> 的浸入式電熱器用來加熱 <mark class="hl-data">0.3 kg</mark> <mark class="hl-term">比熱容量</mark>為 <mark class="hl-data">2000 J kg<sup>-1</sup> &deg;C<sup>-1</sup></mark> 的液體。若該液體的<mark class="hl-term">初溫</mark>是 <mark class="hl-data">23 &deg;C</mark>，求加熱 <mark class="hl-data">2 分鐘後的溫度</mark>。假設所有能量都被液體吸收。
+        </div>
+
+        <div class="calc-box">
+            1. Total energy supplied by heater:<br>
+            &nbsp;&nbsp;&nbsp;t = 2 min = 2 &times; 60 s = 120 s<br>
+            &nbsp;&nbsp;&nbsp;E = P &times; t = 100 W &times; 120 s = <strong>12,000 J</strong><br><br>
+            2. Rise in temperature (&Delta;T):<br>
+            &nbsp;&nbsp;&nbsp;E = m &middot; c &middot; &Delta;T<br>
+            &nbsp;&nbsp;&nbsp;12000 = 0.3 &times; 2000 &times; &Delta;T<br>
+            &nbsp;&nbsp;&nbsp;12000 = 600 &times; &Delta;T<br>
+            &nbsp;&nbsp;&nbsp;&Delta;T = <strong>20 &deg;C</strong><br><br>
+            3. Final temperature (T_final):<br>
+            &nbsp;&nbsp;&nbsp;T_final = T_initial + &Delta;T = 23 &deg;C + 20 &deg;C = <strong>43 &deg;C</strong>
+        </div>
+
+        <div class="zh-block">
+            <span class="tag">解析</span> 初溫為 23 &deg;C，計算出溫升 &Delta;<i>T</i> = 20 &deg;C 後，切記相加得到加熱後的末溫：23 + 20 = 43 &deg;C。
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle Chinese for an individual question card
+    function toggleCardZh(btn) {
+        const card = btn.closest('.card');
+        const isShown = card.classList.toggle('show-zh');
+        
+        if (isShown) {
+            btn.innerHTML = '<span>🌐 隱藏中文 / Hide Chinese</span>';
+            btn.classList.add('active');
+        } else {
+            btn.innerHTML = '<span>🌐 顯示中文 / Show Chinese</span>';
+            btn.classList.remove('active');
+        }
+    }
+
+    // Global Show/Hide controls
+    function setAllChinese(show) {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const btn = card.querySelector('.btn-toggle-zh');
+            if (show) {
+                card.classList.add('show-zh');
+                if (btn) {
+                    btn.innerHTML = '<span>🌐 隱藏中文 / Hide Chinese</span>';
+                    btn.classList.add('active');
+                }
+            } else {
+                card.classList.remove('show-zh');
+                if (btn) {
+                    btn.innerHTML = '<span>🌐 顯示中文 / Show Chinese</span>';
+                    btn.classList.remove('active');
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
