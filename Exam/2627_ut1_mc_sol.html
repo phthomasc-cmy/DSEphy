@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physics Solutions with Explanations</title>
+
+<!-- MathJax for rendering math symbols -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    max-width: 860px;
+    margin: 24px auto;
+    padding: 0 16px;
+    background-color: #f8f9fa;
+  }
+  .question-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 22px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+  }
+  .question-title {
+    font-weight: 700;
+    font-size: 1.15em;
+    color: #1e40af;
+    margin-bottom: 10px;
+  }
+  .answer {
+    font-weight: 700;
+    font-size: 1.05em;
+    color: #15803d;
+    background-color: #f0fdf4;
+    padding: 8px 12px;
+    border-left: 4px solid #22c55e;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .explanation-en {
+    color: #475569;
+    font-size: 0.96em;
+    margin-bottom: 14px;
+  }
+  .btn-container {
+    margin-top: 10px;
+  }
+  .toggle-btn {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 6px 14px;
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .toggle-btn:hover {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+  }
+  .chinese-box {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background-color: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    border-radius: 4px;
+    color: #78350f;
+    font-size: 0.95em;
+    line-height: 1.7;
+  }
+  .chinese-title {
+    font-weight: bold;
+    color: #b45309;
+    margin-bottom: 4px;
+  }
+  ul {
+    margin: 6px 0 6px 20px;
+    padding: 0;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+  .fraction {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 0.9em;
+    padding: 0 2px;
+  }
+  .fraction > span {
+    display: block;
+    padding: 0.5px;
+  }
+  .fraction .numerator {
+    border-bottom: 1px solid currentColor;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Question 1 -->
+  <div class="question-card">
+    <div class="question-title">Question 1</div>
+    <div class="answer">Answer: D (Both <em>X</em> and <em>Y</em> are suitable for making thermometers.)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong> A thermometric property only needs to change continuously and monotonically (preferably linearly) with temperature so that every temperature corresponds to a unique property value. Because both lines are straight and continuous (one with a positive slope and the other with a negative slope), both materials are suitable.
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      測溫性質（thermometric property）只需隨溫度單調且連續地變化，使得每一個溫度都對應一個唯一的物理量數值。圖中 <em>X</em> 和 <em>Y</em> 的物理量 <em>P</em> 隨溫度 <em>T</em> 均呈線性單調變化（<em>X</em> 為正斜率，<em>Y</em> 為負斜率），兩者均可用於製作溫度計。因此正確答案為 <strong>D</strong>。
+    </div>
+  </div>
+
+  <!-- Question 2 -->
+  <div class="question-card">
+    <div class="question-title">Question 2</div>
+    <div class="answer">Answer: A ((1) and (2) only)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong> In microscopic terms, the internal energy of a system is defined strictly as the sum of the random kinetic energy and the intermolecular potential energy of all its constituent particles. It does not include external or overall electrical energy.
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      從微觀角度來看，物體的<strong>內能（Internal Energy）</strong>是指物質內部所有分子作無規則運動的<strong>動能</strong>與分子間相互作用的<strong>勢能（位能）</strong>之總和，並不包含分子的電能。因此只有 (1) 和 (2) 正確，正確答案為 <strong>A</strong>。
+    </div>
+  </div>
+
+  <!-- Question 3 -->
+  <div class="question-card">
+    <div class="question-title">Question 3</div>
+    <div class="answer">Answer: C ((2) and (3) only)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong>
+      <ul>
+        <li><strong>(1) is incorrect:</strong> Not all radiation is trapped; some is reflected, and parts of the electromagnetic spectrum can transmit back out.</li>
+        <li><strong>(2) is correct:</strong> The physical enclosure prevents the heated air inside from circulating and escaping, which reduces heat loss via convection.</li>
+        <li><strong>(3) is correct:</strong> By trapping thermal energy and significantly suppressing convection, the inside temperature is higher than outside.</li>
+      </ul>
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      <ul>
+        <li>(1) 錯誤：並非所有進入溫室的輻射都會被困住，部分會被反射或透過玻璃透射出去。</li>
+        <li>(2) 正確：溫室的封閉玻璃結構阻擋了室內外空氣自由流動，能有效減少因對流（convection）造成的熱損失。</li>
+        <li>(3) 正確：由於熱量被截留且對流散熱受阻，溫室內的溫度高於室外溫度。</li>
+      </ul>
+      因此 (2) 和 (3) 正確，答案為 <strong>C</strong>。
+    </div>
+  </div>
+
+  <!-- Question 4 -->
+  <div class="question-card">
+    <div class="question-title">Question 4</div>
+    <div class="answer">Answer: B ((2) only)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong>
+      <ul>
+        <li><strong>(1) is incorrect:</strong> Heat conduction still occurs between your hand and the wooden block, but at a much slower rate because wood is a poor conductor.</li>
+        <li><strong>(2) is correct:</strong> Human skin temperature is around 37 &deg;C. Metal has a much higher thermal conductivity than wood, so it conducts thermal energy away from your hand faster, making it feel colder.</li>
+        <li><strong>(3) is incorrect:</strong> Both blocks are at 20 &deg;C (in thermal equilibrium), so no net heat flows between them when touched together.</li>
+      </ul>
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      <ul>
+        <li>(1) 錯誤：接觸木塊時依然會發生熱傳導，只是因為木頭是不良導體，熱傳導速率極慢。</li>
+        <li>(2) 正確：人體手指的溫度約為 37 &deg;C，高於 20 &deg;C。金屬的熱導率遠高於木材，能以更快的速度從手指抽走熱量，因此感覺更冰冷。</li>
+        <li>(3) 錯誤：兩塊物體的溫度相同（均為 20 &deg;C），兩者處於熱平衡狀態，因此相互接觸時不會發生淨熱傳遞。</li>
+      </ul>
+      因此只有 (2) 正確，答案為 <strong>B</strong>。
+    </div>
+  </div>
+
+  <!-- Question 5 -->
+  <div class="question-card">
+    <div class="question-title">Question 5</div>
+    <div class="answer">Answer: A ((1) only)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong> Thermal energy flows spontaneously from a region of higher temperature to a region of lower temperature until thermal equilibrium is established. The direction of energy transfer is governed solely by the temperature difference, not by mass or total internal energy.
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      熱能只會自發地由<strong>高溫物體</strong>流向<strong>低溫物體</strong>。因此，能量傳遞的方向僅由兩者的<strong>溫度</strong>決定，與兩者的質量或所含內能的多寡無關。故只有 (1) 正確，答案為 <strong>A</strong>。
+    </div>
+  </div>
+
+  <!-- Question 6 -->
+  <div class="question-card">
+    <div class="question-title">Question 6</div>
+    <div class="answer">Answer: D (0.05 &times; 2060 &times; (&minus;7 + 15))</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong><br>
+      Formula: \(E = mc\Delta T\)<br>
+      &bull; Mass \(m = 50\text{ g} = 0.05\text{ kg}\)<br>
+      &bull; Specific heat capacity \(c = 2060\text{ J kg}^{-1}\text{ &deg;C}^{-1}\)<br>
+      &bull; Temperature change \(\Delta T = T_{\text{final}} - T_{\text{initial}} = -7 - (-15) = (-7 + 15)\text{ &deg;C}\)<br>
+      Substituting gives: \(E = 0.05 \times 2060 \times (-7 + 15)\text{ J}\).
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      根據比熱容公式 \(E = mc\Delta T\)：<br>
+      1. 質量的國際標準單位為千克（kg）：\(m = 50\text{ g} = 0.05\text{ kg}\)；<br>
+      2. 溫度變化量 \(\Delta T = T_{\text{末}} - T_{\text{初}} = -7\text{ &deg;C} - (-15\text{ &deg;C}) = (-7 + 15)\text{ &deg;C}\)；<br>
+      因此吸收的能量表達式為：\(0.05 \times 2060 \times (-7 + 15)\)。答案為 <strong>D</strong>。
+    </div>
+  </div>
+
+  <!-- Question 7 -->
+  <div class="question-card">
+    <div class="question-title">Question 7</div>
+    <div class="answer">Answer: C (2 : 3)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong><br>
+      From \(Q = mc\Delta T\), we have \(\Delta T = \frac{Q}{mc}\).<br>
+      Given \(Q_1 = Q_2\), \(m_1 : m_2 = 2 : 1\), and \(c_1 : c_2 = 3 : 4\):
+      $$\frac{\Delta T_1}{\Delta T_2} = \frac{m_2 c_2}{m_1 c_1} = \left(\frac{1}{2}\right) \times \left(\frac{4}{3}\right) = \frac{4}{6} = \frac{2}{3}$$
+      The ratio of their temperature rises is <strong>2 : 3</strong>.
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      根據公式 \(Q = mc\Delta T\)，可得溫升 \(\Delta T = \frac{Q}{mc}\)。<br>
+      當兩者吸收相同能量（\(Q\) 相同）時，溫升與熱容量 \((mc)\) 成反比：<br>
+      \(\frac{\Delta T_1}{\Delta T_2} = \frac{m_2 c_2}{m_1 c_1} = \frac{1 \times 4}{2 \times 3} = \frac{4}{6} = \frac{2}{3}\)<br>
+      因此溫升之比為 <strong>2 : 3</strong>，答案為 <strong>C</strong>。
+    </div>
+  </div>
+
+  <!-- Question 8 -->
+  <div class="question-card">
+    <div class="question-title">Question 8</div>
+    <div class="answer">Answer: D ((1), (2) and (3))</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong><br>
+      The thermal energy supplied in time \(t\) is \(Q = Pt = mc\Delta T\).<br>
+      Rearranging for the gradient of the graph gives:
+      $$\text{slope} = \frac{\Delta T}{t} = \frac{P}{mc}$$
+      Hence, the slope depends on:
+      (1) mass of the block (\(m\)), (2) heater power (\(P\)), and (3) specific heat capacity (\(c\)).
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      設加熱器功率為 \(P\)，在時間 \(t\) 內提供的熱量為 \(Q = Pt\)。<br>
+      由熱量公式 \(Pt = mc\Delta T\)，可得溫度&ndash;時間圖線的斜率（即溫升速率）：<br>
+      $$\text{斜率} = \frac{\Delta T}{t} = \frac{P}{mc}$$
+      因此斜率取決於：(1) 金屬塊的質量 \(m\)、(2) 加熱器的功率 \(P\)、(3) 金屬塊的比熱容 \(c\)。三項均正確，答案為 <strong>D</strong>。
+    </div>
+  </div>
+
+  <!-- Question 9 -->
+  <div class="question-card">
+    <div class="question-title">Question 9</div>
+    <div class="answer">Answer: B (Average potential energy: increases | Average kinetic energy: remains constant)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong>
+      <ul>
+        <li>Temperature remains constant during melting at the melting point, so the <strong>average kinetic energy remains constant</strong>.</li>
+        <li>The heat energy absorbed is used to break intermolecular bonds, which causes the <strong>average potential energy to increase</strong>.</li>
+      </ul>
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      物質在熔點由固態轉變為液態（熔化）的過程中：
+      <ul>
+        <li>溫度保持不變，由於溫度是分子平均動能的量度，因此<strong>分子的平均動能保持不變（remains constant）</strong>。</li>
+        <li>吸收的熱能（熔化潛熱）用於克服分子間的引力並破壞晶格結構，因此<strong>分子的平均勢能增加（increases）</strong>。</li>
+      </ul>
+      正確答案為 <strong>B</strong>。
+    </div>
+  </div>
+
+  <!-- Question 10 -->
+  <div class="question-card">
+    <div class="question-title">Question 10</div>
+    <div class="answer">Answer: C ((2) and (3))</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong>
+      <ul>
+        <li><strong>(1) does not increase rate:</strong> Adding more liquid to the same cylinder does not change the exposed top surface area.</li>
+        <li><strong>(2) increases rate:</strong> Pouring into a bowl increases the exposed liquid surface area, allowing more surface molecules to escape per second.</li>
+        <li><strong>(3) increases rate:</strong> Higher temperature gives molecules greater kinetic energy to overcome intermolecular attraction and evaporate faster.</li>
+      </ul>
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      蒸發速率主要受液體表面積、溫度、空氣流速及濕度影響：
+      <ul>
+        <li>(1) 增加圓柱玻璃杯中的液體體積，暴露在空氣中的液面面積並未改變，因此不會加快蒸發速率。</li>
+        <li>(2) 將液體倒入碗中顯著增大了暴露的表面積，加快蒸發速率。</li>
+        <li>(3) 提高液體溫度使更多液體分子具有足夠動能脫離液面，加快蒸發速率。</li>
+      </ul>
+      因此 (2) 和 (3) 正確，答案為 <strong>C</strong>。
+    </div>
+  </div>
+
+  <!-- Question 11 -->
+  <div class="question-card">
+    <div class="question-title">Question 11</div>
+    <div class="answer">Answer: B (565 W)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong><br>
+      &bull; Mass of sweat \(m = 30\text{ g} = 0.03\text{ kg}\)<br>
+      &bull; Time \(t = 2\text{ minutes} = 2 \times 60 = 120\text{ s}\)<br>
+      &bull; Latent heat absorbed \(Q = m l_v = 0.03\text{ kg} \times 2.26 \times 10^6\text{ J kg}^{-1} = 67800\text{ J}\)<br>
+      &bull; Heating power \(P = \frac{Q}{t} = \frac{67800\text{ J}}{120\text{ s}} = 565\text{ W}\)
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      汗水質量轉換：\(m = 30\text{ g} = 0.03\text{ kg}\)；<br>
+      時間轉換：\(t = 2\text{ 分鐘} = 120\text{ 秒}\)；<br>
+      汗水蒸發吸收的總熱量為：<br>
+      \(Q = m l_v = 0.03 \times (2.26 \times 10^6) = 67800\text{ J}\)<br>
+      因為人體溫度保持恆定且無其他熱損失，身體的發熱功率等於汗水蒸發的吸熱功率：<br>
+      \(P = \frac{Q}{t} = \frac{67800\text{ J}}{120\text{ s}} = 565\text{ W}\)。答案為 <strong>B</strong>。
+    </div>
+  </div>
+
+  <!-- Question 12 -->
+  <div class="question-card">
+    <div class="question-title">Question 12</div>
+    <div class="answer">Answer: A ((1) only)</div>
+    <div class="explanation-en">
+      <strong>English Explanation:</strong>
+      <ul>
+        <li><strong>(1) is correct:</strong> The plateau between \(t_1\) and \(t_2\) is completely horizontal, showing that the temperature remains constant.</li>
+        <li><strong>(2) is incorrect:</strong> The plateau represents a phase transition (such as melting or boiling), so the state of matter is continuously changing.</li>
+        <li><strong>(3) is incorrect:</strong> Thermal energy continues to be supplied to the material, increasing its molecular potential energy, which means its total internal energy increases.</li>
+      </ul>
+    </div>
+    <div class="btn-container">
+      <button class="toggle-btn" onclick="toggleExplanation(this)">顯示中文解析 / Show Chinese</button>
+    </div>
+    <div class="chinese-box">
+      <div class="chinese-title">中文解析：</div>
+      在時間 \(t_1\) 到 \(t_2\) 之間：
+      <ul>
+        <li>(1) 正確：圖線為水平段，表示該時間段內溫度保持不變。</li>
+        <li>(2) 錯誤：該水平平台代表物質正在發生態變（例如固態轉變為液態），其物態（狀態）正在改變。</li>
+        <li>(3) 錯誤：加熱仍在持續，物質不斷吸收熱量轉化為分子勢能，因此其內能（internal energy）正在增加而非保持不變。</li>
+      </ul>
+      因此只有 (1) 正確，答案為 <strong>A</strong>。
+    </div>
+  </div>
+
+<script>
+  function toggleExplanation(btn) {
+    const box = btn.parentElement.nextElementSibling;
+    if (box.style.display === "block") {
+      box.style.display = "none";
+      btn.textContent = "顯示中文解析 / Show Chinese";
+    } else {
+      box.style.display = "block";
+      btn.textContent = "隱藏中文解析 / Hide Chinese";
+    }
+  }
+</script>
+
+</body>
+</html>
