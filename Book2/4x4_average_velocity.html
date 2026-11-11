@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4x4 Grid Physics Simulation: Displacement & Quadrant Bearing</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            text-align: center;
+            max-width: 840px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: #60a5fa;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .canvas-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            background-color: #0b2912;
+            border-radius: 8px;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 14px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .btn-pause { background: var(--accent-yellow); color: #1e293b; }
+        .btn-pause:hover { background: #d97706; color: white; }
+
+        .btn-reset { background: #475569; color: white; }
+        .btn-reset:hover { background: #64748b; }
+
+        .side-panel {
+            flex: 1;
+            min-width: 330px;
+            max-width: 490px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            color: #93c5fd;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .telemetry-item {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .telemetry-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .telemetry-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: #38bdf8;
+        }
+
+        /* Quiz Box */
+        .quiz-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0 10px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-wrapper span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-left: 6px;
+        }
+
+        /* Full Quadrant Bearing Input: [N/S] [Angle]° [E/W] */
+        .bearing-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+
+        .bearing-input-wrapper select {
+            background: #1e293b;
+            color: #38bdf8;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .bearing-input-wrapper input {
+            flex: 1;
+            padding: 6px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+
+        #feedback {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            display: none;
+            line-height: 1.45;
+        }
+
+        .feedback-success {
+            background-color: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--accent-green);
+            color: #6ee7b7;
+        }
+
+        .feedback-error {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--accent-red);
+            color: #fca5a5;
+        }
+
+        .solution-box {
+            display: none;
+            margin-top: 12px;
+            background: #0b1120;
+            border: 1px dashed #475569;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .solution-box strong { color: #f8fafc; }
+        .solution-box code { color: #38bdf8; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>4×4 City Grid: Random Walk & Quadrant Bearing</h1>
+        <p>The car drives along a 4×4 block road grid (50 m per block) at a constant <strong>10 m/s</strong>. At each crossroad, it <strong>randomly turns 90° left or right</strong>. Pause whenever you wish to calculate displacement, average velocity, and direction.</p>
+    </header>
+
+    <div class="container">
+        <!-- Canvas simulation -->
+        <div class="canvas-card">
+            <canvas id="simCanvas" width="480" height="480"></canvas>
+            <div class="controls">
+                <button id="startBtn" class="btn-primary">Start</button>
+                <button id="pauseBtn" class="btn-pause">Pause</button>
+                <button id="resetBtn" class="btn-reset">Reset</button>
+            </div>
+        </div>
+
+        <!-- Telemetry & Challenge Panel -->
+        <div class="side-panel">
+            <div class="card">
+                <h2>Live Telemetry</h2>
+                <div class="telemetry-grid">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Elapsed Time (t)</div>
+                        <div class="telemetry-value" id="dispTime">0.00 s</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Constant Speed</div>
+                        <div class="telemetry-value">10.0 m/s</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Horiz. Disp. (Δx)</div>
+                        <div class="telemetry-value" id="dispX">0.0 m</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Vert. Disp. (Δy)</div>
+                        <div class="telemetry-value" id="dispY">0.0 m</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Student Challenge</h2>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Enter the magnitudes and determine the direction using <strong>N/S θ° E/W</strong> measured relative to the center origin (0, 0).
+                </p>
+
+                <div class="quiz-form">
+                    <div class="input-group">
+                        <label for="inputDisp">Displacement Magnitude |Δr|:</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inputDisp" step="0.1" placeholder="e.g. 111.8">
+                            <span>m</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="inputVel">Average Velocity Magnitude |v<sub>avg</sub>|:</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inputVel" step="0.01" placeholder="e.g. 7.45">
+                            <span>m/s</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Quadrant Bearing (Direction):</label>
+                        <div class="bearing-input-wrapper">
+                            <select id="selectNS">
+                                <option value="N">N</option>
+                                <option value="S">S</option>
+                            </select>
+                            <input type="number" id="inputAngle" step="0.1" placeholder="acute angle θ">
+                            <span style="color: var(--text-muted);">°</span>
+                            <select id="selectEW">
+                                <option value="E">E</option>
+                                <option value="W">W</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                        <button id="checkBtn" class="btn-primary" style="flex: 2;">Check Answers</button>
+                        <button id="toggleSolBtn" class="btn-reset" style="flex: 1;">Solution</button>
+                    </div>
+
+                    <div id="feedback"></div>
+
+                    <div id="solutionBox" class="solution-box">
+                        <strong>Formulas:</strong><br>
+                        • Magnitude: <code>|Δr| = √(Δx² + Δy²)</code><br>
+                        • Avg Velocity: <code>|v_avg| = |Δr| / t</code><br>
+                        • Acute angle from N/S: <code>θ = tan⁻¹(|Δx| / |Δy|)</code><br>
+                        • Bearing: <code>[N or S] θ° [E or W]</code> depending on the sign of Δx and Δy.<br><br>
+                        <div id="stepCalculations"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 4x4 Blocks => 5x5 Grid Lines
+        // Coordinates in meters: -100, -50, 0, +50, +100 in both X and Y
+        const BLOCK_SIZE = 50; 
+        const GRID_MIN = -100;
+        const GRID_MAX = 100;
+        const SPEED = 10; // 10 m/s (takes 5s per block)
+
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const CENTER_PX = canvas.width / 2; // 240
+        const SCALE = 1.7; // pixels per meter (200m span = 340px)
+
+        let isRunning = false;
+        let lastTimestamp = null;
+        let elapsedTime = 0;
+
+        // Car position and navigation state
+        let posX = 0; // Starts at center origin (0, 0)
+        let posY = 0;
+        let dirX = 0; // Current travel direction: initial North (0, 1)
+        let dirY = 1;
+        let nextNodeX = 0;
+        let nextNodeY = 50;
+        let headingAngle = -Math.PI / 2; // Radians for rendering car body
+
+        // History breadcrumbs
+        let breadcrumbs = [{x: 0, y: 0}];
+
+        function toCanvasCoords(x_m, y_m) {
+            return {
+                x: CENTER_PX + (x_m * SCALE),
+                y: CENTER_PX - (y_m * SCALE)
+            };
+        }
+
+        // Check if node is inside the 4x4 grid bounds
+        function isInsideGrid(x, y) {
+            return x >= GRID_MIN - 0.01 && x <= GRID_MAX + 0.01 && 
+                   y >= GRID_MIN - 0.01 && y <= GRID_MAX + 0.01;
+        }
+
+        // At each crossroad, turn Left or Right (90°) while staying inside grid
+        function chooseNextTurn(curX, curY, dX, dY) {
+            // Left turn vector in Cartesian (+Y = North): (-dY, dX)
+            const leftDir = { dx: -dY, dy: dX };
+            // Right turn vector: (dY, -dX)
+            const rightDir = { dx: dY, dy: -dX };
+
+            const leftTarget = { x: curX + leftDir.dx * BLOCK_SIZE, y: curY + leftDir.dy * BLOCK_SIZE };
+            const rightTarget = { x: curX + rightDir.dx * BLOCK_SIZE, y: curY + rightDir.dy * BLOCK_SIZE };
+
+            const canTurnLeft = isInsideGrid(leftTarget.x, leftTarget.y);
+            const canTurnRight = isInsideGrid(rightTarget.x, rightTarget.y);
+
+            let chosen;
+            if (canTurnLeft && canTurnRight) {
+                // Random turn left or right
+                chosen = Math.random() < 0.5 ? leftDir : rightDir;
+            } else if (canTurnLeft) {
+                chosen = leftDir;
+            } else if (canTurnRight) {
+                chosen = rightDir;
+            } else {
+                // If at a corner boundary where neither turn is valid, continue straight
+                chosen = { dx: dX, dy: dY };
+            }
+
+            return chosen;
+        }
+
+        function updatePhysics(dt) {
+            if (!isRunning) return;
+
+            elapsedTime += dt;
+            const step = SPEED * dt;
+
+            // Distance to next intersection node
+            const distRemaining = Math.hypot(nextNodeX - posX, nextNodeY - posY);
+
+            if (step >= distRemaining) {
+                // Arrived at crossroad
+                posX = nextNodeX;
+                posY = nextNodeY;
+                breadcrumbs.push({x: posX, y: posY});
+                if (breadcrumbs.length > 25) breadcrumbs.shift();
+
+                // Select next random turn
+                const turn = chooseNextTurn(posX, posY, dirX, dirY);
+                dirX = turn.dx;
+                dirY = turn.dy;
+                nextNodeX = Math.round(posX + dirX * BLOCK_SIZE);
+                nextNodeY = Math.round(posY + dirY * BLOCK_SIZE);
+
+                // Compute screen heading angle
+                headingAngle = Math.atan2(-dirY, dirX);
+            } else {
+                posX += dirX * step;
+                posY += dirY * step;
+            }
+
+            document.getElementById('dispTime').textContent = elapsedTime.toFixed(2) + ' s';
+            document.getElementById('dispX').textContent = (posX >= 0 ? '+' : '') + posX.toFixed(1) + ' m';
+            document.getElementById('dispY').textContent = (posY >= 0 ? '+' : '') + posY.toFixed(1) + ' m';
+        }
+
+        // Returns Quadrant Bearing: { ns: 'N'|'S', angleDeg: number, ew: 'E'|'W' }
+        function getFullQuadrantBearing(dx, dy) {
+            if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+                return { ns: 'N', angleDeg: 0, ew: 'E' };
+            }
+
+            const ns = dy >= 0 ? 'N' : 'S';
+            const ew = dx >= 0 ? 'E' : 'W';
+
+            let angleRad = Math.atan2(Math.abs(dx), Math.abs(dy)); // acute angle with N/S axis
+            let angleDeg = angleRad * (180 / Math.PI);
+
+            return { ns, angleDeg, ew };
+        }
+
+        function drawCompass(x, y, r) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, -r); ctx.lineTo(0, r);
+            ctx.moveTo(-r, 0); ctx.lineTo(r, 0);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(0, -r - 4);
+            ctx.lineTo(-4, -r + 5);
+            ctx.lineTo(4, -r + 5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('N', 0, -r - 11);
+            ctx.fillText('S', 0, r + 9);
+            ctx.fillText('E', r + 9, 0);
+            ctx.fillText('W', -r - 9, 0);
+
+            ctx.restore();
+        }
+
+        function drawGridRoads() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const gridCoords = [-100, -50, 0, 50, 100];
+
+            // Road asphalt bands
+            ctx.lineWidth = 26;
+            ctx.strokeStyle = '#334155';
+            ctx.lineCap = 'square';
+
+            // Horizontal roads
+            for (let y of gridCoords) {
+                const p1 = toCanvasCoords(-100, y);
+                const p2 = toCanvasCoords(100, y);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+
+            // Vertical roads
+            for (let x of gridCoords) {
+                const p1 = toCanvasCoords(x, -100);
+                const p2 = toCanvasCoords(x, 100);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+
+            // Road dashed lines
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(248, 250, 252, 0.4)';
+            ctx.setLineDash([5, 5]);
+
+            for (let y of gridCoords) {
+                const p1 = toCanvasCoords(-100, y);
+                const p2 = toCanvasCoords(100, y);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+            for (let x of gridCoords) {
+                const p1 = toCanvasCoords(x, -100);
+                const p2 = toCanvasCoords(x, 100);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Draw historical path trail
+            if (breadcrumbs.length > 1) {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+                ctx.beginPath();
+                const startP = toCanvasCoords(breadcrumbs[0].x, breadcrumbs[0].y);
+                ctx.moveTo(startP.x, startP.y);
+                for (let i = 1; i < breadcrumbs.length; i++) {
+                    const pt = toCanvasCoords(breadcrumbs[i].x, breadcrumbs[i].y);
+                    ctx.lineTo(pt.x, pt.y);
+                }
+                const carPt = toCanvasCoords(posX, posY);
+                ctx.lineTo(carPt.x, carPt.y);
+                ctx.stroke();
+            }
+
+            // Mark intersections with subtle coordinate dots
+            ctx.fillStyle = '#64748b';
+            for (let x of gridCoords) {
+                for (let y of gridCoords) {
+                    const pt = toCanvasCoords(x, y);
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Start/Origin Point Marker at Center (0, 0)
+            const pOrigin = toCanvasCoords(0, 0);
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(pOrigin.x, pOrigin.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 10px monospace';
+            ctx.fillText('ORIGIN (0,0)', pOrigin.x + 8, pOrigin.y + 14);
+
+            // Vector arrow connecting Origin to Car
+            const carCanvas = toCanvasCoords(posX, posY);
+            if (Math.hypot(posX, posY) > 1) {
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.moveTo(pOrigin.x, pOrigin.y);
+                ctx.lineTo(carCanvas.x, carCanvas.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            drawCompass(canvas.width - 40, 40, 20);
+        }
+
+        function drawCar() {
+            const pos = toCanvasCoords(posX, posY);
+
+            ctx.save();
+            ctx.translate(pos.x, pos.y);
+            ctx.rotate(headingAngle);
+
+            // Car body
+            ctx.fillStyle = '#ef4444';
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 6;
+            ctx.fillRect(-12, -7, 24, 14);
+
+            // Windshield
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(0, -5, 5, 10);
+
+            // Headlights
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(10, -6, 2, 3);
+            ctx.fillRect(10, 3, 2, 3);
+
+            ctx.restore();
+        }
+
+        function loop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            if (dt < 0.2) updatePhysics(dt);
+
+            drawGridRoads();
+            drawCar();
+            requestAnimationFrame(loop);
+        }
+
+        // Controls
+        document.getElementById('startBtn').addEventListener('click', () => isRunning = true);
+        document.getElementById('pauseBtn').addEventListener('click', () => isRunning = false);
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false;
+            elapsedTime = 0;
+            posX = 0;
+            posY = 0;
+            dirX = 0;
+            dirY = 1;
+            nextNodeX = 0;
+            nextNodeY = 50;
+            headingAngle = -Math.PI / 2;
+            breadcrumbs = [{x: 0, y: 0}];
+
+            document.getElementById('dispTime').textContent = '0.00 s';
+            document.getElementById('dispX').textContent = '0.0 m';
+            document.getElementById('dispY').textContent = '0.0 m';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('solutionBox').style.display = 'none';
+            document.getElementById('inputDisp').value = '';
+            document.getElementById('inputVel').value = '';
+            document.getElementById('inputAngle').value = '';
+        });
+
+        // Quiz Check
+        document.getElementById('checkBtn').addEventListener('click', () => {
+            const userDisp = parseFloat(document.getElementById('inputDisp').value);
+            const userVel = parseFloat(document.getElementById('inputVel').value);
+            const userAngle = parseFloat(document.getElementById('inputAngle').value);
+            const userNS = document.getElementById('selectNS').value;
+            const userEW = document.getElementById('selectEW').value;
+            const feedback = document.getElementById('feedback');
+
+            if (isNaN(userDisp) || isNaN(userVel) || isNaN(userAngle)) {
+                feedback.className = 'feedback-error';
+                feedback.textContent = 'Please fill in all numerical fields for displacement, velocity, and angle.';
+                feedback.style.display = 'block';
+                return;
+            }
+
+            if (elapsedTime === 0) {
+                feedback.className = 'feedback-error';
+                feedback.textContent = 'Please run the simulation for a moment before calculating!';
+                feedback.style.display = 'block';
+                return;
+            }
+
+            const trueDisp = Math.hypot(posX, posY);
+            const trueVel = trueDisp / elapsedTime;
+            const trueBearing = getFullQuadrantBearing(posX, posY);
+
+            const isDispCorrect = Math.abs(userDisp - trueDisp) <= Math.max(0.8, trueDisp * 0.02);
+            const isVelCorrect = Math.abs(userVel - trueVel) <= Math.max(0.1, trueVel * 0.02);
+
+            const isAngleClose = Math.abs(userAngle - trueBearing.angleDeg) <= 2.0;
+
+            // Handle quadrant edge cases (axes: 0° or 90°)
+            const isNSCorrect = (trueBearing.angleDeg > 88) || (userNS === trueBearing.ns);
+            const isEWCorrect = (trueBearing.angleDeg < 2) || (userEW === trueBearing.ew);
+            const isBearingCorrect = isAngleClose && isNSCorrect && isEWCorrect;
+
+            updateSolutionText(trueDisp, trueVel, trueBearing);
+
+            const expectedBearingStr = `${trueBearing.ns} ${trueBearing.angleDeg.toFixed(1)}° ${trueBearing.ew}`;
+
+            if (isDispCorrect && isVelCorrect && isBearingCorrect) {
+                feedback.className = 'feedback-success';
+                feedback.innerHTML = `<strong>Correct! Fantastic physics intuition!</strong><br>
+                    • Displacement Magnitude: ${trueDisp.toFixed(2)} m<br>
+                    • Avg Velocity Magnitude: ${trueVel.toFixed(2)} m/s<br>
+                    • Direction: <strong>${expectedBearingStr}</strong>`;
+            } else {
+                feedback.className = 'feedback-error';
+                let msg = '<strong>Review your calculations:</strong><br>';
+                if (!isDispCorrect) msg += `• Displacement |Δr| expected ≈ ${trueDisp.toFixed(1)} m.<br>`;
+                if (!isVelCorrect) msg += `• Average Velocity expected ≈ ${trueVel.toFixed(2)} m/s.<br>`;
+                if (!isBearingCorrect) msg += `• Bearing expected ≈ <strong>${expectedBearingStr}</strong>.<br>`;
+                feedback.innerHTML = msg;
+            }
+            feedback.style.display = 'block';
+        });
+
+        function updateSolutionText(trueDisp, trueVel, bearing) {
+            const steps = document.getElementById('stepCalculations');
+            const absX = Math.abs(posX).toFixed(1);
+            const absY = Math.abs(posY).toFixed(1);
+            const bearingStr = `${bearing.ns} ${bearing.angleDeg.toFixed(1)}° ${bearing.ew}`;
+
+            steps.innerHTML = `
+                <strong>Current State:</strong><br>
+                t = ${elapsedTime.toFixed(2)} s, Δx = ${posX.toFixed(1)} m, Δy = ${posY.toFixed(1)} m<br><br>
+
+                <strong>1. Displacement Magnitude:</strong><br>
+                |Δr| = √((Δx)² + (Δy)²) = √((${posX.toFixed(1)})² + (${posY.toFixed(1)})²)<br>
+                |Δr| = <strong>${trueDisp.toFixed(2)} m</strong><br><br>
+
+                <strong>2. Average Velocity Magnitude:</strong><br>
+                |v_avg| = |Δr| / t = ${trueDisp.toFixed(2)} / ${elapsedTime.toFixed(2)} = <strong>${trueVel.toFixed(2)} m/s</strong><br><br>
+
+                <strong>3. Quadrant Bearing:</strong><br>
+                • Vertical reference: Δy is ${posY >= 0 ? 'positive (North: N)' : 'negative (South: S)'}.<br>
+                • Horizontal reference: Δx is ${posX >= 0 ? 'positive (East: E)' : 'negative (West: W)'}.<br>
+                • Acute angle from ${bearing.ns} axis: θ = tan⁻¹(|Δx| / |Δy|) = tan⁻¹(${absX} / ${absY}) = <strong>${bearing.angleDeg.toFixed(1)}°</strong><br>
+                • Final Direction: <strong>${bearingStr}</strong>
+            `;
+        }
+
+        document.getElementById('toggleSolBtn').addEventListener('click', () => {
+            const trueDisp = Math.hypot(posX, posY);
+            const trueVel = elapsedTime > 0 ? (trueDisp / elapsedTime) : 0;
+            const trueBearing = getFullQuadrantBearing(posX, posY);
+            updateSolutionText(trueDisp, trueVel, trueBearing);
+
+            const solBox = document.getElementById('solutionBox');
+            solBox.style.display = (solBox.style.display === 'block') ? 'none' : 'block';
+        });
+
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
