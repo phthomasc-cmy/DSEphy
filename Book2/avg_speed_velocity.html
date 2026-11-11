@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinematics Lab: Car on a Straight Road</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --road: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--accent);
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 950px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Canvas simulation */
+    .canvas-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 220px;
+    }
+
+    /* Dashboard cards */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      text-align: center;
+    }
+
+    .metric-card .title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-card .value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .metric-card .unit {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-left: 2px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: var(--card-bg);
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-grow: 1;
+      max-width: 480px;
+    }
+
+    .slider-group label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    input[type=range] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .accel-val {
+      font-weight: 700;
+      font-size: 1.1rem;
+      min-width: 65px;
+      color: var(--accent);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #0369a1;
+    }
+
+    button.btn-secondary {
+      background: #475569;
+    }
+
+    button.btn-secondary:hover {
+      background: #334155;
+    }
+
+    /* Student Challenge Panel */
+    .challenge-panel {
+      background: #172554;
+      border: 1px solid #1e40af;
+      padding: 18px 20px;
+      border-radius: 12px;
+    }
+
+    .challenge-panel h2 {
+      font-size: 1.1rem;
+      color: #93c5fd;
+      margin-bottom: 8px;
+    }
+
+    .challenge-panel p {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .quiz-item {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .quiz-item label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: #e2e8f0;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .quiz-item input[type="number"] {
+      width: 110px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .quiz-actions {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #feedback {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .correct { color: var(--success); }
+    .incorrect { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Kinematics Simulator: Straight Road Motion</h1>
+    <p>Explore acceleration, velocity, distance, and displacement in 1D space.</p>
+  </header>
+
+  <div class="main-container">
+    <!-- Visual Simulation -->
+    <div class="canvas-card">
+      <canvas id="simCanvas" width="950" height="220"></canvas>
+    </div>
+
+    <!-- Telemetry Display Panel -->
+    <div class="dashboard">
+      <div class="metric-card">
+        <div class="title">Time Elapsed</div>
+        <div class="value"><span id="valTime">0.0</span><span class="unit">s</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Inst. Speed |v|</div>
+        <div class="value"><span id="valSpeed">0.0</span><span class="unit">m/s</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Inst. Velocity (v)</div>
+        <div class="value"><span id="valVelocity">0.0</span><span class="unit">m/s</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Distance (d)</div>
+        <div class="value"><span id="valDistance">0.0</span><span class="unit">m</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Displacement (Δx)</div>
+        <div class="value"><span id="valDisplacement">0.0</span><span class="unit">m</span></div>
+      </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <div class="slider-group">
+        <label for="accelSlider">Acceleration (a):</label>
+        <input type="range" id="accelSlider" min="-5" max="5" step="1" value="0">
+        <span class="accel-val" id="accelDisplay">0 m/s²</span>
+      </div>
+
+      <div class="buttons">
+        <button id="btnPlayPause">Start</button>
+        <button id="btnReset" class="btn-secondary">Reset</button>
+      </div>
+    </div>
+
+    <!-- Student Calculation Challenge -->
+    <div class="challenge-panel">
+      <h2>Student Challenge: Average Speed vs. Average Velocity</h2>
+      <p>
+        Pause the simulation at any point after the car has moved. Using the values recorded above, 
+        calculate both values rounded to <strong>2 decimal places</strong> and verify your answers:
+      </p>
+
+      <div class="quiz-grid">
+        <div class="quiz-item">
+          <label>1. Average Speed = Total Distance / Total Time</label>
+          <div class="input-row">
+            <input type="number" step="0.01" id="ansSpeed" placeholder="0.00">
+            <span>m/s</span>
+          </div>
+        </div>
+
+        <div class="quiz-item">
+          <label>2. Average Velocity = Displacement / Total Time</label>
+          <div class="input-row">
+            <input type="number" step="0.01" id="ansVelocity" placeholder="0.00">
+            <span>m/s</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button id="btnCheck">Check My Answers</button>
+        <button id="btnReveal" class="btn-secondary">Show Answers</button>
+        <span id="feedback"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Physics State ---
+    let t = 0;              // time (s)
+    let v = 0;              // velocity (m/s)
+    let a = 0;              // acceleration (m/s^2), integer -5 to 5
+    let x = 0;              // position / displacement (m)
+    let totalDist = 0;      // scalar path length (m)
+    let isRunning = false;
+    let lastTimestamp = null;
+
+    // View scale: 1 meter = 15 screen pixels
+    const SCALE = 15; 
+
+    // DOM Elements
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const accelSlider = document.getElementById('accelSlider');
+    const accelDisplay = document.getElementById('accelDisplay');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const btnReset = document.getElementById('btnReset');
+
+    const valTime = document.getElementById('valTime');
+    const valSpeed = document.getElementById('valSpeed');
+    const valVelocity = document.getElementById('valVelocity');
+    const valDistance = document.getElementById('valDistance');
+    const valDisplacement = document.getElementById('valDisplacement');
+
+    const ansSpeed = document.getElementById('ansSpeed');
+    const ansVelocity = document.getElementById('ansVelocity');
+    const btnCheck = document.getElementById('btnCheck');
+    const btnReveal = document.getElementById('btnReveal');
+    const feedback = document.getElementById('feedback');
+
+    // Handle acceleration input (-5 to +5 m/s^2)
+    accelSlider.addEventListener('input', (e) => {
+      a = parseInt(e.target.value, 10);
+      accelDisplay.textContent = (a > 0 ? `+${a}` : `${a}`) + " m/s²";
+    });
+
+    btnPlayPause.addEventListener('click', () => {
+      isRunning = !isRunning;
+      btnPlayPause.textContent = isRunning ? 'Pause' : 'Resume';
+      if (isRunning) {
+        lastTimestamp = performance.now();
+        requestAnimationFrame(updateLoop);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      isRunning = false;
+      btnPlayPause.textContent = 'Start';
+      t = 0;
+      v = 0;
+      x = 0;
+      totalDist = 0;
+      a = 0;
+      accelSlider.value = 0;
+      accelDisplay.textContent = "0 m/s²";
+      feedback.textContent = "";
+      ansSpeed.value = "";
+      ansVelocity.value = "";
+      updateDisplay();
+      render();
+    });
+
+    // Main physics and render loop
+    function updateLoop(timestamp) {
+      if (!isRunning) return;
+
+      const dt = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      // Restrict dt to avoid jump on browser tab switch
+      if (dt < 0.2) {
+        // Physics integration (Euler-Cromer)
+        v += a * dt;
+        const dx = v * dt;
+        x += dx;
+        totalDist += Math.abs(dx);
+        t += dt;
+      }
+
+      updateDisplay();
+      render();
+      requestAnimationFrame(updateLoop);
+    }
+
+    function updateDisplay() {
+      valTime.textContent = t.toFixed(1);
+      valSpeed.textContent = Math.abs(v).toFixed(2);
+      valVelocity.textContent = v.toFixed(2);
+      valDistance.textContent = totalDist.toFixed(2);
+      valDisplacement.textContent = x.toFixed(2);
+    }
+
+    // Canvas drawing
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const roadY = h - 60;
+      const carScreenX = w / 2; // Keep car centered, scroll the world
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. Sky & Background mountains (parallax)
+      ctx.fillStyle = "#0c1527";
+      ctx.fillRect(0, 0, w, roadY);
+
+      // Simple mountains in distance
+      ctx.fillStyle = "#1e293b";
+      ctx.beginPath();
+      for (let i = -1000; i < 2000; i += 150) {
+        const mx = i - (x * SCALE * 0.1) % 150;
+        ctx.lineTo(mx, roadY - 40);
+        ctx.lineTo(mx + 75, roadY - 100);
+        ctx.lineTo(mx + 150, roadY - 40);
+      }
+      ctx.fill();
+
+      // 2. Road surface
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(0, roadY, w, 60);
+
+      // Road shoulder/curb
+      ctx.fillStyle = "#64748b";
+      ctx.fillRect(0, roadY, w, 4);
+
+      // Distance tick marks on road (every 5 meters)
+      const startMeter = Math.floor((x - carScreenX / SCALE) / 5) * 5;
+      const endMeter = Math.ceil((x + carScreenX / SCALE) / 5) * 5;
+
+      ctx.textAlign = "center";
+      for (let m = startMeter; m <= endMeter; m += 5) {
+        const markerX = carScreenX + (m - x) * SCALE;
+
+        // Tick mark
+        ctx.strokeStyle = (m === 0) ? "#ef4444" : "#94a3b8";
+        ctx.lineWidth = (m === 0) ? 3 : 1;
+        ctx.beginPath();
+        ctx.moveTo(markerX, roadY + 4);
+        ctx.lineTo(markerX, roadY + 22);
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = (m === 0) ? "#f87171" : "#cbd5e1";
+        ctx.font = (m === 0) ? "bold 11px sans-serif" : "10px sans-serif";
+        ctx.fillText(m + "m", markerX, roadY + 36);
+      }
+
+      // 3. Draw Car
+      drawCar(carScreenX, roadY);
+    }
+
+    function drawCar(cx, groundY) {
+      const carW = 64;
+      const carH = 26;
+      const carX = cx - carW / 2;
+      const carY = groundY - carH - 8;
+
+      ctx.save();
+
+      // Direction flip if car is moving left or reversing visually
+      const facingRight = (v >= 0);
+
+      // Car body
+      ctx.fillStyle = "#0284c7";
+      ctx.beginPath();
+      ctx.roundRect(carX, carY + 8, carW, 16, 4);
+      ctx.fill();
+
+      // Cabin / Roof
+      ctx.fillStyle = "#0369a1";
+      ctx.beginPath();
+      ctx.moveTo(carX + 12, carY + 8);
+      ctx.lineTo(carX + 22, carY);
+      ctx.lineTo(carX + 46, carY);
+      ctx.lineTo(carX + 54, carY + 8);
+      ctx.closePath();
+      ctx.fill();
+
+      // Window glass
+      ctx.fillStyle = "#bae6fd";
+      ctx.beginPath();
+      ctx.moveTo(carX + 18, carY + 7);
+      ctx.lineTo(carX + 24, carY + 2);
+      ctx.lineTo(carX + 44, carY + 2);
+      ctx.lineTo(carX + 50, carY + 7);
+      ctx.closePath();
+      ctx.fill();
+
+      // Headlight & Taillight
+      ctx.fillStyle = "#facc15"; // front light (right)
+      ctx.fillRect(carX + carW - 3, carY + 11, 3, 5);
+      ctx.fillStyle = (a < 0) ? "#ff2222" : "#991b1b"; // brake red (left)
+      ctx.fillRect(carX, carY + 11, 3, 5);
+
+      // Wheels (rotation based on total distance)
+      const wheelRadius = 8;
+      const wheelAngle = (x * SCALE) / wheelRadius;
+
+      drawWheel(carX + 14, groundY - 6, wheelRadius, wheelAngle);
+      drawWheel(carX + carW - 14, groundY - 6, wheelRadius, wheelAngle);
+
+      ctx.restore();
+    }
+
+    function drawWheel(wx, wy, r, angle) {
+      ctx.save();
+      ctx.translate(wx, wy);
+      ctx.rotate(angle);
+
+      // Tire
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rim
+      ctx.fillStyle = "#cbd5e1";
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Spoke pattern to visualize rotation
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-r, 0);
+      ctx.lineTo(r, 0);
+      ctx.moveTo(0, -r);
+      ctx.lineTo(0, r);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // --- Student Calculation Validation ---
+    btnCheck.addEventListener('click', () => {
+      if (t < 0.5) {
+        feedback.className = "incorrect";
+        feedback.textContent = "Please let the car run for at least a few seconds first!";
+        return;
+      }
+
+      const userSpeed = parseFloat(ansSpeed.value);
+      const userVelocity = parseFloat(ansVelocity.value);
+
+      if (isNaN(userSpeed) || isNaN(userVelocity)) {
+        feedback.className = "incorrect";
+        feedback.textContent = "Please input numeric values for both fields.";
+        return;
+      }
+
+      const expectedSpeed = totalDist / t;
+      const expectedVelocity = x / t;
+
+      const tol = 0.08; // tolerance range (+/- 0.08 m/s)
+      const speedCorrect = Math.abs(userSpeed - expectedSpeed) <= tol;
+      const velocityCorrect = Math.abs(userVelocity - expectedVelocity) <= tol;
+
+      if (speedCorrect && velocityCorrect) {
+        feedback.className = "correct";
+        feedback.textContent = "✓ Excellent! Both calculations are correct!";
+      } else if (!speedCorrect && velocityCorrect) {
+        feedback.className = "incorrect";
+        feedback.textContent = "Velocity is correct, but check your average speed (d / t).";
+      } else if (speedCorrect && !velocityCorrect) {
+        feedback.className = "incorrect";
+        feedback.textContent = "Speed is correct, but check your average velocity (Δx / t).";
+      } else {
+        feedback.className = "incorrect";
+        feedback.textContent = "Both answers are off. Remember: Speed = d / t, Velocity = Δx / t.";
+      }
+    });
+
+    btnReveal.addEventListener('click', () => {
+      if (t < 0.1) return;
+      ansSpeed.value = (totalDist / t).toFixed(2);
+      ansVelocity.value = (x / t).toFixed(2);
+      feedback.className = "correct";
+      feedback.textContent = `Answers populated from formulas at t = ${t.toFixed(1)}s.`;
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
