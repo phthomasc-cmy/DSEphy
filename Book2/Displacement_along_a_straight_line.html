@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Lab: Vector Sum & Displacement on a Straight Line</title>
+
+  <!-- MathJax for rendering math symbols & vector equations -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --secondary: #059669;
+      --accent: #b91c1c;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      background: var(--card);
+      padding: 18px 22px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-left: 6px solid #10b981;
+    }
+
+    header h1 {
+      font-size: 1.45rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-icon {
+      background: #10b981;
+      color: white;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 1.1rem;
+    }
+
+    /* Direction Instruction Banner */
+    .instruction-card {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .instruction-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e40af;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-active {
+      background: #1d4ed8 !important;
+      color: white !important;
+      border-color: #1d4ed8 !important;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+
+    /* Diagram Styling */
+    .diagram-container {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 15px;
+      overflow-x: auto;
+    }
+
+    svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+
+    /* Vector Notation in Standard HTML (Fallback & Clean Look) */
+    .vec {
+      display: inline-block;
+      position: relative;
+      padding-top: 0.25em;
+      font-style: normal;
+      font-family: inherit;
+    }
+    .vec::before {
+      content: "→";
+      position: absolute;
+      top: -0.45em;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85em;
+      line-height: 1;
+    }
+
+    /* Interactive Worksheet */
+    .exercise-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .step-item {
+      background: #fdfdfd;
+      border-left: 4px solid #cbd5e1;
+      padding: 14px 18px;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .step-label {
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: block;
+      font-size: 1rem;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 1.05rem;
+    }
+
+    select, input[type="number"] {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1.5px solid #cbd5e1;
+      background: white;
+      outline: none;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    .feedback {
+      margin-top: 8px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      display: none;
+    }
+
+    .feedback.correct {
+      color: var(--secondary);
+      display: block;
+    }
+
+    .feedback.wrong {
+      color: var(--accent);
+      display: block;
+    }
+
+    .watchout-box {
+      margin-top: 15px;
+      background: #fefce8;
+      border-left: 5px solid #eab308;
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><span class="badge-icon">D</span> Displacement Along a Straight Line</h1>
+    <p style="color: var(--text-muted); margin-top: 4px;">Learn how sign conventions (+ / -) define vector summation along 1D straight lines.</p>
+  </header>
+
+  <!-- Strict Positive Direction Instruction -->
+  <div class="instruction-card">
+    <div class="instruction-text">
+      <span>👉 <strong>Instruction:</strong> Take <span id="pos-dir-name" style="text-decoration: underline; font-size: 1.25rem;">EAST</span> as positive (+)</span>
+    </div>
+    <div class="btn-group">
+      <button onclick="setPositiveDirection('East')" id="btn-east" class="btn-active">East is (+)</button>
+      <button onclick="setPositiveDirection('West')" id="btn-west">West is (+)</button>
+      <button onclick="randomizeExercise()" style="border-color:#eab308; color:#a16207;">🎲 New Problem</button>
+    </div>
+  </div>
+
+  <!-- Scenario & Vector Diagram -->
+  <div class="card">
+    <div id="scenario-text" style="font-size: 1.08rem; line-height: 1.6;">
+      <!-- Dynamic story content inserted via JS -->
+    </div>
+
+    <!-- Scaled SVG Visualizer based on textbook Fig. 5.10 -->
+    <div class="diagram-container">
+      <svg id="vector-svg" viewBox="0 0 820 250" width="100%" height="250"></svg>
+    </div>
+  </div>
+
+  <!-- Interactive Input Steps -->
+  <div class="card">
+    <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Calculation & Interpretation</h2>
+    
+    <form id="quiz-form" class="exercise-form" onsubmit="event.preventDefault(); checkAnswers();">
+      
+      <!-- Step 1 -->
+      <div class="step-item">
+        <label class="step-label" id="label-step1">
+          1. 1st Displacement vector <span class="vec">OA</span>:
+        </label>
+        <div class="input-row">
+          <span><span class="vec">OA</span> = </span>
+          <select id="sign1" required>
+            <option value="">Sign...</option>
+            <option value="+">+</option>
+            <option value="-">−</option>
+          </select>
+          <input type="number" id="mag1" placeholder="magnitude" style="width: 120px;" min="0" required>
+          <span>m</span>
+        </div>
+        <div id="feedback1" class="feedback"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item">
+        <label class="step-label" id="label-step2">
+          2. 2nd Displacement vector <span class="vec">AB</span>:
+        </label>
+        <div class="input-row">
+          <span><span class="vec">AB</span> = </span>
+          <select id="sign2" required>
+            <option value="">Sign...</option>
+            <option value="+">+</option>
+            <option value="-">−</option>
+          </select>
+          <input type="number" id="mag2" placeholder="magnitude" style="width: 120px;" min="0" required>
+          <span>m</span>
+        </div>
+        <div id="feedback2" class="feedback"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item">
+        <label class="step-label">
+          3. Overall resultant displacement: 
+          <strong><span class="vec">OB</span> = <span class="vec">OA</span> + <span class="vec">AB</span></strong>
+        </label>
+        <div class="input-row">
+          <span><span class="vec">OB</span> = </span>
+          <select id="sign-res" required>
+            <option value="">Sign...</option>
+            <option value="+">+</option>
+            <option value="-">−</option>
+          </select>
+          <input type="number" id="mag-res" placeholder="magnitude" style="width: 120px;" min="0" required>
+          <span>m</span>
+        </div>
+        <div id="feedback3" class="feedback"></div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-item">
+        <label class="step-label">
+          4. Physical Conclusion (Distance & Compass Direction):
+        </label>
+        <div class="input-row">
+          <span>Overall displacement is</span>
+          <input type="number" id="mag-final" placeholder="distance" style="width: 110px;" min="0" required>
+          <span>m to the</span>
+          <select id="dir-final" required>
+            <option value="">Direction...</option>
+            <option value="east">east</option>
+            <option value="west">west</option>
+          </select>
+        </div>
+        <div id="feedback4" class="feedback"></div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button type="submit" class="btn-active" style="padding: 10px 24px;">Check Answers</button>
+        <button type="button" onclick="resetForm()">Reset</button>
+      </div>
+    </form>
+
+    <div class="watchout-box">
+      <strong>💡 Choice of the positive direction:</strong>
+      <p style="margin-top: 4px;">
+        Note that you are free to choose either direction as positive! Try switching the instruction above between <strong>"East is (+)"</strong> and <strong>"West is (+)"</strong>. The algebraic signs will flip, but the physical reality (Step 4) will always remain unchanged.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Problem State (Default = Textbook Shirley Example)
+  let problem = {
+    person: "Shirley",
+    d1: 200,
+    dir1: "east",
+    d2: 350,
+    dir2: "west"
+  };
+
+  let positiveDirection = "East"; // "East" or "West"
+
+  function setPositiveDirection(dir) {
+    positiveDirection = dir;
+    document.getElementById("pos-dir-name").textContent = dir.toUpperCase();
+    
+    document.getElementById("btn-east").className = dir === 'East' ? 'btn-active' : '';
+    document.getElementById("btn-west").className = dir === 'West' ? 'btn-active' : '';
+    
+    renderAll();
+    clearFeedbacks();
+  }
+
+  function randomizeExercise() {
+    const names = ["Shirley", "Amada", "Leo", "Maya", "Ken"];
+    const d1 = Math.floor(Math.random() * 3 + 2) * 100; // 200, 300, 400
+    const d2 = Math.floor(Math.random() * 3 + 2) * 100 + 50; // 250, 350, 450
+    const dirs = ["east", "west"];
+    const dir1 = dirs[Math.floor(Math.random() * dirs.length)];
+    const dir2 = (dir1 === "east") ? "west" : "east";
+
+    problem = {
+      person: names[Math.floor(Math.random() * names.length)],
+      d1,
+      dir1,
+      d2,
+      dir2
+    };
+
+    resetForm();
+    renderAll();
+  }
+
+  function renderAll() {
+    // Render text description
+    const container = document.getElementById("scenario-text");
+    container.innerHTML = `
+      Suppose tourist <strong>${problem.person}</strong> walks 
+      <strong>${problem.d1} m to the ${problem.dir1}</strong> from the Cultural Centre ($O$) to the Space Museum ($A$). 
+      She then turns around and walks <strong>${problem.d2} m to the ${problem.dir2}</strong> to the Five Flag Poles ($B$). 
+      <br>What is her <strong>overall displacement</strong> $\\vec{OB}$ in the journey?
+    `;
+
+    document.getElementById("label-step1").innerHTML = 
+      `1. Displacement of 1st section (${problem.d1} m ${problem.dir1}): <span class="vec">OA</span>`;
+    document.getElementById("label-step2").innerHTML = 
+      `2. Displacement of 2nd section (${problem.d2} m ${problem.dir2}): <span class="vec">AB</span>`;
+
+    // Re-render MathJax expressions if loaded
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise([container]);
+    }
+
+    drawDiagram();
+  }
+
+  // Draw arrow with head helper
+  function drawArrow(x1, y1, x2, y2, color, strokeWidth = 2.5) {
+    const headLength = 10;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const angle = Math.atan2(dy, dx);
+
+    // Arrow line
+    let svgStr = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${strokeWidth}" />`;
+
+    // Arrowhead polygon
+    const p1x = x2;
+    const p1y = y2;
+    const p2x = x2 - headLength * Math.cos(angle - Math.PI / 6);
+    const p2y = y2 - headLength * Math.sin(angle - Math.PI / 6);
+    const p3x = x2 - headLength * Math.cos(angle + Math.PI / 6);
+    const p3y = y2 - headLength * Math.sin(angle + Math.PI / 6);
+
+    svgStr += `<polygon points="${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}" fill="${color}" />`;
+    return svgStr;
+  }
+
+  function drawDiagram() {
+    const svg = document.getElementById("vector-svg");
+    svg.innerHTML = '';
+
+    const originX = 400;
+    const groundY = 80;
+    const scale = 0.65;
+
+    const offset1 = (problem.dir1 === 'east' ? 1 : -1) * problem.d1;
+    const offset2 = offset1 + (problem.dir2 === 'east' ? 1 : -1) * problem.d2;
+
+    const xO = originX;
+    const xA = originX + offset1 * scale;
+    const xB = originX + offset2 * scale;
+
+    let elements = `
+      <!-- Ground Straight Line -->
+      <rect x="60" y="${groundY - 6}" width="700" height="12" fill="#cbd5e1" rx="4"/>
+      
+      <!-- Axis direction indicator -->
+      <text x="760" y="32" text-anchor="end" font-size="13" font-weight="bold" fill="#334155">
+        ${positiveDirection === 'East' ? 'east (+)' : 'east (−)'} ➔
+      </text>
+      <text x="60" y="32" text-anchor="start" font-size="13" font-weight="bold" fill="#334155">
+        ⬅ ${positiveDirection === 'West' ? 'west (+)' : 'west (−)'}
+      </text>
+
+      <!-- Vertical Guideline Dashed Lines -->
+      <line x1="${xO}" y1="${groundY - 10}" x2="${xO}" y2="230" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="1.5"/>
+      <line x1="${xA}" y1="${groundY - 10}" x2="${xA}" y2="155" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="1.5"/>
+      <line x1="${xB}" y1="${groundY - 10}" x2="${xB}" y2="230" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="1.5"/>
+
+      <!-- Landmark Labels -->
+      <circle cx="${xO}" cy="${groundY}" r="5" fill="#1e293b"/>
+      <text x="${xO}" y="${groundY - 16}" text-anchor="middle" font-weight="bold" font-size="14">O</text>
+
+      <circle cx="${xA}" cy="${groundY}" r="5" fill="#1e293b"/>
+      <text x="${xA}" y="${groundY - 16}" text-anchor="middle" font-weight="bold" font-size="14">A</text>
+
+      <circle cx="${xB}" cy="${groundY}" r="5" fill="#1e293b"/>
+      <text x="${xB}" y="${groundY - 16}" text-anchor="middle" font-weight="bold" font-size="14">B</text>
+    `;
+
+    // 1st Vector OA
+    const y1 = 115;
+    elements += `<text x="70" y="${y1 + 4}" font-size="12" font-weight="bold" fill="#64748b">1st</text>`;
+    elements += drawArrow(xO, y1, xA, y1, "#2563eb", 2.5);
+    elements += `<text x="${(xO + xA)/2}" y="${y1 - 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#2563eb">
+      OA (${problem.d1} m ${problem.dir1})
+    </text>`;
+
+    // 2nd Vector AB
+    const y2 = 145;
+    elements += `<text x="70" y="${y2 + 4}" font-size="12" font-weight="bold" fill="#64748b">2nd</text>`;
+    elements += drawArrow(xA, y2, xB, y2, "#7c3aed", 2.5);
+    elements += `<text x="${(xA + xB)/2}" y="${y2 - 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#7c3aed">
+      AB (${problem.d2} m ${problem.dir2})
+    </text>`;
+
+    // Resultant Vector OB
+    const yRes = 205;
+    elements += `<text x="70" y="${yRes + 4}" font-size="12" font-weight="bold" fill="#ea580c">overall</text>`;
+    elements += drawArrow(xO, yRes, xB, yRes, "#ea580c", 3.5);
+    elements += `<text x="${(xO + xB)/2}" y="${yRes - 8}" text-anchor="middle" font-size="13" font-weight="bold" fill="#ea580c">
+      Resultant: OB (Start O ➔ End B)
+    </text>`;
+
+    svg.innerHTML = elements;
+  }
+
+  function checkAnswers() {
+    const s = problem;
+
+    // Correct signed values based on user-selected instruction
+    const correctSign1 = (s.dir1.toLowerCase() === positiveDirection.toLowerCase()) ? "+" : "-";
+    const val1 = (correctSign1 === "+" ? 1 : -1) * s.d1;
+
+    const correctSign2 = (s.dir2.toLowerCase() === positiveDirection.toLowerCase()) ? "+" : "-";
+    const val2 = (correctSign2 === "+" ? 1 : -1) * s.d2;
+
+    const totalVal = val1 + val2;
+    const correctSignTotal = totalVal >= 0 ? "+" : "-";
+    const correctMagTotal = Math.abs(totalVal);
+
+    // Final direction in real-world compass coordinates
+    let finalCompassDir = "";
+    if (totalVal > 0) {
+      finalCompassDir = positiveDirection.toLowerCase();
+    } else {
+      finalCompassDir = (positiveDirection.toLowerCase() === "east") ? "west" : "east";
+    }
+
+    // Read student inputs
+    const uSign1 = document.getElementById("sign1").value;
+    const uMag1 = parseFloat(document.getElementById("mag1").value);
+
+    const uSign2 = document.getElementById("sign2").value;
+    const uMag2 = parseFloat(document.getElementById("mag2").value);
+
+    const uSignRes = document.getElementById("sign-res").value;
+    const uMagRes = parseFloat(document.getElementById("mag-res").value);
+
+    const uMagFinal = parseFloat(document.getElementById("mag-final").value);
+    const uDirFinal = document.getElementById("dir-final").value;
+
+    // Check 1
+    const ok1 = (uSign1 === correctSign1) && (uMag1 === s.d1);
+    setFeedback("feedback1", ok1, ok1 ? "✓ Correct!" : 
+      `✗ Incorrect sign. Because ${positiveDirection} is defined as (+), motion to the ${s.dir1} must take '${correctSign1}'. Expected: ${correctSign1}${s.d1} m.`
+    );
+
+    // Check 2
+    const ok2 = (uSign2 === correctSign2) && (uMag2 === s.d2);
+    setFeedback("feedback2", ok2, ok2 ? "✓ Correct!" : 
+      `✗ Incorrect. Walking to the ${s.dir2} is opposite to ${positiveDirection === 'East' ? 'East' : 'West'}. Expected: ${correctSign2}${s.d2} m.`
+    );
+
+    // Check 3
+    const ok3 = (uSignRes === correctSignTotal) && (uMagRes === correctMagTotal);
+    setFeedback("feedback3", ok3, ok3 ? `✓ Correct! Resultant is ${correctSignTotal}${correctMagTotal} m.` : 
+      `✗ Algebraic sum: (${correctSign1}${s.d1}) + (${correctSign2}${s.d2}) = ${correctSignTotal}${correctMagTotal} m.`
+    );
+
+    // Check 4
+    const ok4 = (uMagFinal === correctMagTotal) && (uDirFinal === finalCompassDir);
+    setFeedback("feedback4", ok4, ok4 ? `✓ Perfect! The traveler ends up ${correctMagTotal} m to the ${finalCompassDir}.` : 
+      `✗ Remember: the '${correctSignTotal}' sign indicates position is towards the ${finalCompassDir}. Correct: ${correctMagTotal} m to the ${finalCompassDir}.`
+    );
+  }
+
+  function setFeedback(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = `feedback ${isOk ? 'correct' : 'wrong'}`;
+    el.textContent = msg;
+  }
+
+  function clearFeedbacks() {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById(`feedback${i}`);
+      el.className = "feedback";
+      el.textContent = "";
+    }
+  }
+
+  function resetForm() {
+    document.getElementById("quiz-form").reset();
+    clearFeedbacks();
+  }
+
+  // Initialize
+  renderAll();
+</script>
+
+</body>
+</html>
