@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Period Displacement–Time Graph</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #dc2626;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 28px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+            color: #1e3a8a;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+
+        .segments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .segments-header h2 {
+            font-size: 1.15rem;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        .segment-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr 1fr;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .segment-title {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: #1e3a8a;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        input, select {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #ffffff;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 15px 0;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 890px;
+            height: auto;
+        }
+
+        .slope-inspector {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+
+        .slope-inspector h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.02rem;
+            color: #1d4ed8;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            font-size: 0.92rem;
+        }
+
+        .stat-box {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #dbeafe;
+        }
+
+        .stat-box span {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .segment-card {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Displacement–Time Graph (<i>s</i>–<i>t</i>)</h1>
+    <p class="subtitle">Multi-Period Motion Simulator: <i>s</i> = 0 at <i>t</i> = 0 s</p>
+
+    <!-- Segments Controls -->
+    <div class="segments-header">
+        <h2>Time Periods (0 to 10 s)</h2>
+        <div class="btn-group">
+            <button class="btn-primary" onclick="addSegment()">+ Add Intermediate Point</button>
+            <button class="btn-secondary" onclick="removeLastSegment()">− Remove Last Point</button>
+        </div>
+    </div>
+
+    <div id="segmentsList"></div>
+
+    <!-- Plot Canvas -->
+    <div class="canvas-wrapper">
+        <canvas id="graphCanvas" width="860" height="420"></canvas>
+    </div>
+
+    <!-- Slope Inspector -->
+    <div class="slope-inspector">
+        <h3>Slope Analysis: Velocity from Slope (&Delta;<i>s</i> / &Delta;<i>t</i>)</h3>
+        <div class="slider-container">
+            <label for="timeSlider">Inspect Time (<i>t</i>):</label>
+            <input type="range" id="timeSlider" min="0" max="10" step="0.05" value="3.5">
+            <span id="timeSliderVal"><b>3.5 s</b></span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">Displacement, <i>s</i>:<br><span id="dispVal">0.00 m</span></div>
+            <div class="stat-box">Current Period:<br><span id="periodVal">Period 1</span></div>
+            <div class="stat-box">Calculated Slope (&Delta;<i>s</i> / &Delta;<i>t</i>):<br><span id="slopeVal">0.00 m/s</span></div>
+            <div class="stat-box">Instantaneous Velocity, <i>v</i>:<br><span id="veloVal">0.00 m/s</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let segments = [
+        { startTime: 0, endTime: 4, type: 'uniform', u: 6, a: 0 },
+        { startTime: 4, endTime: 10, type: 'accelerated', u: 6, a: -2 }
+    ];
+
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const segmentsContainer = document.getElementById('segmentsList');
+    const timeSlider = document.getElementById('timeSlider');
+    const timeSliderVal = document.getElementById('timeSliderVal');
+    const dispVal = document.getElementById('dispVal');
+    const periodVal = document.getElementById('periodVal');
+    const slopeVal = document.getElementById('slopeVal');
+    const veloVal = document.getElementById('veloVal');
+
+    // Increased left margin to 95 to prevent any text overlap
+    const margin = { top: 30, right: 30, bottom: 50, left: 95 };
+    const plotWidth = canvas.width - margin.left - margin.right;
+    const plotHeight = canvas.height - margin.top - margin.bottom;
+
+    function renderSegmentsUI() {
+        segmentsContainer.innerHTML = '';
+
+        segments.forEach((seg, index) => {
+            const isLast = index === segments.length - 1;
+            const card = document.createElement('div');
+            card.className = 'segment-card';
+
+            card.innerHTML = `
+                <div class="segment-title">
+                    Period ${index + 1}<br>
+                    <small style="color:#64748b; font-weight:normal;">
+                        ${seg.startTime.toFixed(1)} s &rarr; ${seg.endTime.toFixed(1)} s
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>End Time (s):</label>
+                    <input type="number" min="${seg.startTime + 0.5}" max="${isLast ? 10 : segments[index + 1].endTime - 0.5}" 
+                           step="0.5" value="${seg.endTime}" 
+                           ${isLast ? 'disabled title="Final point ends at 10.0 s"' : `onchange="updateEndTime(${index}, this.value)"`}>
+                </div>
+
+                <div class="form-group">
+                    <label>Motion Type:</label>
+                    <select onchange="updateSegmentType(${index}, this.value)">
+                        <option value="uniform" ${seg.type === 'uniform' ? 'selected' : ''}>Uniform</option>
+                        <option value="accelerated" ${seg.type === 'accelerated' ? 'selected' : ''}>Accelerated</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>${seg.type === 'uniform' ? 'Velocity, <i>v</i> (m/s):' : 'Initial Velocity, <i>u</i> (m/s):'}</label>
+                    <input type="number" step="0.5" value="${seg.u}" oninput="updateSegmentVelocity(${index}, this.value)">
+                </div>
+
+                <div class="form-group" style="${seg.type === 'uniform' ? 'display:none;' : ''}">
+                    <label>Acceleration, <i>a</i> (m/s²):</label>
+                    <input type="number" step="0.5" value="${seg.a}" oninput="updateSegmentAcceleration(${index}, this.value)">
+                </div>
+            `;
+            segmentsContainer.appendChild(card);
+        });
+    }
+
+    function addSegment() {
+        if (segments.length >= 5) {
+            alert("Maximum 5 segments allowed.");
+            return;
+        }
+
+        const lastSeg = segments[segments.length - 1];
+        const span = lastSeg.endTime - lastSeg.startTime;
+        if (span < 1.0) {
+            alert("Last time period is too short to split further.");
+            return;
+        }
+
+        const midPoint = parseFloat((lastSeg.startTime + span / 2).toFixed(1));
+        const originalEnd = lastSeg.endTime;
+        
+        lastSeg.endTime = midPoint;
+        segments.push({
+            startTime: midPoint,
+            endTime: originalEnd,
+            type: 'uniform',
+            u: lastSeg.u,
+            a: 0
+        });
+
+        renderSegmentsUI();
+        updatePlot();
+    }
+
+    function removeLastSegment() {
+        if (segments.length <= 1) {
+            alert("At least one time period is required.");
+            return;
+        }
+        segments.pop();
+        segments[segments.length - 1].endTime = 10;
+        renderSegmentsUI();
+        updatePlot();
+    }
+
+    function updateEndTime(index, val) {
+        let newEnd = parseFloat(val);
+        const minAllowed = segments[index].startTime + 0.2;
+        const maxAllowed = (index < segments.length - 1) ? segments[index + 1].endTime - 0.2 : 10;
+
+        if (newEnd < minAllowed) newEnd = minAllowed;
+        if (newEnd > maxAllowed) newEnd = maxAllowed;
+
+        segments[index].endTime = newEnd;
+        if (index + 1 < segments.length) {
+            segments[index + 1].startTime = newEnd;
+        }
+
+        renderSegmentsUI();
+        updatePlot();
+    }
+
+    function updateSegmentType(index, type) {
+        segments[index].type = type;
+        renderSegmentsUI();
+        updatePlot();
+    }
+
+    function updateSegmentVelocity(index, val) {
+        segments[index].u = parseFloat(val) || 0;
+        updatePlot();
+    }
+
+    function updateSegmentAcceleration(index, val) {
+        segments[index].a = parseFloat(val) || 0;
+        updatePlot();
+    }
+
+    function getDisplacementAndSegment(t) {
+        let currentS = 0;
+        let activeIndex = 0;
+
+        for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i];
+            const acc = seg.type === 'accelerated' ? seg.a : 0;
+            const duration = seg.endTime - seg.startTime;
+
+            if (t >= seg.startTime && (t <= seg.endTime || i === segments.length - 1)) {
+                activeIndex = i;
+                const dt = Math.max(0, t - seg.startTime);
+                currentS += (seg.u * dt) + (0.5 * acc * (dt ** 2));
+                return { s: currentS, segIndex: activeIndex };
+            } else {
+                currentS += (seg.u * duration) + (0.5 * acc * (duration ** 2));
+            }
+        }
+        return { s: currentS, segIndex: segments.length - 1 };
+    }
+
+    function calculateSlope(t) {
+        const dt = 0.0001;
+        const s1 = getDisplacementAndSegment(Math.max(0, t - dt)).s;
+        const s2 = getDisplacementAndSegment(Math.min(10, t + dt)).s;
+        return (s2 - s1) / (2 * dt);
+    }
+
+    function updatePlot() {
+        const inspectT = parseFloat(timeSlider.value);
+        timeSliderVal.innerHTML = `<b>${inspectT.toFixed(2)} s</b>`;
+
+        let points = [];
+        let minS = 0;
+        let maxS = 0;
+
+        for (let t = 0; t <= 10.001; t += 0.05) {
+            const res = getDisplacementAndSegment(t);
+            points.push({ t, s: res.s });
+            if (res.s < minS) minS = res.s;
+            if (res.s > maxS) maxS = res.s;
+        }
+
+        if (minS === maxS) {
+            maxS += 10;
+            minS -= 10;
+        } else {
+            const range = maxS - minS;
+            maxS += range * 0.12;
+            minS -= range * 0.12;
+        }
+
+        function toCanvasX(t) {
+            return margin.left + (t / 10) * plotWidth;
+        }
+        function toCanvasY(s) {
+            return margin.top + (1 - (s - minS) / (maxS - minS)) * plotHeight;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Grid & Axes
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px sans-serif';
+
+        // Ticks: Time (X-axis)
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        for (let t = 0; t <= 10; t += 2) {
+            const x = toCanvasX(t);
+            ctx.beginPath();
+            ctx.moveTo(x, margin.top);
+            ctx.lineTo(x, canvas.height - margin.bottom);
+            ctx.stroke();
+            ctx.fillText(t + ' s', x, canvas.height - margin.bottom + 8);
+        }
+
+        // Ticks: Displacement (Y-axis) - cleanly right-aligned
+        const yTicks = 5;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        for (let i = 0; i <= yTicks; i++) {
+            const val = minS + (i / yTicks) * (maxS - minS);
+            const y = toCanvasY(val);
+            ctx.beginPath();
+            ctx.moveTo(margin.left, y);
+            ctx.lineTo(canvas.width - margin.right, y);
+            ctx.stroke();
+            // Positioned 10px to the left of the vertical axis
+            ctx.fillText(val.toFixed(1) + ' m', margin.left - 10, y);
+        }
+
+        // Zero reference axis
+        if (minS <= 0 && maxS >= 0) {
+            const yZero = toCanvasY(0);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, yZero);
+            ctx.lineTo(canvas.width - margin.right, yZero);
+            ctx.stroke();
+        }
+
+        // Boundary lines between segments
+        segments.forEach((seg, i) => {
+            if (i > 0) {
+                const bx = toCanvasX(seg.startTime);
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(bx, margin.top);
+                ctx.lineTo(bx, canvas.height - margin.bottom);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`t=${seg.startTime.toFixed(1)}s`, bx, margin.top + 14);
+            }
+        });
+
+        // X-Axis Title
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('Time, t (s)', margin.left + (plotWidth / 2), canvas.height - 8);
+        
+        // Y-Axis Title (Rotated & Centered well away from the numbers)
+        ctx.save();
+        ctx.translate(22, margin.top + (plotHeight / 2));
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Displacement, s (m)', 0, 0);
+        ctx.restore();
+
+        // Draw Continuous Displacement Curve
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        points.forEach((pt, index) => {
+            const x = toCanvasX(pt.t);
+            const y = toCanvasY(pt.s);
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // Tangent & current point calculations
+        const inspectResult = getDisplacementAndSegment(inspectT);
+        const currentS = inspectResult.s;
+        const currentSegIndex = inspectResult.segIndex;
+        const slope = calculateSlope(inspectT);
+
+        // Draw Tangent line
+        const tangentSpan = 1.5;
+        const t1 = Math.max(0, inspectT - tangentSpan);
+        const t2 = Math.min(10, inspectT + tangentSpan);
+        const s1 = currentS - slope * (inspectT - t1);
+        const s2 = currentS + slope * (t2 - inspectT);
+
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(toCanvasX(t1), toCanvasY(s1));
+        ctx.lineTo(toCanvasX(t2), toCanvasY(s2));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Highlight selected point on curve
+        const ptX = toCanvasX(inspectT);
+        const ptY = toCanvasY(currentS);
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath();
+        ctx.arc(ptX, ptY, 5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Update statistics displays
+        dispVal.innerText = `${currentS.toFixed(2)} m`;
+        periodVal.innerText = `Period ${currentSegIndex + 1} (${segments[currentSegIndex].type === 'uniform' ? 'Uniform' : 'Accelerated'})`;
+        slopeVal.innerText = `${slope.toFixed(2)} m/s`;
+        veloVal.innerText = `${slope.toFixed(2)} m/s`;
+    }
+
+    timeSlider.addEventListener('input', updatePlot);
+
+    renderSegmentsUI();
+    updatePlot();
+</script>
+</body>
+</html>
