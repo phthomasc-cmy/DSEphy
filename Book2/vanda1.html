@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Simulation: Velocity & Constant Acceleration</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --road-gray: #334155;
+      --road-dash: #94a3b8;
+      --car-blue: #0284c7;
+      --accel-purple: #9333ea;
+      --vel-orange: #ea580c;
+      --border: #e2e8f0;
+      --active-stage-bg: #fef3c7;
+      --active-stage-border: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 15px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 860px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 28px 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .intro-text {
+      color: #475569;
+      font-size: 0.98rem;
+      margin-bottom: 24px;
+    }
+
+    .math {
+      font-style: italic;
+      font-family: "Georgia", serif;
+    }
+
+    /* Simulation Viewport */
+    .sim-viewport {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px 20px 16px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .legend-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .positive-dir {
+      background: #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: #334155;
+    }
+
+    .accel-tag {
+      color: var(--accel-purple);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .accel-arrow-icon {
+      display: inline-block;
+      width: 80px;
+      height: 3px;
+      background: var(--accel-purple);
+      position: relative;
+    }
+    .accel-arrow-icon::before {
+      content: '';
+      position: absolute;
+      left: -2px;
+      top: -4px;
+      border-right: 7px solid var(--accel-purple);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    /* Road Track */
+    .track-wrapper {
+      position: relative;
+      height: 90px;
+      margin: 30px 10px 15px;
+    }
+
+    .road {
+      width: 100%;
+      height: 60px;
+      background: var(--road-gray);
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .center-line {
+      width: 100%;
+      height: 2px;
+      border-top: 2px dashed var(--road-dash);
+      opacity: 0.6;
+    }
+
+    /* Car object */
+    .car {
+      position: absolute;
+      width: 54px;
+      height: 28px;
+      background: var(--car-blue);
+      border-radius: 7px;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 0.15s ease-out;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      z-index: 10;
+    }
+
+    .car::before, .car::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      width: 12px;
+      height: 20px;
+      background: #bae6fd;
+      border-radius: 3px;
+    }
+    .car::before { left: 9px; }
+    .car::after { right: 9px; }
+
+    /* Velocity Arrow on Car */
+    .vel-arrow {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .vel-shaft {
+      height: 3px;
+      background: var(--vel-orange);
+      position: relative;
+      transition: width 0.15s ease-out;
+    }
+
+    .vel-arrow-head {
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      position: absolute;
+      top: -3.5px;
+    }
+
+    .vel-arrow-head.right {
+      right: -6px;
+      border-left: 7px solid var(--vel-orange);
+    }
+
+    .vel-arrow-head.left {
+      left: -6px;
+      border-right: 7px solid var(--vel-orange);
+    }
+
+    .rest-indicator {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #dc2626;
+      background: #fee2e2;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* Track rulers */
+    .track-marks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    /* Live Telemetry Display */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .dash-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .dash-card .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #64748b;
+      letter-spacing: 0.5px;
+    }
+
+    .dash-card .value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 4px;
+      color: #0f172a;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    button {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    button:hover {
+      background: #0369a1;
+    }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    button.secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin-top: 8px;
+    }
+
+    .slider-box input[type="range"] {
+      flex: 1;
+      height: 6px;
+      accent-color: #0284c7;
+      cursor: pointer;
+    }
+
+    /* Stages Explanation */
+    .stages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stage-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      transition: all 0.2s ease;
+      font-size: 0.92rem;
+    }
+
+    .stage-item.active {
+      background: var(--active-stage-bg);
+      border-color: var(--active-stage-border);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+    }
+
+    .stage-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #0f172a;
+    }
+
+    .takeaway-box {
+      border-left: 4px solid #f59e0b;
+      background: #fffbeb;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      .controls {
+        flex-direction: column;
+      }
+      .slider-box {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>1D Motion: Velocity & Acceleration Simulation</h1>
+    <p class="intro-text">
+      Direction to the <strong>right is positive (+)</strong>. Initial velocity <span class="math">v<sub>0</sub> = +10 m s<sup>−1</sup></span>, 
+      constant acceleration <span class="math">a = −1 m s<sup>−2</sup></span> (e.g., strong headwind).
+    </p>
+
+    <!-- Simulation Viewport -->
+    <div class="sim-viewport">
+      <div class="legend-bar">
+        <span class="positive-dir">➔ + (Right is Positive)</span>
+        <div class="accel-tag">
+          <span class="accel-arrow-icon"></span>
+          <span><span class="math">a</span> = −1 m s<sup>−2</sup> (constant leftward)</span>
+        </div>
+      </div>
+
+      <div class="track-wrapper">
+        <div class="road">
+          <div class="center-line"></div>
+          
+          <!-- Animated Car -->
+          <div class="car" id="car">
+            <div id="vectorContainer"></div>
+          </div>
+        </div>
+
+        <div class="track-marks">
+          <span>0 m (Start)</span>
+          <span>25 m</span>
+          <span>50 m (Max displacement)</span>
+          <span>25 m</span>
+          <span>0 m (Return)</span>
+        </div>
+      </div>
+
+      <!-- Live Dashboard -->
+      <div class="dashboard">
+        <div class="dash-card">
+          <div class="label">Time (t)</div>
+          <div class="value" id="valTime">0 s</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">Velocity (v)</div>
+          <div class="value" id="valVel" style="color: var(--vel-orange);">+10 m s⁻¹</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">Displacement (s)</div>
+          <div class="value" id="valPos">0 m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="secondary" id="btnPrev">◀ −1 Second</button>
+      <button id="btnPlay">▶ Play</button>
+      <button class="secondary" id="btnNext">+1 Second ▶</button>
+      <button class="secondary" id="btnReset">⟲ Reset</button>
+
+      <div class="slider-box">
+        <span style="font-size: 0.85rem; font-weight: 600;">0s</span>
+        <input type="range" id="timeSlider" min="0" max="20" step="1" value="0">
+        <span style="font-size: 0.85rem; font-weight: 600;">20s</span>
+      </div>
+    </div>
+
+    <!-- Stage Description -->
+    <div class="stages-list">
+      <div class="stage-item" id="stage1">
+        <div class="stage-title">Stage 1 (0 s &le; t &lt; 10 s): Moving Right & Slowing Down</div>
+        <div>
+          The car moves to the <strong>right</strong> (<span class="math">v > 0</span>), but acceleration points <strong>left</strong> (<span class="math">a = −1 m s<sup>−2</sup></span>). 
+          Since velocity and acceleration have <strong>opposite signs</strong>, the speed decreases by 1 m s<sup>−1</sup> every second.
+        </div>
+      </div>
+
+      <div class="stage-item" id="stage2">
+        <div class="stage-title">Stage 2 (t = 10 s): Momentarily at Rest</div>
+        <div>
+          Velocity drops to exactly <span class="math">v = 0 m s<sup>−1</sup></span> at displacement <span class="math">s = +50 m</span>. 
+          The car instantaneously stops before reversing direction. (Acceleration is still <span class="math">−1 m s<sup>−2</sup></span>!)
+        </div>
+      </div>
+
+      <div class="stage-item" id="stage3">
+        <div class="stage-title">Stage 3 (10 s &lt; t &le; 20 s): Moving Left & Speeding Up</div>
+        <div>
+          The car moves to the <strong>left</strong> (<span class="math">v &lt; 0</span>). 
+          Since velocity and acceleration now have the <strong>same sign (both negative)</strong>, the car accelerates leftward, speeding up to −10 m s<sup>−1</sup>.
+        </div>
+      </div>
+    </div>
+
+    <div class="takeaway-box">
+      <strong>Rule:</strong> When velocity and acceleration have <strong>opposite directions</strong>, the object <strong>slows down</strong> (decelerates). 
+      When they share the <strong>same direction</strong>, the object <strong>speeds up</strong>.
+    </div>
+  </div>
+
+  <script>
+    // Physics parameters
+    const v0 = 10;   // initial velocity (+10 m/s)
+    const a = -1;    // acceleration (-1 m/s^2)
+    let t = 0;       // current time in seconds (0 to 20)
+    let isPlaying = false;
+    let playInterval = null;
+
+    // Elements
+    const car = document.getElementById("car");
+    const vectorContainer = document.getElementById("vectorContainer");
+    const valTime = document.getElementById("valTime");
+    const valVel = document.getElementById("valVel");
+    const valPos = document.getElementById("valPos");
+    const timeSlider = document.getElementById("timeSlider");
+    const btnPlay = document.getElementById("btnPlay");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnReset = document.getElementById("btnReset");
+
+    const stage1 = document.getElementById("stage1");
+    const stage2 = document.getElementById("stage2");
+    const stage3 = document.getElementById("stage3");
+
+    function updateSimulation() {
+      // Equations of motion
+      // v(t) = v0 + a * t
+      const v = v0 + (a * t);
+      // s(t) = v0*t + 0.5*a*t^2 (range is 0m to 50m)
+      const s = (v0 * t) + (0.5 * a * t * t);
+
+      // Map position s (0 to 50m) to road track percentage (10% to 90%)
+      const minLeft = 10;
+      const maxLeft = 90;
+      const leftPercent = minLeft + (s / 50) * (maxLeft - minLeft);
+      car.style.left = `${leftPercent}%`;
+
+      // Update vector display
+      const absSpeed = Math.abs(v);
+      const arrowLength = absSpeed * 5; // scaling for visualization
+
+      if (v > 0) {
+        vectorContainer.innerHTML = `
+          <div class="vel-arrow" style="transform: translate(0, -50%);">
+            <div class="vel-shaft" style="width: ${arrowLength}px;">
+              <span class="vel-arrow-head right"></span>
+            </div>
+          </div>
+        `;
+      } else if (v < 0) {
+        vectorContainer.innerHTML = `
+          <div class="vel-arrow" style="transform: translate(-100%, -50%);">
+            <div class="vel-shaft" style="width: ${arrowLength}px;">
+              <span class="vel-arrow-head left"></span>
+            </div>
+          </div>
+        `;
+      } else {
+        vectorContainer.innerHTML = `<span class="rest-indicator">v = 0 (At Rest)</span>`;
+      }
+
+      // Update labels
+      valTime.innerText = `${t} s`;
+      valVel.innerText = `${v > 0 ? '+' : ''}${v} m s⁻¹`;
+      valPos.innerText = `${s} m`;
+      timeSlider.value = t;
+
+      // Highlight active stage
+      stage1.classList.remove("active");
+      stage2.classList.remove("active");
+      stage3.classList.remove("active");
+
+      if (t < 10) {
+        stage1.classList.add("active");
+      } else if (t === 10) {
+        stage2.classList.add("active");
+      } else {
+        stage3.classList.add("active");
+      }
+    }
+
+    // Step by 1s
+    function changeTime(step) {
+      t = Math.min(20, Math.max(0, t + step));
+      updateSimulation();
+      if (t === 20 && isPlaying) {
+        pause();
+      }
+    }
+
+    function play() {
+      isPlaying = true;
+      btnPlay.innerText = "⏸ Pause";
+      if (t >= 20) t = 0;
+      playInterval = setInterval(() => {
+        if (t < 20) {
+          changeTime(1);
+        } else {
+          pause();
+        }
+      }, 1000); // changes 1 second each time
+    }
+
+    function pause() {
+      isPlaying = false;
+      btnPlay.innerText = "▶ Play";
+      clearInterval(playInterval);
+    }
+
+    // Event listeners
+    btnPlay.addEventListener("click", () => {
+      if (isPlaying) pause();
+      else play();
+    });
+
+    btnPrev.addEventListener("click", () => {
+      pause();
+      changeTime(-1);
+    });
+
+    btnNext.addEventListener("click", () => {
+      pause();
+      changeTime(1);
+    });
+
+    btnReset.addEventListener("click", () => {
+      pause();
+      t = 0;
+      updateSimulation();
+    });
+
+    timeSlider.addEventListener("input", (e) => {
+      pause();
+      t = parseInt(e.target.value, 10);
+      updateSimulation();
+    });
+
+    // Initialize
+    updateSimulation();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinematics Lab: Velocity & Acceleration Simulation</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --road-gray: #1e293b;
+      --road-dash: #94a3b8;
+      --car-blue: #0284c7;
+      --accel-purple: #9333ea;
+      --vel-orange: #ea580c;
+      --border: #e2e8f0;
+      --active-stage-bg: #fef3c7;
+      --active-stage-border: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 15px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 28px 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      margin-bottom: 6px;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+    }
+
+    .math {
+      font-style: italic;
+      font-family: "Georgia", serif;
+    }
+
+    /* Configuration Panel */
+    .config-panel {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      align-items: center;
+    }
+
+    .config-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .config-group label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    select, input[type="number"] {
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1px solid #94a3b8;
+      background: white;
+      font-size: 0.95rem;
+      color: #0f172a;
+      outline: none;
+    }
+
+    input[type="number"] {
+      width: 80px;
+    }
+
+    /* Simulation Viewport */
+    .sim-viewport {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 20px 18px;
+      margin-bottom: 22px;
+    }
+
+    .legend-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .direction-badge {
+      background: #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: #334155;
+    }
+
+    .accel-vector-banner {
+      color: var(--accel-purple);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .accel-arrow-line {
+      display: inline-block;
+      width: 70px;
+      height: 3px;
+      background: var(--accel-purple);
+      position: relative;
+    }
+
+    .accel-arrow-line.arrow-left::before {
+      content: '';
+      position: absolute;
+      left: -2px;
+      top: -4px;
+      border-right: 7px solid var(--accel-purple);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .accel-arrow-line.arrow-right::after {
+      content: '';
+      position: absolute;
+      right: -2px;
+      top: -4px;
+      border-left: 7px solid var(--accel-purple);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    /* Road Track */
+    .track-wrapper {
+      position: relative;
+      margin: 30px 10px 15px;
+    }
+
+    .road {
+      width: 100%;
+      height: 64px;
+      background: var(--road-gray);
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .center-line {
+      width: 100%;
+      height: 2px;
+      border-top: 2px dashed var(--road-dash);
+      opacity: 0.6;
+    }
+
+    /* Car Visual */
+    .car {
+      position: absolute;
+      width: 54px;
+      height: 28px;
+      background: var(--car-blue);
+      border-radius: 7px;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 0.15s ease-out;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.35);
+      z-index: 10;
+    }
+
+    .car::before, .car::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      width: 11px;
+      height: 20px;
+      background: #e0f2fe;
+      border-radius: 3px;
+    }
+    .car::before { left: 9px; }
+    .car::after { right: 9px; }
+
+    /* Velocity Arrow Dynamic */
+    .vel-arrow {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .vel-shaft {
+      height: 3px;
+      background: var(--vel-orange);
+      position: relative;
+      transition: width 0.15s ease-out;
+    }
+
+    .vel-arrow-head {
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      position: absolute;
+      top: -3.5px;
+    }
+
+    .vel-arrow-head.right {
+      right: -6px;
+      border-left: 7px solid var(--vel-orange);
+    }
+
+    .vel-arrow-head.left {
+      left: -6px;
+      border-right: 7px solid var(--vel-orange);
+    }
+
+    .rest-indicator {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 1px 7px;
+      border-radius: 4px;
+      border: 1px solid #fca5a5;
+      white-space: nowrap;
+    }
+
+    .track-marks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 10px;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* Dashboard Metrics */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .dash-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 12px 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .dash-card .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .dash-card .value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 4px;
+      color: #0f172a;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    button {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    button:hover {
+      background: #0369a1;
+    }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    button.secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 520px;
+      margin-top: 10px;
+    }
+
+    .slider-box input[type="range"] {
+      flex: 1;
+      height: 6px;
+      accent-color: #0284c7;
+      cursor: pointer;
+    }
+
+    /* Live Motion Analysis Box */
+    .status-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+
+    .status-card.opposite {
+      background: #fffbeb;
+      border-color: #f59e0b;
+    }
+
+    .status-card.same {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .status-card.rest {
+      background: #fef2f2;
+      border-color: #ef4444;
+    }
+
+    .status-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .status-desc {
+      font-size: 0.95rem;
+      color: #334155;
+    }
+
+    .takeaway-box {
+      border-left: 4px solid #f59e0b;
+      background: #fdfaf1;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.92rem;
+      color: #451a03;
+    }
+
+    @media (max-width: 680px) {
+      .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .legend-bar {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Kinematics Lab: Direction of Velocity & Acceleration</h1>
+    <p class="subtitle">
+      Explore how constant acceleration affects an object's velocity and position in 1D straight-line motion.
+    </p>
+
+    <!-- Parameter Setup Panel -->
+    <div class="config-panel">
+      <div class="config-group">
+        <label for="v0Mag">Initial Velocity (<span class="math">v<sub>0</sub></span>):</label>
+        <div class="input-row">
+          <select id="v0Sign">
+            <option value="1">+ (Right)</option>
+            <option value="-1">− (Left)</option>
+          </select>
+          <input type="number" id="v0Mag" min="0" max="25" step="1" value="10">
+          <span>m s<sup>−1</sup></span>
+        </div>
+      </div>
+
+      <div class="config-group">
+        <label for="aMag">Acceleration (<span class="math">a</span>):</label>
+        <div class="input-row">
+          <select id="aSign">
+            <option value="-1">− (Left)</option>
+            <option value="1">+ (Right)</option>
+          </select>
+          <input type="number" id="aMag" min="0" max="10" step="0.5" value="1">
+          <span>m s<sup>−2</sup></span>
+        </div>
+      </div>
+
+      <div class="config-group" style="align-self: flex-end;">
+        <button id="btnApply" style="width: 100%; justify-content: center;">Apply Parameters & Reset</button>
+      </div>
+    </div>
+
+    <!-- Simulation Viewport -->
+    <div class="sim-viewport">
+      <div class="legend-bar">
+        <span class="direction-badge">➔ + (Right is Positive)</span>
+        <div class="accel-vector-banner" id="accelBanner">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Road Area -->
+      <div class="track-wrapper">
+        <div class="road">
+          <div class="center-line"></div>
+          
+          <div class="car" id="car">
+            <div id="vectorContainer"></div>
+          </div>
+        </div>
+
+        <div class="track-marks" id="trackMarks">
+          <!-- Dynamically generated markers -->
+        </div>
+      </div>
+
+      <!-- Live Readout Dashboard -->
+      <div class="dashboard">
+        <div class="dash-card">
+          <div class="label">Time (t)</div>
+          <div class="value" id="valTime">0 s</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">Velocity (v)</div>
+          <div class="value" id="valVel" style="color: var(--vel-orange);">+10.0 m s⁻¹</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">Acceleration (a)</div>
+          <div class="value" id="valAccel" style="color: var(--accel-purple);">−1.0 m s⁻²</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">Displacement (s)</div>
+          <div class="value" id="valPos">0.0 m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stepper & Time Controls -->
+    <div class="controls">
+      <button class="secondary" id="btnPrev">◀ −1 Second</button>
+      <button id="btnPlay">▶ Play</button>
+      <button class="secondary" id="btnNext">+1 Second ▶</button>
+      <button class="secondary" id="btnReset">⟲ Reset</button>
+
+      <div class="slider-box">
+        <span style="font-size: 0.85rem; font-weight: 700;" id="sliderMin">0s</span>
+        <input type="range" id="timeSlider" min="0" max="20" step="1" value="0">
+        <span style="font-size: 0.85rem; font-weight: 700;" id="sliderMax">20s</span>
+      </div>
+    </div>
+
+    <!-- Live Motion State Interpretation -->
+    <div class="status-card" id="statusCard">
+      <div class="status-title" id="statusTitle">Analyzing Motion...</div>
+      <div class="status-desc" id="statusDesc">...</div>
+    </div>
+
+    <div class="takeaway-box">
+      <strong>Core Principle:</strong> 
+      When velocity and acceleration have <strong>opposite signs</strong>, the car <strong>slows down</strong>. 
+      When velocity and acceleration have the <strong>same sign</strong>, the car <strong>speeds up</strong>. 
+      If <span class="math">v = 0</span> while <span class="math">a &ne; 0</span>, the object is <strong>momentarily at rest</strong> and reversing its motion.
+    </div>
+  </div>
+
+  <script>
+    // Physics parameters (user customizable)
+    let v0 = 10;
+    let a = -1;
+    let t = 0;
+    const maxT = 20;
+
+    // Track scaling boundaries
+    let minDisp = 0;
+    let maxDisp = 50;
+
+    let isPlaying = false;
+    let playInterval = null;
+
+    // DOM Elements
+    const v0SignInput = document.getElementById("v0Sign");
+    const v0MagInput = document.getElementById("v0Mag");
+    const aSignInput = document.getElementById("aSign");
+    const aMagInput = document.getElementById("aMag");
+    const btnApply = document.getElementById("btnApply");
+
+    const car = document.getElementById("car");
+    const vectorContainer = document.getElementById("vectorContainer");
+    const accelBanner = document.getElementById("accelBanner");
+    const trackMarks = document.getElementById("trackMarks");
+
+    const valTime = document.getElementById("valTime");
+    const valVel = document.getElementById("valVel");
+    const valAccel = document.getElementById("valAccel");
+    const valPos = document.getElementById("valPos");
+
+    const timeSlider = document.getElementById("timeSlider");
+    const sliderMin = document.getElementById("sliderMin");
+    const sliderMax = document.getElementById("sliderMax");
+
+    const btnPlay = document.getElementById("btnPlay");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnReset = document.getElementById("btnReset");
+
+    const statusCard = document.getElementById("statusCard");
+    const statusTitle = document.getElementById("statusTitle");
+    const statusDesc = document.getElementById("statusDesc");
+
+    function readInputs() {
+      const vSign = parseFloat(v0SignInput.value);
+      const vMag = Math.max(0, parseFloat(v0MagInput.value) || 0);
+      v0 = vSign * vMag;
+
+      const accSign = parseFloat(aSignInput.value);
+      const accMag = Math.max(0, parseFloat(aMagInput.value) || 0);
+      a = accSign * accMag;
+
+      computeTrackBounds();
+      resetSimulation();
+    }
+
+    // Determine min/max displacement reached over 0..maxT to auto-fit track
+    function computeTrackBounds() {
+      let sValues = [];
+      for (let step = 0; step <= maxT; step += 0.5) {
+        sValues.push(v0 * step + 0.5 * a * step * step);
+      }
+      let minVal = Math.min(0, ...sValues);
+      let maxVal = Math.max(0, ...sValues);
+
+      if (maxVal === minVal) {
+        maxVal = 10;
+        minVal = -10;
+      }
+
+      // Add a 10% breathing buffer
+      const range = maxVal - minVal;
+      minDisp = minVal - range * 0.05;
+      maxDisp = maxVal + range * 0.05;
+
+      // Update track tick marks
+      trackMarks.innerHTML = `
+        <span>${minVal.toFixed(0)} m</span>
+        <span>${((minVal + maxVal) / 2).toFixed(0)} m</span>
+        <span>${maxVal.toFixed(0)} m</span>
+      `;
+
+      // Update acceleration banner vector
+      if (a === 0) {
+        accelBanner.innerHTML = `<span><span class="math">a</span> = 0 m s<sup>−2</sup> (No acceleration)</span>`;
+      } else if (a > 0) {
+        accelBanner.innerHTML = `
+          <span><span class="math">a</span> = +${a.toFixed(1)} m s<sup>−2</sup></span>
+          <span class="accel-arrow-line arrow-right"></span>
+        `;
+      } else {
+        accelBanner.innerHTML = `
+          <span class="accel-arrow-line arrow-left"></span>
+          <span><span class="math">a</span> = ${a.toFixed(1)} m s<sup>−2</sup></span>
+        `;
+      }
+    }
+
+    function updateSimulation() {
+      // Kinematic equations
+      // v = v0 + a * t
+      const v = v0 + a * t;
+      // s = v0 * t + 0.5 * a * t^2
+      const s = v0 * t + 0.5 * a * t * t;
+
+      // Position car linearly between minDisp and maxDisp (clamped between 8% and 92%)
+      const normalizedPos = (s - minDisp) / (maxDisp - minDisp);
+      const clampedPct = 8 + Math.max(0, Math.min(1, normalizedPos)) * (92 - 8);
+      car.style.left = `${clampedPct}%`;
+
+      // Velocity Arrow Visual
+      const speed = Math.abs(v);
+      const arrowLength = Math.min(90, speed * 4.5);
+
+      if (Math.abs(v) < 0.001) {
+        vectorContainer.innerHTML = `<span class="rest-indicator">Momentarily at Rest (v = 0)</span>`;
+      } else if (v > 0) {
+        vectorContainer.innerHTML = `
+          <div class="vel-arrow" style="transform: translate(0, -50%);">
+            <div class="vel-shaft" style="width: ${arrowLength}px;">
+              <span class="vel-arrow-head right"></span>
+            </div>
+          </div>
+        `;
+      } else {
+        vectorContainer.innerHTML = `
+          <div class="vel-arrow" style="transform: translate(-100%, -50%);">
+            <div class="vel-shaft" style="width: ${arrowLength}px;">
+              <span class="vel-arrow-head left"></span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Live metrics update
+      valTime.innerText = `${t} s`;
+      valVel.innerText = `${v >= 0 ? '+' : ''}${v.toFixed(1)} m s⁻¹`;
+      valAccel.innerText = `${a >= 0 ? '+' : ''}${a.toFixed(1)} m s⁻²`;
+      valPos.innerText = `${s >= 0 ? '+' : ''}${s.toFixed(1)} m`;
+      timeSlider.value = t;
+
+      // Dynamic Motion Interpretation
+      updateExplanation(v, s);
+    }
+
+    function updateExplanation(v, s) {
+      statusCard.className = "status-card";
+
+      if (Math.abs(v) < 0.001) {
+        statusCard.classList.add("rest");
+        statusTitle.innerText = `At t = ${t} s: Momentarily at Rest (v = 0)`;
+        statusDesc.innerHTML = `The car's velocity has dropped to zero at displacement <span class="math">s = ${s.toFixed(1)} m</span>. If acceleration is non-zero (<span class="math">a = ${a} m s<sup>−2</sup></span>), the car is actively reversing its direction.`;
+      } else if ((v > 0 && a > 0) || (v < 0 && a < 0)) {
+        statusCard.classList.add("same");
+        const dir = v > 0 ? "right (+)" : "left (−)";
+        statusTitle.innerText = `Speeding Up: Velocity & Acceleration in the SAME direction`;
+        statusDesc.innerHTML = `Both velocity (<span class="math">v = ${v.toFixed(1)} m s<sup>−1</sup></span>) and acceleration (<span class="math">a = ${a.toFixed(1)} m s<sup>−2</sup></span>) point to the <strong>${dir}</strong>. Since their signs match, the car is <strong>accelerating and gaining speed</strong>.`;
+      } else if ((v > 0 && a < 0) || (v < 0 && a > 0)) {
+        statusCard.classList.add("opposite");
+        const vDir = v > 0 ? "right (+)" : "left (−)";
+        const aDir = a > 0 ? "right (+)" : "left (−)";
+        statusTitle.innerText = `Slowing Down: Velocity & Acceleration in OPPOSITE directions`;
+        statusDesc.innerHTML = `The car is currently moving to the <strong>${vDir}</strong>, but the acceleration is pulling it to the <strong>${aDir}</strong>. Because the signs are opposite, the car is <strong>decelerating</strong> by ${Math.abs(a)} m s<sup>−1</sup> every second.`;
+      } else {
+        // a === 0
+        statusTitle.innerText = `Uniform Motion: Acceleration is Zero`;
+        statusDesc.innerHTML = `Since <span class="math">a = 0</span>, the velocity remains strictly constant at <span class="math">v = ${v.toFixed(1)} m s<sup>−1</sup></span> without speeding up or slowing down.`;
+      }
+    }
+
+    function changeTime(step) {
+      t = Math.min(maxT, Math.max(0, t + step));
+      updateSimulation();
+      if (t === maxT && isPlaying) {
+        pause();
+      }
+    }
+
+    function play() {
+      if (t >= maxT) t = 0;
+      isPlaying = true;
+      btnPlay.innerText = "⏸ Pause";
+      playInterval = setInterval(() => {
+        if (t < maxT) {
+          changeTime(1);
+        } else {
+          pause();
+        }
+      }, 1000); // 1-second interval
+    }
+
+    function pause() {
+      isPlaying = false;
+      btnPlay.innerText = "▶ Play";
+      clearInterval(playInterval);
+    }
+
+    function resetSimulation() {
+      pause();
+      t = 0;
+      timeSlider.value = 0;
+      updateSimulation();
+    }
+
+    // Event Listeners
+    btnPlay.addEventListener("click", () => {
+      if (isPlaying) pause();
+      else play();
+    });
+
+    btnPrev.addEventListener("click", () => {
+      pause();
+      changeTime(-1);
+    });
+
+    btnNext.addEventListener("click", () => {
+      pause();
+      changeTime(1);
+    });
+
+    btnReset.addEventListener("click", resetSimulation);
+
+    btnApply.addEventListener("click", readInputs);
+
+    timeSlider.addEventListener("input", (e) => {
+      pause();
+      t = parseInt(e.target.value, 10);
+      updateSimulation();
+    });
+
+    // Initialize
+    readInputs();
+  </script>
+
+</body>
+</html>
