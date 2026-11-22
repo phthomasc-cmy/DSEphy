@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uniformly Accelerated Motion (SUVAT) — Interactive Revision</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-light: #eff6ff;
+      --accent: #ea580c;
+      --accent-light: #fff7ed;
+      --accent-border: #fdba74;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --error: #b91c1c;
+      --error-bg: #fef2f2;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    header p {
+      margin: 0.2rem 0 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 1.5rem auto;
+      padding: 0 1rem 3rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.4rem;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Collapsible Reference Sheet */
+    .ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .eq-ref-box {
+      background: var(--primary-light);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      text-align: center;
+    }
+
+    .eq-ref-box .eq-math {
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .eq-ref-box .eq-missing {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .tactics-flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: #fff;
+      border-top: 2px dotted var(--accent-border);
+      margin-top: 0.5rem;
+    }
+
+    .tactic-step-pill {
+      flex: 1 1 170px;
+      background: var(--accent-light);
+      border: 1.5px solid var(--accent-border);
+      border-radius: 8px;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.85rem;
+    }
+
+    .tactic-step-pill strong {
+      color: var(--error);
+      display: block;
+      font-size: 0.82rem;
+    }
+
+    .tactic-arrow {
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 1.2rem;
+    }
+
+    .key-notes {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      background: #f8fafc;
+      border-left: 4px solid var(--accent);
+      padding: 0.65rem 0.9rem;
+      border-radius: 0 8px 8px 0;
+      color: #334155;
+    }
+
+    /* Controls Bar */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      align-items: end;
+    }
+
+    label.ctrl-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    select, input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+      transition: border-color 0.15s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-accent:hover { background: #c2410c; }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--text);
+      border: 1.5px solid #cbd5e1;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .btn-sm {
+      padding: 0.38rem 0.7rem;
+      font-size: 0.82rem;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+    }
+
+    .stat-box .stat-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-box .stat-lbl {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    /* Question Box */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.22rem 0.6rem;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .badge.scenario { background: #dbeafe; color: #1e40af; }
+    .badge.diff-Standard { background: #dcfce7; color: #166534; }
+    .badge.diff-Intermediate { background: #fef3c7; color: #92400e; }
+    .badge.diff-Challenge { background: #fee2e2; color: #991b1b; }
+
+    .question-text {
+      font-size: 1.08rem;
+      line-height: 1.65;
+      color: #0f172a;
+      margin-bottom: 0.85rem;
+    }
+
+    .sub-parts {
+      margin: 0.5rem 0 0.75rem 0.25rem;
+      padding-left: 1rem;
+      border-left: 3px solid var(--primary);
+    }
+
+    .sub-parts p {
+      margin: 0.35rem 0;
+    }
+
+    .hl-phrase {
+      background: #fef08a;
+      padding: 0.05rem 0.25rem;
+      border-radius: 4px;
+      border-bottom: 2px solid #eab308;
+    }
+
+    .diagram-wrap {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem;
+      margin-top: 0.5rem;
+      overflow-x: auto;
+    }
+
+    /* Interactive 4-Step Tactics Workspace */
+    .tactics-step-box {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+      background: #fff;
+    }
+
+    .tactics-step-box.step-active {
+      border-color: var(--accent-border);
+      background: #fffdfb;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .step-tag {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--error);
+      border: 1px solid var(--accent-border);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 6px;
+      margin-right: 0.4rem;
+    }
+
+    .suvat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 0.7rem;
+    }
+
+    .suvat-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.7rem;
+      background: #f8fafc;
+    }
+
+    .suvat-item label.var-name {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .suvat-item small {
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .suvat-item select {
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+    }
+
+    .suvat-item input {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.55rem;
+    }
+
+    .eq-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .eq-choice-btn {
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .eq-choice-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .eq-choice-btn.selected {
+      border-color: var(--primary);
+      background: #dbeafe;
+      color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .eq-choice-btn span.hint-absent {
+      display: block;
+      font-family: sans-serif;
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .answer-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 0.75rem;
+      max-width: 460px;
+      margin-top: 0.4rem;
+    }
+
+    .feedback-box {
+      margin-top: 0.85rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      display: none;
+    }
+
+    .feedback-box.show { display: block; }
+    .feedback-box.ok { background: var(--success-bg); border: 1px solid #86efac; color: #14532d; }
+    .feedback-box.bad { background: var(--error-bg); border: 1px solid #fca5a5; color: #7f1d1d; }
+    .feedback-box.warn { background: var(--warn-bg); border: 1px solid #fcd34d; color: #78350f; }
+
+    .solution-box {
+      display: none;
+      margin-top: 1rem;
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+    }
+
+    .solution-box.show { display: block; }
+
+    .solution-box h3 {
+      margin: 0 0 0.7rem;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .sol-step {
+      margin-bottom: 0.65rem;
+      padding-left: 0.75rem;
+      border-left: 3px solid var(--accent-border);
+    }
+
+    .math-inline {
+      font-family: "Cambria Math", "Times New Roman", Georgia, serif;
+      font-weight: 600;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      .tactic-arrow { display: none; }
+      .answer-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Equations of Uniformly Accelerated Motion (SUVAT)</h1>
+      <p>Interactive Revision &bull; 4-Step Problem-Solving Tactics</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn-outline btn-sm" id="toggleRefBtn" style="background:rgba(255,255,255,0.14);color:#fff;border-color:rgba(255,255,255,0.35);">
+        Hide Formula &amp; Tactics Reference
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Reference Sheet (Equations + Textbook Tactics) -->
+  <section class="card" id="referenceCard">
+    <div class="section-title">
+      <h2>The 4 Equations &amp; Problem-Solving Tactics</h2>
+      <label style="font-size:0.82rem;color:var(--muted);cursor:pointer;">
+        <input type="checkbox" id="showMissingHint" checked /> Show "absent variable" tip
+      </label>
+    </div>
+
+    <div class="ref-grid">
+      <div class="eq-ref-box">
+        <div class="eq-math">v = u + at</div>
+        <div class="eq-missing">Missing: <strong>s</strong> (displacement)</div>
+      </div>
+      <div class="eq-ref-box">
+        <div class="eq-math">s = &frac12;(u + v)t</div>
+        <div class="eq-missing">Missing: <strong>a</strong> (acceleration)</div>
+      </div>
+      <div class="eq-ref-box">
+        <div class="eq-math">s = ut + &frac12;at&sup2;</div>
+        <div class="eq-missing">Missing: <strong>v</strong> (final velocity)</div>
+      </div>
+      <div class="eq-ref-box">
+        <div class="eq-math">v&sup2; = u&sup2; + 2as</div>
+        <div class="eq-missing">Missing: <strong>t</strong> (time)</div>
+      </div>
+    </div>
+
+    <div class="tactics-flow">
+      <div class="tactic-step-pill">
+        <strong>Step 1:</strong> Define the positive direction.
+      </div>
+      <div class="tactic-arrow">&rarr;</div>
+      <div class="tactic-step-pill">
+        <strong>Step 2:</strong> Identify the known and unknown quantities.
+      </div>
+      <div class="tactic-arrow">&rarr;</div>
+      <div class="tactic-step-pill">
+        <strong>Step 3:</strong> Apply a suitable equation.
+      </div>
+      <div class="tactic-arrow">&rarr;</div>
+      <div class="tactic-step-pill">
+        <strong>Step 4:</strong> Solve for the unknowns.
+      </div>
+    </div>
+
+    <div class="key-notes">
+      <strong>Key Physics Clues:</strong>
+      &bull; <em>"Accelerates steadily / uniformly"</em> &rArr; acceleration <strong>a</strong> is constant.
+      &bull; <em>"Starts from rest"</em> &rArr; <strong>u = 0</strong>.
+      &bull; <em>"Comes to a stop / rest"</em> &rArr; <strong>v = 0</strong>.
+      &bull; <em>"Decelerates at X m s<sup>&minus;2</sup>"</em> &rArr; <strong>a = &minus;X</strong> (opposite to motion).
+    </div>
+  </section>
+
+  <!-- Practice Generator Controls & Progress -->
+  <section class="card">
+    <div class="controls-grid">
+      <div>
+        <label class="ctrl-label" for="modeSelect">Practice Mode</label>
+        <select id="modeSelect">
+          <option value="guided">Guided 4-Step Tactics (Recommended)</option>
+          <option value="quick">Quick Answer Mode</option>
+        </select>
+      </div>
+      <div>
+        <label class="ctrl-label" for="eqFocusSelect">Equation Focus</label>
+        <select id="eqFocusSelect">
+          <option value="all">All 4 Equations (Mixed)</option>
+          <option value="eq1">Eq 1: v = u + at</option>
+          <option value="eq2">Eq 2: s = &frac12;(u + v)t</option>
+          <option value="eq3">Eq 3: s = ut + &frac12;at&sup2;</option>
+          <option value="eq4">Eq 4: v&sup2; = u&sup2; + 2as</option>
+          <option value="twopart">2-Part Problems (like Textbook)</option>
+        </select>
+      </div>
+      <div>
+        <label class="ctrl-label" for="diffSelect">Difficulty</label>
+        <select id="diffSelect">
+          <option value="Standard">Standard (Positive a, SI units)</option>
+          <option value="Intermediate">Intermediate (Rest, braking, signs)</option>
+          <option value="Challenge">Challenge (km/h &rarr; m/s, free fall)</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="newQBtn" style="flex:1;">New Question</button>
+        <button class="btn-accent" id="f1Btn" title="Load the exact Formula One example from your textbook">Textbook F1</button>
+      </div>
+    </div>
+
+    <div class="stats-bar" style="margin-top:1rem;">
+      <div class="stat-box">
+        <div class="stat-val" id="statScore">0 / 0</div>
+        <div class="stat-lbl">Correct / Attempted</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statStreak">0</div>
+        <div class="stat-lbl">Current Streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statEqAcc">—</div>
+        <div class="stat-lbl">Eq 1 / Eq 2 / Eq 3 / Eq 4</div>
+      </div>
+      <div class="stat-box" style="display:flex;align-items:center;justify-content:center;">
+        <button class="btn-outline btn-sm" id="resetStatsBtn">Reset Progress</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Question Card -->
+  <section class="card">
+    <div class="section-title">
+      <h2 id="qHeading">Question</h2>
+      <button class="btn-outline btn-sm" id="highlightCluesBtn">Highlight Key Clues</button>
+    </div>
+
+    <div class="badges" id="qBadges"></div>
+    <div class="question-text" id="qText"></div>
+    <div class="sub-parts hidden" id="qSubParts"></div>
+
+    <div class="diagram-wrap" id="diagramWrap"></div>
+  </section>
+
+  <!-- Interactive 4-Step Workspace -->
+  <section class="card" id="workspaceCard">
+    <!-- STEP 1 -->
+    <div class="tactics-step-box step-active" id="step1Box">
+      <div class="step-header">
+        <div><span class="step-tag">Step 1</span><strong>Define the positive direction</strong></div>
+      </div>
+      <div id="step1Options" style="display:flex;flex-wrap:wrap;gap:0.75rem;"></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="tactics-step-box" id="step2Box">
+      <div class="step-header">
+        <div><span class="step-tag">Step 2</span><strong>Identify the known and unknown quantities</strong> <span style="font-size:0.84rem;color:var(--muted);">(Use SI units &amp; correct signs!)</span></div>
+      </div>
+      <div class="suvat-grid" id="suvatGrid"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="tactics-step-box" id="step3Box">
+      <div class="step-header">
+        <div><span class="step-tag">Step 3</span><strong>Apply a suitable equation</strong></div>
+      </div>
+      <div id="step3Container"></div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="tactics-step-box" id="step4Box">
+      <div class="step-header">
+        <div><span class="step-tag">Step 4</span><strong>Solve for the unknown(s)</strong></div>
+      </div>
+      <div id="step4Container"></div>
+    </div>
+
+    <div class="btn-row" style="margin-top:0.5rem;">
+      <button class="btn-primary" id="checkBtn">Check My Answer</button>
+      <button class="btn-outline" id="showSolBtn">Show Worked Solution</button>
+      <button class="btn-accent" id="nextQBtn">Next Question &rarr;</button>
+    </div>
+
+    <div class="feedback-box" id="feedbackBox"></div>
+    <div class="solution-box" id="solutionBox"></div>
+  </section>
+
+</div>
+
+<script>
+(function() {
+  // ---------- Constants & Equations ----------
+  const EQUATIONS = [
+    { id: 'eq1', label: 'v = u + at', absent: 's', absentName: 'No displacement (s)' },
+    { id: 'eq2', label: 's = ½(u + v)t', absent: 'a', absentName: 'No acceleration (a)' },
+    { id: 'eq3', label: 's = ut + ½at²', absent: 'v', absentName: 'No final velocity (v)' },
+    { id: 'eq4', label: 'v² = u² + 2as', absent: 't', absentName: 'No time (t)' }
+  ];
+
+  const UNITS = {
+    u: 'm s⁻¹',
+    v: 'm s⁻¹',
+    a: 'm s⁻²',
+    s: 'm',
+    t: 's'
+  };
+
+  const VAR_NAMES = {
+    u: 'Initial velocity',
+    v: 'Final velocity',
+    a: 'Acceleration',
+    s: 'Displacement',
+    t: 'Time'
+  };
+
+  // ---------- State ----------
+  let currentQ = null;
+  let cluesHighlighted = false;
+  let selectedStep1 = 'forward';
+  let selectedEqA = null;
+  let selectedEqB = null;
+  let hasCheckedCurrent = false;
+
+  const stats = {
+    correct: 0,
+    attempted: 0,
+    streak: 0,
+    byEq: {
+      eq1: { c: 0, a: 0 },
+      eq2: { c: 0, a: 0 },
+      eq3: { c: 0, a: 0 },
+      eq4: { c: 0, a: 0 }
+    }
+  };
+
+  // ---------- Utility Functions ----------
+  const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const roundClean = (n, dp = 2) => {
+    const f = Math.pow(10, dp);
+    return Math.round((n + Number.EPSILON) * f) / f;
+  };
+  const fmt = (n) => {
+    if (Number.isInteger(n)) return String(n);
+    return String(roundClean(n, 2));
+  };
+
+  function nearlyEqual(userVal, trueVal) {
+    if (isNaN(userVal)) return false;
+    const tol = Math.max(0.06, Math.abs(trueVal) * 0.02); // 2% or 0.06 tolerance for 3 s.f.
+    return Math.abs(userVal - trueVal) <= tol;
+  }
+
+  // ---------- Question Generators ----------
+  function getTextbookF1Question() {
+    return {
+      isTwoPart: true,
+      scenario: 'Formula One (Textbook Example)',
+      difficulty: 'Standard',
+      directionPrompt: 'forward',
+      directionOptions: [
+        { val: 'forward', label: 'Forward (direction of motion) is positive (+)' },
+        { val: 'backward', label: 'Backward is positive (+)' }
+      ],
+      vals: { u: 55, v: 75, a: 4, s: 325, t: 5 },
+      given: ['u', 'a', 't'],
+      parts: [
+        {
+          label: '(a) What is the speed of the race car after the acceleration?',
+          target: 'v',
+          validEqs: ['eq1'],
+          primaryEq: 'eq1'
+        },
+        {
+          label: '(b) How far does the race car travel during the acceleration?',
+          target: 's',
+          validEqs: ['eq2', 'eq3', 'eq4'],
+          primaryEq: 'eq3'
+        }
+      ],
+      rawHtml: `A Formula One race car <span class="clue">accelerates steadily</span> at <span class="clue">4 m s<sup>&minus;2</sup></span> for <span class="clue">5 s</span> from a speed of <span class="clue">55 m s<sup>&minus;1</sup></span> to overtake its competitor.`,
+      icon: 'car'
+    };
+  }
+
+  const SCENARIOS = {
+    forwardAccel: [
+      { name: 'Motorsport', subject: 'A racing car', verb: 'accelerates steadily', icon: 'car' },
+      { name: 'High-Speed Rail', subject: 'A high-speed train', verb: 'accelerates uniformly', icon: 'train' },
+      { name: 'Aviation', subject: 'A jet plane on a runway', verb: 'accelerates steadily', icon: 'plane' },
+      { name: 'Athletics', subject: 'A sprinter', verb: 'accelerates uniformly', icon: 'runner' },
+      { name: 'Cycling', subject: 'A track cyclist', verb: 'accelerates steadily', icon: 'bike' }
+    ],
+    braking: [
+      { name: 'Road Safety', subject: 'A car', verb: 'decelerates uniformly', icon: 'car' },
+      { name: 'Rail Braking', subject: 'A commuter train', verb: 'decelerates steadily', icon: 'train' },
+      { name: 'Landing', subject: 'An aircraft after touching down', verb: 'decelerates uniformly', icon: 'plane' }
+    ]
+  };
+
+  function generateSingleQuestion(eqFocus, diff) {
+    // Pick target equation if 'all'
+    const eqId = eqFocus === 'all' ? pick(['eq1', 'eq2', 'eq3', 'eq4']) : eqFocus;
+
+    // Decide scenario style based on difficulty
+    // Challenge can include km/h conversion or vertical free-fall (for eq1, eq3, eq4)
+    if (diff === 'Challenge' && Math.random() < 0.45 && eqId !== 'eq2') {
+      return generateFreeFallQuestion(eqId);
+    }
+
+    const useKmh = (diff === 'Challenge' && Math.random() < 0.65);
+    const useBraking = (diff !== 'Standard' && Math.random() < 0.45);
+    const useFromRest = (!useBraking && diff !== 'Standard' && Math.random() < 0.4);
+
+    let u, v, a, s, t;
+
+    if (useBraking) {
+      // Braking: u > 0, a < 0, v >= 0
+      const stopCompletely = Math.random() < 0.55;
+      if (stopCompletely) {
+        v = 0;
+        const decelMag = pick([2, 2.5, 3, 4, 5, 6, 8]);
+        a = -decelMag;
+        t = randInt(3, 10);
+        u = roundClean(decelMag * t, 2);
+      } else {
+        const decelMag = pick([1.5, 2, 2.5, 3, 4, 5]);
+        a = -decelMag;
+        t = randInt(3, 8);
+        v = randInt(4, 18);
+        u = roundClean(v + decelMag * t, 2);
+      }
+      if (useKmh) {
+        // Ensure u (and v if needed) are nice in km/h (multiples of 5 m/s = 18 km/h)
+        const decelMag = pick([2, 2.5, 4, 5]);
+        a = -decelMag;
+        t = pick([4, 5, 6, 8, 10]);
+        u = pick([20, 25, 30, 35, 40]); // multiples of 5 -> 72, 90, 108, 126, 144 km/h
+        v = roundClean(u + a * t, 2);
+        if (v < 0) {
+          v = 0;
+          t = roundClean(u / decelMag, 2);
+        }
+      }
+      s = roundClean(0.5 * (u + v) * t, 2);
+    } else {
+      // Forward acceleration
+      if (useFromRest) {
+        u = 0;
+      } else if (useKmh) {
+        u = pick([10, 15, 20, 25, 30]); // 36, 54, 72, 90, 108 km/h
+      } else {
+        u = randInt(4, 45);
+      }
+      a = pick([1.5, 2, 2.5, 3, 4, 5, 6, 8]);
+      t = randInt(3, 12);
+      if (useKmh) {
+        // If asking for v in eq1/eq4 or using v, keep numbers clean
+        t = pick([4, 5, 6, 8, 10]);
+        a = pick([1.5, 2, 2.5, 3, 4, 5]);
+      }
+      v = roundClean(u + a * t, 2);
+      s = roundClean(u * t + 0.5 * a * t * t, 2);
+    }
+
+    // Choose which variable is target & which 3 are given based on eqId
+    let target, given;
+    if (eqId === 'eq1') {
+      // v, u, a, t (no s)
+      const choices = ['v', 'a', 't'];
+      if (!useFromRest) choices.push('u');
+      target = pick(choices);
+      given = ['v', 'u', 'a', 't'].filter(x => x !== target);
+    } else if (eqId === 'eq2') {
+      // s, u, v, t (no a)
+      const choices = ['s', 't'];
+      if (!useFromRest) choices.push('u');
+      if (!(useBraking && v === 0)) choices.push('v');
+      target = pick(choices);
+      given = ['s', 'u', 'v', 't'].filter(x => x !== target);
+    } else if (eqId === 'eq3') {
+      // s, u, a, t (no v)
+      const choices = ['s', 'a'];
+      if (!useFromRest) choices.push('u');
+      if (u === 0) choices.push('t'); // avoid quadratic t when u != 0
+      target = pick(choices);
+      given = ['s', 'u', 'a', 't'].filter(x => x !== target);
+    } else {
+      // eq4: v, u, a, s (no t)
+      const choices = ['v', 'a', 's'];
+      if (!useFromRest) choices.push('u');
+      target = pick(choices);
+      given = ['v', 'u', 'a', 's'].filter(x => x !== target);
+    }
+
+    // Build natural physics narrative
+    const sc = useBraking ? pick(SCENARIOS.braking) : pick(SCENARIOS.forwardAccel);
+    const vals = { u, v, a, s, t };
+
+    const rawHtml = buildNarrative(sc, vals, given, target, useBraking, useKmh);
+
+    return {
+      isTwoPart: false,
+      scenario: sc.name + (useKmh ? ' (Unit Conversion)' : ''),
+      difficulty: diff,
+      directionPrompt: 'forward',
+      directionOptions: [
+        { val: 'forward', label: 'Forward (direction of initial motion) is positive (+)' },
+        { val: 'backward', label: 'Backward (opposite to motion) is positive (+)' }
+      ],
+      vals,
+      given,
+      parts: [
+        {
+          label: null,
+          target,
+          validEqs: [eqId],
+          primaryEq: eqId
+        }
+      ],
+      rawHtml,
+      icon: sc.icon,
+      noteKmh: useKmh
+    };
+  }
+
+  function buildNarrative(sc, vals, given, target, useBraking, useKmh) {
+    const has = (k) => given.includes(k);
+    const parts = [];
+
+    const fmtSpeed = (val) => {
+      if (useKmh && val > 0) {
+        return `<span class="clue">${roundClean(val * 3.6, 1)} km h<sup>&minus;1</sup></span>`;
+      }
+      return `<span class="clue">${fmt(val)} m s<sup>&minus;1</sup></span>`;
+    };
+
+    // Opening clause with u and/or a
+    let intro = `${sc.subject}`;
+    if (has('u') && vals.u === 0) {
+      intro += ` <span class="clue">starts from rest</span> and`;
+    } else if (has('u')) {
+      intro += ` travelling at ${fmtSpeed(vals.u)}`;
+    }
+
+    if (has('a')) {
+      if (useBraking) {
+        intro += ` <span class="clue">decelerates uniformly at ${fmt(Math.abs(vals.a))} m s<sup>&minus;2</sup></span>`;
+      } else {
+        intro += ` <span class="clue">${sc.verb} at ${fmt(vals.a)} m s<sup>&minus;2</sup></span>`;
+      }
+    } else {
+      intro += ` ${useBraking ? '<span class="clue">slows down uniformly</span>' : `<span class="clue">${sc.verb}</span>`}`;
+    }
+
+    if (has('t')) {
+      intro += ` for <span class="clue">${fmt(vals.t)} s</span>`;
+    }
+
+    if (has('s')) {
+      intro += ` over a distance of <span class="clue">${fmt(vals.s)} m</span>`;
+    }
+
+    if (has('v')) {
+      if (vals.v === 0) {
+        intro += ` until it <span class="clue">comes to a complete stop</span>`;
+      } else {
+        intro += ` until it reaches a speed of ${fmtSpeed(vals.v)}`;
+      }
+    }
+
+    intro += '.';
+    parts.push(intro);
+
+    // Question prompt
+    const qMap = {
+      v: 'Calculate its final speed at the end of this motion.',
+      u: 'Find its initial speed before this acceleration.',
+      a: useBraking ? 'Find the acceleration of the object (include the correct sign).' : 'Calculate its uniform acceleration.',
+      s: 'How far does it travel during this motion?',
+      t: 'How much time does this motion take?'
+    };
+    parts.push(qMap[target]);
+    if (useKmh) {
+      parts.push(`<em style="font-size:0.9rem;color:#475569;">(Convert any speeds in km h<sup>&minus;1</sup> to m s<sup>&minus;1</sup> first.)</em>`);
+    }
+
+    return parts.join(' ');
+  }
+
+  function generateFreeFallQuestion(eqId) {
+    const g = 9.81;
+    const isDrop = Math.random() < 0.55;
+    let u, v, a, s, t, target, given, dirPrompt, dirOpts, rawHtml;
+
+    if (isDrop) {
+      // Dropped from rest downward (+ downward)
+      u = 0;
+      a = g;
+      t = pick([1.5, 2, 2.5, 3, 4]);
+      v = roundClean(u + a * t, 2);
+      s = roundClean(0.5 * a * t * t, 2);
+      dirPrompt = 'downward';
+      dirOpts = [
+        { val: 'downward', label: 'Downward (direction of fall) is positive (+)' },
+        { val: 'upward', label: 'Upward is positive (+)' }
+      ];
+
+      if (eqId === 'eq1') {
+        target = pick(['v', 't']);
+        given = ['u', 'v', 'a', 't'].filter(x => x !== target);
+      } else if (eqId === 'eq3') {
+        target = pick(['s', 't']);
+        given = ['u', 's', 'a', 't'].filter(x => x !== target);
+      } else {
+        target = pick(['v', 's']);
+        given = ['u', 'v', 'a', 's'].filter(x => x !== target);
+      }
+
+      const obj = pick(['A stone', 'A steel ball', 'A wrench', 'A marble']);
+      let text = `${obj} is <span class="clue">dropped from rest</span> from a high tower`;
+      if (given.includes('t')) text += ` and falls freely for <span class="clue">${fmt(t)} s</span>`;
+      if (given.includes('s')) text += ` through a vertical distance of <span class="clue">${fmt(s)} m</span>`;
+      if (given.includes('v')) text += ` and reaches a downward speed of <span class="clue">${fmt(v)} m s<sup>&minus;1</sup></span>`;
+      text += `. (Take <em>g</em> = 9.81 m s<sup>&minus;2</sup> and neglect air resistance.) `;
+
+      const qMap = {
+        v: 'Find its speed at that instant.',
+        s: 'How far has it fallen?',
+        t: 'How long does it take?'
+      };
+      rawHtml = text + qMap[target];
+    } else {
+      // Thrown vertically upwards to highest point (+ upward, a = -9.81, v = 0)
+      v = 0;
+      a = -g;
+      t = pick([1.5, 2, 2.5, 3]);
+      u = roundClean(g * t, 2);
+      s = roundClean(0.5 * u * t, 2);
+      dirPrompt = 'upward';
+      dirOpts = [
+        { val: 'upward', label: 'Upward (direction of initial throw) is positive (+)' },
+        { val: 'downward', label: 'Downward is positive (+)' }
+      ];
+
+      if (eqId === 'eq1') {
+        target = pick(['t', 'u']);
+        given = ['u', 'v', 'a', 't'].filter(x => x !== target);
+      } else if (eqId === 'eq3') {
+        target = 's';
+        given = ['u', 'a', 't'];
+      } else {
+        target = pick(['s', 'u']);
+        given = ['u', 'v', 'a', 's'].filter(x => x !== target);
+      }
+
+      const obj = pick(['A ball', 'A rocket flare', 'A coin']);
+      let text = `${obj} is thrown vertically upwards`;
+      if (given.includes('u')) text += ` with an initial speed of <span class="clue">${fmt(u)} m s<sup>&minus;1</sup></span>`;
+      if (given.includes('t')) text += ` and takes <span class="clue">${fmt(t)} s</span> to reach its <span class="clue">highest point</span>`;
+      else if (given.includes('s')) text += ` and reaches a <span class="clue">maximum height</span> of <span class="clue">${fmt(s)} m</span>`;
+      else text += ` until it reaches its <span class="clue">highest point</span>`;
+      text += `. (Take <em>g</em> = 9.81 m s<sup>&minus;2</sup> and neglect air resistance.) `;
+
+      const qMap = {
+        s: 'Find the maximum height reached.',
+        t: 'How long does it take to reach the highest point?',
+        u: 'Find the initial upward speed of the projection.'
+      };
+      rawHtml = text + qMap[target];
+    }
+
+    return {
+      isTwoPart: false,
+      scenario: 'Free Fall under Gravity',
+      difficulty: 'Challenge',
+      directionPrompt: dirPrompt,
+      directionOptions: dirOpts,
+      vals: { u, v, a, s, t },
+      given,
+      parts: [
+        {
+          label: null,
+          target,
+          validEqs: [eqId],
+          primaryEq: eqId
+        }
+      ],
+      rawHtml,
+      icon: 'ball'
+    };
+  }
+
+  function generateTwoPartQuestion(diff) {
+    const useBraking = (diff !== 'Standard' && Math.random() < 0.45);
+    const sc = useBraking ? pick(SCENARIOS.braking) : pick(SCENARIOS.forwardAccel);
+    let u, v, a, s, t;
+
+    if (useBraking) {
+      const decel = pick([2, 3, 4, 5]);
+      a = -decel;
+      t = randInt(3, 8);
+      v = randInt(0, 15);
+      u = v + decel * t;
+    } else {
+      u = (diff !== 'Standard' && Math.random() < 0.35) ? 0 : randInt(5, 45);
+      a = pick([2, 2.5, 3, 4, 5]);
+      t = randInt(4, 10);
+      v = roundClean(u + a * t, 2);
+    }
+    s = roundClean(u * t + 0.5 * a * t * t, 2);
+
+    let text = `${sc.subject}`;
+    if (u === 0) {
+      text += ` <span class="clue">starts from rest</span> and`;
+    } else {
+      text += ` travelling at <span class="clue">${fmt(u)} m s<sup>&minus;1</sup></span>`;
+    }
+    if (useBraking) {
+      text += ` <span class="clue">decelerates steadily</span> at <span class="clue">${fmt(Math.abs(a))} m s<sup>&minus;2</sup></span> for <span class="clue">${fmt(t)} s</span>.`;
+    } else {
+      text += ` <span class="clue">${sc.verb}</span> at <span class="clue">${fmt(a)} m s<sup>&minus;2</sup></span> for <span class="clue">${fmt(t)} s</span>.`;
+    }
+
+    return {
+      isTwoPart: true,
+      scenario: sc.name + ' (2-Part Problem)',
+      difficulty: diff,
+      directionPrompt: 'forward',
+      directionOptions: [
+        { val: 'forward', label: 'Forward (direction of initial motion) is positive (+)' },
+        { val: 'backward', label: 'Backward is positive (+)' }
+      ],
+      vals: { u, v, a, s, t },
+      given: ['u', 'a', 't'],
+      parts: [
+        {
+          label: '(a) What is its speed after this time?',
+          target: 'v',
+          validEqs: ['eq1'],
+          primaryEq: 'eq1'
+        },
+        {
+          label: '(b) How far does it travel during this time?',
+          target: 's',
+          validEqs: ['eq2', 'eq3', 'eq4'],
+          primaryEq: 'eq3'
+        }
+      ],
+      rawHtml: text,
+      icon: sc.icon
+    };
+  }
+
+  // ---------- Render Question & Diagram ----------
+  function renderDiagram(q) {
+    const wrap = document.getElementById('diagramWrap');
+    const isVert = (q.icon === 'ball');
+    const hasGiven = (k) => q.given.includes(k);
+    const targets = q.parts.map(p => p.target);
+    const dispVal = (k) => {
+      if (hasGiven(k)) return `${k} = ${fmt(q.vals[k])} ${UNITS[k]}`;
+      if (targets.includes(k)) return `${k} = ?`;
+      return `${k} (not needed)`;
+    };
+
+    const aLabel = hasGiven('a')
+      ? `a = ${fmt(q.vals.a)} m s⁻²`
+      : (targets.includes('a') ? 'a = ?' : 'constant a');
+
+    if (isVert) {
+      const upPos = q.directionPrompt === 'upward';
+      wrap.innerHTML = `
+        <svg viewBox="0 0 640 120" width="100%" style="max-width:640px;display:block;margin:auto;">
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#1e40af"/>
+            </marker>
+            <marker id="arrO" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#ea580c"/>
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="640" height="120" fill="#f8fafc"/>
+          <line x1="60" y1="20" x2="60" y2="100" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4"/>
+          <circle cx="60" cy="${upPos ? 88 : 30}" r="12" fill="#2563eb"/>
+          <circle cx="60" cy="${upPos ? 30 : 88}" r="12" fill="#93c5fd" stroke="#2563eb" stroke-width="2" stroke-dasharray="3 2"/>
+          <line x1="95" y1="${upPos ? 95 : 25}" x2="95" y2="${upPos ? 25 : 95}" stroke="#ea580c" stroke-width="2.5" marker-end="url(#arrO)"/>
+          <text x="110" y="64" font-size="13" font-weight="700" fill="#ea580c">Positive (+): ${upPos ? 'Upward' : 'Downward'}</text>
+          <text x="320" y="34" font-size="13" fill="#0f172a" font-weight="600">${dispVal('u')}   |   ${dispVal('v')}</text>
+          <text x="320" y="62" font-size="13" fill="#1e40af" font-weight="600">${aLabel}</text>
+          <text x="320" y="90" font-size="13" fill="#0f172a" font-weight="600">${dispVal('s')}   |   ${dispVal('t')}</text>
+        </svg>`;
+      return;
+    }
+
+    const isDecel = q.vals.a < 0;
+    wrap.innerHTML = `
+      <svg viewBox="0 0 660 130" width="100%" style="max-width:660px;display:block;margin:auto;">
+        <defs>
+          <marker id="arrB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#1e40af"/>
+          </marker>
+          <marker id="arrO2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#ea580c"/>
+          </marker>
+        </defs>
+        <!-- Road -->
+        <line x1="20" y1="92" x2="640" y2="92" stroke="#64748b" stroke-width="3"/>
+        <!-- Positive Direction indicator -->
+        <line x1="240" y1="18" x2="360" y2="18" stroke="#ea580c" stroke-width="2.2" marker-end="url(#arrO2)"/>
+        <text x="300" y="13" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ea580c">Positive (+) direction</text>
+        <!-- Start Object -->
+        <rect x="45" y="64" width="64" height="24" rx="6" fill="#2563eb"/>
+        <circle cx="60" cy="90" r="6" fill="#0f172a"/>
+        <circle cx="94" cy="90" r="6" fill="#0f172a"/>
+        <text x="77" y="54" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f172a">${dispVal('u')}</text>
+
+        <!-- End Object (ghosted) -->
+        <rect x="520" y="64" width="64" height="24" rx="6" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+        <circle cx="535" cy="90" r="6" fill="#334155"/>
+        <circle cx="569" cy="90" r="6" fill="#334155"/>
+        <text x="552" y="54" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f172a">${dispVal('v')}</text>
+
+        <!-- Acceleration arrow -->
+        <line x1="${isDecel ? 370 : 250}" y1="45" x2="${isDecel ? 250 : 370}" y2="45" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrB)"/>
+        <text x="310" y="38" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">${aLabel}</text>
+
+        <!-- Displacement & Time span -->
+        <line x1="115" y1="108" x2="515" y2="108" stroke="#475569" stroke-width="1.5"/>
+        <line x1="115" y1="102" x2="115" y2="114" stroke="#475569" stroke-width="1.5"/>
+        <line x1="515" y1="102" x2="515" y2="114" stroke="#475569" stroke-width="1.5"/>
+        <rect x="200" y="99" width="230" height="20" fill="#f8fafc"/>
+        <text x="315" y="113" text-anchor="middle" font-size="12.5" font-weight="600" fill="#334155">${dispVal('s')}   |   ${dispVal('t')}</text>
+      </svg>`;
+  }
+
+  function renderQuestion() {
+    const q = currentQ;
+    cluesHighlighted = false;
+    hasCheckedCurrent = false;
+    selectedStep1 = q.directionPrompt;
+    selectedEqA = null;
+    selectedEqB = null;
+
+    document.getElementById('highlightCluesBtn').textContent = 'Highlight Key Clues';
+    document.getElementById('qBadges').innerHTML = `
+      <span class="badge scenario">${q.scenario}</span>
+      <span class="badge diff-${q.difficulty}">${q.difficulty}</span>
+      ${q.isTwoPart ? '<span class="badge">2-Part Question</span>' : ''}
+    `;
+
+    document.getElementById('qText').innerHTML = q.rawHtml;
+
+    const subEl = document.getElementById('qSubParts');
+    if (q.isTwoPart) {
+      subEl.classList.remove('hidden');
+      subEl.innerHTML = q.parts.map(p => `<p><strong>${p.label}</strong></p>`).join('');
+    } else {
+      subEl.classList.add('hidden');
+      subEl.innerHTML = '';
+    }
+
+    renderDiagram(q);
+    renderWorkspace();
+    hideFeedbackAndSolution();
+  }
+
+  function renderWorkspace() {
+    const q = currentQ;
+    const isQuick = document.getElementById('modeSelect').value === 'quick';
+
+    document.getElementById('step1Box').classList.toggle('hidden', isQuick);
+    document.getElementById('step2Box').classList.toggle('hidden', isQuick);
+    document.getElementById('step3Box').classList.toggle('hidden', isQuick);
+
+    // Step 1
+    const s1 = document.getElementById('step1Options');
+    s1.innerHTML = q.directionOptions.map((opt, idx) => `
+      <label style="display:flex;align-items:center;gap:0.45rem;cursor:pointer;background:#f8fafc;border:1px solid var(--border);padding:0.5rem 0.75rem;border-radius:8px;font-size:0.9rem;">
+        <input type="radio" name="dirRadio" value="${opt.val}" ${idx === 0 ? 'checked' : ''} />
+        <span>${opt.label}</span>
+      </label>
+    `).join('');
+    s1.querySelectorAll('input[name="dirRadio"]').forEach(r => {
+      r.addEventListener('change', (e) => { selectedStep1 = e.target.value; });
+    });
+
+    // Step 2: SUVAT Inputs
+    const grid = document.getElementById('suvatGrid');
+    grid.innerHTML = ['u', 'v', 'a', 's', 't'].map(k => `
+      <div class="suvat-item">
+        <label class="var-name">${k} <small>${VAR_NAMES[k]} (${UNITS[k]})</small></label>
+        <select id="status_${k}" data-var="${k}">
+          <option value="known">Known value</option>
+          <option value="find">Unknown (Find ?)</option>
+          <option value="unused">Not needed</option>
+        </select>
+        <input type="number" step="any" id="val_${k}" placeholder="Value in ${UNITS[k]}" />
+      </div>
+    `).join('');
+
+    ['u', 'v', 'a', 's', 't'].forEach(k => {
+      const sel = document.getElementById(`status_${k}`);
+      const inp = document.getElementById(`val_${k}`);
+      sel.addEventListener('change', () => {
+        if (sel.value === 'known') {
+          inp.disabled = false;
+          inp.placeholder = `Value in ${UNITS[k]}`;
+        } else {
+          inp.disabled = true;
+          inp.value = '';
+          inp.placeholder = sel.value === 'find' ? '?' : '—';
+        }
+      });
+    });
+
+    // Step 3: Equation choice(s)
+    const showHint = document.getElementById('showMissingHint').checked;
+    const s3 = document.getElementById('step3Container');
+    const buildEqButtons = (partKey) => `
+      <div class="eq-choice-grid" data-part="${partKey}">
+        ${EQUATIONS.map(eq => `
+          <button type="button" class="eq-choice-btn" data-eq="${eq.id}" data-part="${partKey}">
+            ${eq.label}
+            <span class="hint-absent ${showHint ? '' : 'hidden'}">${eq.absentName}</span>
+          </button>
+        `).join('')}
+      </div>`;
+
+    if (q.isTwoPart) {
+      s3.innerHTML = `
+        <p style="margin:0 0 0.4rem;font-weight:600;font-size:0.9rem;">For Part (a):</p>
+        ${buildEqButtons('A')}
+        <p style="margin:0.85rem 0 0.4rem;font-weight:600;font-size:0.9rem;">For Part (b):</p>
+        ${buildEqButtons('B')}
+      `;
+    } else {
+      s3.innerHTML = buildEqButtons('A');
+    }
+
+    s3.querySelectorAll('.eq-choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const part = btn.dataset.part;
+        const eqId = btn.dataset.eq;
+        s3.querySelectorAll(`.eq-choice-btn[data-part="${part}"]`).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        if (part === 'A') selectedEqA = eqId;
+        else selectedEqB = eqId;
+      });
+    });
+
+    // Step 4: Final Answers
+    const s4 = document.getElementById('step4Container');
+    const unitOptions = `
+      <option value="m s⁻¹">m s⁻¹</option>
+      <option value="m s⁻²">m s⁻²</option>
+      <option value="m">m</option>
+      <option value="s">s</option>
+    `;
+
+    if (q.isTwoPart) {
+      s4.innerHTML = `
+        <div style="margin-bottom:0.75rem;">
+          <label style="font-weight:600;font-size:0.9rem;">Part (a) Answer (${VAR_NAMES[q.parts[0].target]}, <em>${q.parts[0].target}</em>):</label>
+          <div class="answer-row">
+            <input type="number" step="any" id="ansInputA" placeholder="Enter numerical value" />
+            <select id="unitSelectA">${unitOptions}</select>
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:600;font-size:0.9rem;">Part (b) Answer (${VAR_NAMES[q.parts[1].target]}, <em>${q.parts[1].target}</em>):</label>
+          <div class="answer-row">
+            <input type="number" step="any" id="ansInputB" placeholder="Enter numerical value" />
+            <select id="unitSelectB">${unitOptions}</select>
+          </div>
+        </div>
+      `;
+    } else {
+      const tgt = q.parts[0].target;
+      s4.innerHTML = `
+        <label style="font-weight:600;font-size:0.9rem;">Final Answer for <em>${tgt}</em> (${VAR_NAMES[tgt]}):</label>
+        <div class="answer-row">
+          <input type="number" step="any" id="ansInputA" placeholder="Enter numerical value" />
+          <select id="unitSelectA">${unitOptions}</select>
+        </div>
+      `;
+    }
+  }
+
+  // ---------- Checking & Feedback ----------
+  function checkWork() {
+    const q = currentQ;
+    const isQuick = document.getElementById('modeSelect').value === 'quick';
+    const messages = [];
+    let allCorrect = true;
+
+    if (!isQuick) {
+      // Check Step 1
+      if (selectedStep1 !== q.directionPrompt) {
+        messages.push(`<strong>Step 1 Tip:</strong> Taking the direction of initial motion (${q.directionPrompt}) as positive (+) keeps the initial setup straightforward.`);
+      }
+
+      // Check Step 2 (SUVAT identification)
+      const step2Errors = [];
+      const targets = q.parts.map(p => p.target);
+      ['u', 'v', 'a', 's', 't'].forEach(k => {
+        const status = document.getElementById(`status_${k}`).value;
+        const valRaw = document.getElementById(`val_${k}`).value;
+        const val = parseFloat(valRaw);
+
+        if (q.given.includes(k)) {
+          if (status !== 'known') {
+            step2Errors.push(`<strong>${k}</strong> is given in the question (should be <em>Known</em>).`);
+          } else if (isNaN(val)) {
+            step2Errors.push(`Please enter a value for known quantity <strong>${k}</strong>.`);
+          } else if (!nearlyEqual(val, q.vals[k])) {
+            if (nearlyEqual(-val, q.vals[k]) && q.vals[k] < 0) {
+              step2Errors.push(`Check the <strong>sign of ${k}</strong>! Since it opposes the positive direction (e.g., deceleration / downward gravity), <strong>${k} = ${fmt(q.vals[k])} ${UNITS[k]}</strong>.`);
+            } else if (q.noteKmh && nearlyEqual(val, q.vals[k] * 3.6)) {
+              step2Errors.push(`Convert <strong>${k}</strong> from km h<sup>&minus;1</sup> to m s<sup>&minus;1</sup> by dividing by 3.6.`);
+            } else {
+              step2Errors.push(`Check the value of <strong>${k}</strong> (expected ${fmt(q.vals[k])} ${UNITS[k]}).`);
+            }
+          }
+        } else if (targets.includes(k)) {
+          if (status !== 'find') {
+            step2Errors.push(`<strong>${k}</strong> is what the question asks you to find (set to <em>Unknown</em>).`);
+          }
+        } else {
+          if (status !== 'unused') {
+            step2Errors.push(`<strong>${k}</strong> is neither given nor asked for (set to <em>Not needed</em>).`);
+          }
+        }
+      });
+
+      if (step2Errors.length > 0) {
+        allCorrect = false;
+        messages.push(`<strong>Step 2 (Knowns &amp; Unknowns):</strong><br>&bull; ${step2Errors.join('<br>&bull; ')}`);
+      }
+
+      // Check Step 3
+      const pA = q.parts[0];
+      if (!selectedEqA) {
+        allCorrect = false;
+        messages.push(`<strong>Step 3:</strong> Please select a suitable equation${q.isTwoPart ? ' for Part (a)' : ''}.`);
+      } else if (!pA.validEqs.includes(selectedEqA)) {
+        allCorrect = false;
+        const chosen = EQUATIONS.find(e => e.id === selectedEqA);
+        messages.push(`<strong>Step 3${q.isTwoPart ? ' (Part a)' : ''}:</strong> <span class="math-inline">${chosen.label}</span> contains the unused variable or doesn't help find <strong>${pA.target}</strong> from the given quantities.`);
+      }
+
+      if (q.isTwoPart) {
+        const pB = q.parts[1];
+        if (!selectedEqB) {
+          allCorrect = false;
+          messages.push(`<strong>Step 3 (Part b):</strong> Please select a suitable equation for Part (b).`);
+        } else if (!pB.validEqs.includes(selectedEqB)) {
+          allCorrect = false;
+          messages.push(`<strong>Step 3 (Part b):</strong> Choose an equation that solves for <strong>${pB.target}</strong>.`);
+        }
+      }
+    }
+
+    // Check Step 4 (Numerical Answers + Units)
+    const checkPartAns = (part, inputId, unitId, label) => {
+      const raw = document.getElementById(inputId).value;
+      const num = parseFloat(raw);
+      const unit = document.getElementById(unitId).value;
+      const trueVal = q.vals[part.target];
+      const trueUnit = UNITS[part.target];
+
+      if (raw.trim() === '' || isNaN(num)) {
+        allCorrect = false;
+        messages.push(`<strong>Step 4${label}:</strong> Please enter your numerical answer.`);
+        return false;
+      }
+      if (!nearlyEqual(num, trueVal)) {
+        allCorrect = false;
+        if (nearlyEqual(-num, trueVal)) {
+          messages.push(`<strong>Step 4${label}:</strong> Your magnitude is right, but check the <strong>+/&minus; sign</strong>! Expected <strong>${fmt(trueVal)} ${trueUnit}</strong>.`);
+        } else {
+          messages.push(`<strong>Step 4${label}:</strong> Numerical value is incorrect (check your substitution/algebra).`);
+        }
+        return false;
+      }
+      if (unit !== trueUnit) {
+        allCorrect = false;
+        messages.push(`<strong>Step 4${label}:</strong> Numerical value is correct, but check the <strong>unit</strong>! (${VAR_NAMES[part.target]} uses <strong>${trueUnit}</strong>).`);
+        return false;
+      }
+      return true;
+    };
+
+    if (q.isTwoPart) {
+      checkPartAns(q.parts[0], 'ansInputA', 'unitSelectA', ' (Part a)');
+      checkPartAns(q.parts[1], 'ansInputB', 'unitSelectB', ' (Part b)');
+    } else {
+      checkPartAns(q.parts[0], 'ansInputA', 'unitSelectA', '');
+    }
+
+    // Update stats once per question
+    if (!hasCheckedCurrent) {
+      hasCheckedCurrent = true;
+      stats.attempted++;
+      const mainEq = q.parts[0].primaryEq;
+      stats.byEq[mainEq].a++;
+      if (allCorrect) {
+        stats.correct++;
+        stats.streak++;
+        stats.byEq[mainEq].c++;
+      } else {
+        stats.streak = 0;
+      }
+      updateStatsUI();
+    }
+
+    const fb = document.getElementById('feedbackBox');
+    fb.classList.remove('ok', 'bad', 'warn', 'show');
+    if (allCorrect) {
+      fb.classList.add('ok', 'show');
+      fb.innerHTML = `<strong>Spot on!</strong> All steps and final answers are correct. Great work!`;
+      renderSolution(true);
+    } else {
+      fb.classList.add('bad', 'show');
+      fb.innerHTML = messages.join('<br><br>');
+    }
+  }
+
+  function formatSubstitution(eqId, vals, target) {
+    const { u, v, a, s, t } = vals;
+    if (eqId === 'eq1') {
+      if (target === 'v') return `v = ${fmt(u)} + (${fmt(a)})(${fmt(t)}) = <strong>${fmt(v)} m s<sup>&minus;1</sup></strong>`;
+      if (target === 'u') return `${fmt(v)} = u + (${fmt(a)})(${fmt(t)}) &rArr; u = <strong>${fmt(u)} m s<sup>&minus;1</sup></strong>`;
+      if (target === 'a') return `${fmt(v)} = ${fmt(u)} + a(${fmt(t)}) &rArr; a = (${fmt(v)} &minus; ${fmt(u)}) / ${fmt(t)} = <strong>${fmt(a)} m s<sup>&minus;2</sup></strong>`;
+      if (target === 't') return `${fmt(v)} = ${fmt(u)} + (${fmt(a)})t &rArr; t = (${fmt(v)} &minus; ${fmt(u)}) / (${fmt(a)}) = <strong>${fmt(t)} s</strong>`;
+    }
+    if (eqId === 'eq2') {
+      if (target === 's') return `s = &frac12;(${fmt(u)} + ${fmt(v)})(${fmt(t)}) = <strong>${fmt(s)} m</strong>`;
+      if (target === 't') return `${fmt(s)} = &frac12;(${fmt(u)} + ${fmt(v)})t &rArr; t = <strong>${fmt(t)} s</strong>`;
+      if (target === 'u') return `${fmt(s)} = &frac12;(u + ${fmt(v)})(${fmt(t)}) &rArr; u = <strong>${fmt(u)} m s<sup>&minus;1</sup></strong>`;
+      if (target === 'v') return `${fmt(s)} = &frac12;(${fmt(u)} + v)(${fmt(t)}) &rArr; v = <strong>${fmt(v)} m s<sup>&minus;1</sup></strong>`;
+    }
+    if (eqId === 'eq3') {
+      if (target === 's') return `s = (${fmt(u)})(${fmt(t)}) + &frac12;(${fmt(a)})(${fmt(t)})&sup2; = <strong>${fmt(s)} m</strong>`;
+      if (target === 'a') return `${fmt(s)} = (${fmt(u)})(${fmt(t)}) + &frac12;a(${fmt(t)})&sup2; &rArr; a = <strong>${fmt(a)} m s<sup>&minus;2</sup></strong>`;
+      if (target === 'u') return `${fmt(s)} = u(${fmt(t)}) + &frac12;(${fmt(a)})(${fmt(t)})&sup2; &rArr; u = <strong>${fmt(u)} m s<sup>&minus;1</sup></strong>`;
+      if (target === 't') return `${fmt(s)} = 0 + &frac12;(${fmt(a)})t&sup2; &rArr; t = &radic;(2 &times; ${fmt(s)} / ${fmt(a)}) = <strong>${fmt(t)} s</strong>`;
+    }
+    if (eqId === 'eq4') {
+      if (target === 'v') return `v&sup2; = (${fmt(u)})&sup2; + 2(${fmt(a)})(${fmt(s)}) = ${fmt(v * v)} &rArr; v = <strong>${fmt(v)} m s<sup>&minus;1</sup></strong>`;
+      if (target === 'u') return `(${fmt(v)})&sup2; = u&sup2; + 2(${fmt(a)})(${fmt(s)}) &rArr; u = <strong>${fmt(u)} m s<sup>&minus;1</sup></strong>`;
+      if (target === 'a') return `(${fmt(v)})&sup2; = (${fmt(u)})&sup2; + 2a(${fmt(s)}) &rArr; a = <strong>${fmt(a)} m s<sup>&minus;2</sup></strong>`;
+      if (target === 's') return `(${fmt(v)})&sup2; = (${fmt(u)})&sup2; + 2(${fmt(a)})s &rArr; s = <strong>${fmt(s)} m</strong>`;
+    }
+    return '';
+  }
+
+  function renderSolution(show = true) {
+    const q = currentQ;
+    const box = document.getElementById('solutionBox');
+    const dirText = q.directionOptions[0].label;
+
+    const knownList = q.given.map(k => `${k} = ${fmt(q.vals[k])} ${UNITS[k]}`).join(', ');
+    const targetList = q.parts.map(p => `${p.target} = ?`).join(', ');
+
+    let step34Html = '';
+    q.parts.forEach((p, idx) => {
+      const eqObj = EQUATIONS.find(e => e.id === p.primaryEq);
+      const partTag = q.isTwoPart ? `<strong>Part (${idx === 0 ? 'a' : 'b'}):</strong> ` : '';
+      step34Html += `
+        <div class="sol-step">
+          <div>${partTag}<strong>Step 3 (Equation):</strong> Apply <span class="math-inline">${eqObj.label}</span></div>
+          <div style="margin-top:0.25rem;">${partTag}<strong>Step 4 (Solve):</strong> ${formatSubstitution(p.primaryEq, q.vals, p.target)}</div>
+        </div>
+      `;
+    });
+
+    box.innerHTML = `
+      <h3>Worked Solution (Following Textbook Tactics)</h3>
+      <div class="sol-step"><strong>Step 1 (Positive direction):</strong> Take ${dirText.toLowerCase()}.</div>
+      <div class="sol-step"><strong>Step 2 (Known &amp; Unknown):</strong> Known: <strong>${knownList}</strong> &nbsp;|&nbsp; Find: <strong>${targetList}</strong></div>
+      ${step34Html}
+    `;
+    if (show) box.classList.add('show');
+  }
+
+  function hideFeedbackAndSolution() {
+    document.getElementById('feedbackBox').classList.remove('show');
+    document.getElementById('solutionBox').classList.remove('show');
+  }
+
+  function updateStatsUI() {
+    document.getElementById('statScore').textContent = `${stats.correct} / ${stats.attempted}`;
+    document.getElementById('statStreak').textContent = stats.streak;
+    const eqTxt = ['eq1', 'eq2', 'eq3', 'eq4'].map(id => {
+      const d = stats.byEq[id];
+      return d.a === 0 ? '—' : `${Math.round((d.c / d.a) * 100)}%`;
+    }).join(' / ');
+    document.getElementById('statEqAcc').textContent = eqTxt;
+  }
+
+  function loadNewQuestion() {
+    const eqFocus = document.getElementById('eqFocusSelect').value;
+    const diff = document.getElementById('diffSelect').value;
+    if (eqFocus === 'twopart') {
+      currentQ = generateTwoPartQuestion(diff);
+    } else {
+      currentQ = generateSingleQuestion(eqFocus, diff);
+    }
+    renderQuestion();
+  }
+
+  // ---------- Event Listeners ----------
+  document.getElementById('toggleRefBtn').addEventListener('click', function() {
+    const card = document.getElementById('referenceCard');
+    const hidden = card.classList.toggle('hidden');
+    this.textContent = hidden ? 'Show Formula & Tactics Reference' : 'Hide Formula & Tactics Reference';
+  });
+
+  document.getElementById('showMissingHint').addEventListener('change', (e) => {
+    document.querySelectorAll('.hint-absent').forEach(el => {
+      el.classList.toggle('hidden', !e.target.checked);
+    });
+  });
+
+  document.getElementById('modeSelect').addEventListener('change', () => {
+    renderWorkspace();
+    hideFeedbackAndSolution();
+  });
+
+  document.getElementById('newQBtn').addEventListener('click', loadNewQuestion);
+  document.getElementById('nextQBtn').addEventListener('click', loadNewQuestion);
+
+  document.getElementById('f1Btn').addEventListener('click', () => {
+    currentQ = getTextbookF1Question();
+    renderQuestion();
+  });
+
+  document.getElementById('highlightCluesBtn').addEventListener('click', function() {
+    cluesHighlighted = !cluesHighlighted;
+    document.querySelectorAll('#qText .clue').forEach(el => {
+      el.classList.toggle('hl-phrase', cluesHighlighted);
+    });
+    this.textContent = cluesHighlighted ? 'Remove Highlights' : 'Highlight Key Clues';
+  });
+
+  document.getElementById('checkBtn').addEventListener('click', checkWork);
+  document.getElementById('showSolBtn').addEventListener('click', () => renderSolution(true));
+
+  document.getElementById('resetStatsBtn').addEventListener('click', () => {
+    stats.correct = 0;
+    stats.attempted = 0;
+    stats.streak = 0;
+    ['eq1', 'eq2', 'eq3', 'eq4'].forEach(k => { stats.byEq[k] = { c: 0, a: 0 }; });
+    updateStatsUI();
+  });
+
+  // Load Textbook F1 example on startup so student immediately sees the familiar problem
+  currentQ = getTextbookF1Question();
+  renderQuestion();
+  updateStatsUI();
+})();
+</script>
+</body>
+</html>
