@@ -38,7 +38,7 @@
     header {
       background: linear-gradient(135deg, #1e3a8a, #2563eb);
       color: #fff;
-      padding: 1.25rem 1.5rem;
+      padding: 1.1rem 1.5rem;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
@@ -64,6 +64,34 @@
       opacity: 0.9;
     }
 
+    .header-tools {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .timer-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-pill strong {
+      color: #fff;
+    }
+
+    .timer-paused {
+      background: rgba(234, 88, 12, 0.35);
+      border-color: rgba(253, 186, 116, 0.7);
+    }
+
     .container {
       max-width: 1120px;
       margin: 1.5rem auto;
@@ -83,6 +111,7 @@
 
     .section-title {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 0.75rem;
@@ -187,7 +216,7 @@
       margin-bottom: 0.3rem;
     }
 
-    select, input[type="number"], input[type="text"] {
+    select, input[type="number"], input[type="text"], input[type="url"] {
       width: 100%;
       padding: 0.55rem 0.7rem;
       border: 1.5px solid #cbd5e1;
@@ -208,6 +237,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.6rem;
+      align-items: center;
     }
 
     button {
@@ -232,6 +262,12 @@
     }
     .btn-accent:hover { background: #c2410c; }
 
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-success:hover { background: #166534; }
+
     .btn-outline {
       background: #fff;
       color: var(--text);
@@ -242,6 +278,15 @@
       border-color: #94a3b8;
     }
 
+    .btn-danger-outline {
+      background: #fff;
+      color: var(--error);
+      border: 1.5px solid #fca5a5;
+    }
+    .btn-danger-outline:hover {
+      background: var(--error-bg);
+    }
+
     .btn-sm {
       padding: 0.38rem 0.7rem;
       font-size: 0.82rem;
@@ -250,7 +295,7 @@
     /* Stats Bar */
     .stats-bar {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
       gap: 0.75rem;
     }
 
@@ -262,13 +307,14 @@
     }
 
     .stat-box .stat-val {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--primary);
+      font-variant-numeric: tabular-nums;
     }
 
     .stat-box .stat-lbl {
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       color: var(--muted);
     }
 
@@ -488,7 +534,141 @@
       font-weight: 600;
     }
 
+    /* Performance & Google Sheet Sync */
+    .perf-top-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.85rem;
+      align-items: end;
+      margin-bottom: 1rem;
+    }
+
+    .gsheet-box {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0.9rem 1.05rem;
+      margin-bottom: 1rem;
+    }
+
+    .gsheet-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.65rem;
+      align-items: end;
+    }
+
+    .gsheet-status {
+      font-size: 0.83rem;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .sync-badge {
+      display: inline-block;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .sync-ok { background: #dcfce7; color: #166534; }
+    .sync-warn { background: #fef3c7; color: #92400e; }
+    .sync-err { background: #fee2e2; color: #991b1b; }
+    .sync-idle { background: #e2e8f0; color: #475569; }
+
+    details.gas-guide {
+      margin-top: 0.7rem;
+      font-size: 0.84rem;
+      color: #334155;
+    }
+
+    details.gas-guide summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    pre.gas-code {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 0.8rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.76rem;
+      line-height: 1.45;
+      margin: 0.5rem 0;
+    }
+
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 0.6rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.52rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pill-status {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .pill-ok { background: #dcfce7; color: #166534; }
+    .pill-retry { background: #fef3c7; color: #92400e; }
+    .pill-miss { background: #fee2e2; color: #991b1b; }
+    .pill-sol { background: #e2e8f0; color: #334155; }
+
+    .copy-toast {
+      font-size: 0.82rem;
+      color: var(--success);
+      font-weight: 600;
+      margin-left: 0.4rem;
+    }
+
     .hidden { display: none !important; }
+
+    @media (max-width: 720px) {
+      .gsheet-grid { grid-template-columns: 1fr; }
+    }
 
     @media (max-width: 640px) {
       .tactic-arrow { display: none; }
@@ -504,9 +684,20 @@
       <h1>Equations of Uniformly Accelerated Motion (SUVAT)</h1>
       <p>Interactive Revision &bull; 4-Step Problem-Solving Tactics</p>
     </div>
-    <div class="btn-row">
+    <div class="header-tools">
+      <div class="timer-pill" id="headerTimerPill" title="Active exercise time (pauses automatically if you switch tabs)">
+        <span>Exercise: <strong id="hdrTotalTime">00:00</strong></span>
+        <span>|</span>
+        <span>This Q: <strong id="hdrQTime">00:00</strong></span>
+        <button class="btn-outline btn-sm" id="pauseTimerBtn" style="padding:0.2rem 0.55rem;font-size:0.76rem;background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.4);">
+          Pause
+        </button>
+      </div>
+      <button class="btn-outline btn-sm" id="jumpReportBtn" style="background:rgba(255,255,255,0.14);color:#fff;border-color:rgba(255,255,255,0.35);">
+        Performance &amp; Google Sheet
+      </button>
       <button class="btn-outline btn-sm" id="toggleRefBtn" style="background:rgba(255,255,255,0.14);color:#fff;border-color:rgba(255,255,255,0.35);">
-        Hide Formula &amp; Tactics Reference
+        Hide Formula &amp; Tactics
       </button>
     </div>
   </div>
@@ -607,18 +798,23 @@
     <div class="stats-bar" style="margin-top:1rem;">
       <div class="stat-box">
         <div class="stat-val" id="statScore">0 / 0</div>
-        <div class="stat-lbl">Correct / Attempted</div>
+        <div class="stat-lbl">1st-Try Correct / Attempted</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" id="statStreak">0</div>
-        <div class="stat-lbl">Current Streak</div>
+        <div class="stat-val" id="statStreak">0 / 0</div>
+        <div class="stat-lbl">Current / Best Streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statTotalTime">00:00</div>
+        <div class="stat-lbl">Total Exercise Time</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statAvgTime">—</div>
+        <div class="stat-lbl">Avg Time / Question</div>
       </div>
       <div class="stat-box">
         <div class="stat-val" id="statEqAcc">—</div>
         <div class="stat-lbl">Eq 1 / Eq 2 / Eq 3 / Eq 4</div>
-      </div>
-      <div class="stat-box" style="display:flex;align-items:center;justify-content:center;">
-        <button class="btn-outline btn-sm" id="resetStatsBtn">Reset Progress</button>
       </div>
     </div>
   </section>
@@ -627,7 +823,10 @@
   <section class="card">
     <div class="section-title">
       <h2 id="qHeading">Question</h2>
-      <button class="btn-outline btn-sm" id="highlightCluesBtn">Highlight Key Clues</button>
+      <div class="btn-row">
+        <span class="badge" id="qTimerBadge" style="display:flex;align-items:center;">Time on Q: 00:00</span>
+        <button class="btn-outline btn-sm" id="highlightCluesBtn">Highlight Key Clues</button>
+      </div>
     </div>
 
     <div class="badges" id="qBadges"></div>
@@ -681,11 +880,227 @@
     <div class="solution-box" id="solutionBox"></div>
   </section>
 
+  <!-- Student Exercise Time & Performance Report Card -->
+  <section class="card" id="reportCard">
+    <div class="section-title">
+      <h2>Student Exercise Time &amp; Performance Record</h2>
+      <div class="btn-row">
+        <button class="btn-primary btn-sm" id="exportCsvBtn">Export CSV</button>
+        <button class="btn-outline btn-sm" id="copySummaryBtn">Copy Summary Report</button>
+        <button class="btn-danger-outline btn-sm" id="resetStatsBtn">Clear Saved Data</button>
+        <span class="copy-toast hidden" id="copyToast">Copied!</span>
+      </div>
+    </div>
+
+    <div class="perf-top-row">
+      <div>
+        <label class="ctrl-label" for="studentNameInput">Student Name / ID (saved &amp; exported)</label>
+        <input type="text" id="studentNameInput" placeholder="e.g. Alex Chen (10B)" />
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="repFirstAcc">—</div>
+        <div class="stat-lbl">1st-Try Accuracy (Independent)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="repEventualAcc">—</div>
+        <div class="stat-lbl">Eventual Solve Rate</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="repTotalTime">00:00</div>
+        <div class="stat-lbl">Saved Cumulative Time</div>
+      </div>
+    </div>
+
+    <!-- Google Sheets Sync Box -->
+    <div class="gsheet-box">
+      <div class="gsheet-grid">
+        <div>
+          <label class="ctrl-label" for="gsheetUrlInput">Google Sheet Apps Script Web App URL</label>
+          <input type="url" id="gsheetUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
+        </div>
+        <div class="btn-row">
+          <button class="btn-outline btn-sm" id="testGsheetBtn">Save &amp; Test</button>
+          <button class="btn-success btn-sm" id="syncNowBtn">Sync Pending to Sheet</button>
+        </div>
+      </div>
+      <div class="gsheet-status">
+        <div>
+          <span class="sync-badge sync-idle" id="gsheetBadge">Not configured</span>
+          <span id="gsheetMsg" style="margin-left:0.4rem;color:var(--muted);"></span>
+        </div>
+        <label style="cursor:pointer;color:var(--text);font-weight:500;">
+          <input type="checkbox" id="autoSyncCheck" checked /> Auto-sync after each check
+        </label>
+      </div>
+
+      <details class="gas-guide">
+        <summary>Teacher Setup Guide: How to connect a Google Sheet (click to expand)</summary>
+        <ol style="margin:0.5rem 0;padding-left:1.25rem;">
+          <li>Create a Google Sheet, then go to <strong>Extensions &rarr; Apps Script</strong>.</li>
+          <li>Paste the script below, click <strong>Save</strong>, then <strong>Deploy &rarr; New deployment &rarr; Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>).</li>
+          <li>Copy the Web App URL and either paste it above or set <code>DEFAULT_GOOGLE_SCRIPT_URL</code> in the HTML code before sharing with students.</li>
+        </ol>
+        <button type="button" class="btn-outline btn-sm" id="copyGasBtn">Copy Apps Script Code</button>
+        <pre class="gas-code" id="gasCodeBlock"></pre>
+      </details>
+    </div>
+
+    <div class="breakdown-grid">
+      <div>
+        <strong style="font-size:0.9rem;color:var(--primary);">Performance by Equation</strong>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Equation</th>
+                <th>Attempted</th>
+                <th>1st-Try %</th>
+                <th>Avg Time</th>
+              </tr>
+            </thead>
+            <tbody id="eqBreakdownBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <strong style="font-size:0.9rem;color:var(--primary);">Performance by Difficulty</strong>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Difficulty</th>
+                <th>Attempted</th>
+                <th>1st-Try %</th>
+                <th>Avg Time</th>
+              </tr>
+            </thead>
+            <tbody id="diffBreakdownBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.15rem;">
+      <strong style="font-size:0.9rem;color:var(--primary);">Attempt History Log</strong>
+      <span style="font-size:0.8rem;color:var(--muted);margin-left:0.4rem;">(Saved locally &amp; synced to Google Sheet when connected)</span>
+      <div class="table-wrap" style="max-height:300px;overflow-y:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Timestamp</th>
+              <th>Scenario</th>
+              <th>Eq</th>
+              <th>Difficulty</th>
+              <th>Mode</th>
+              <th>Time</th>
+              <th>Checks</th>
+              <th>Result</th>
+              <th>Diagnostic Note</th>
+              <th>Sheet Sync</th>
+            </tr>
+          </thead>
+          <tbody id="historyLogBody">
+            <tr><td colspan="11" style="text-align:center;color:var(--muted);padding:1rem;">No attempts recorded yet. Solve a question and click "Check My Answer".</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <script>
 (function() {
-  // ---------- Constants & Equations ----------
+  // =========================================================================
+  // TEACHER CONFIGURATION: Paste your deployed Google Apps Script Web App URL
+  // here if you want this HTML file pre-connected for all students.
+  // Example: const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
+  // =========================================================================
+  const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFVxMjQdvO5t9jJ3RJIh_ygprnM07kIN9KXXtux0vKEC3bHStHmE4PF42OAQrYyLUE8Q/exec';
+
+  const STORAGE_KEY = 'uam_suvat_student_record_v2';
+
+  const APPS_SCRIPT_SOURCE = `function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', message: 'SUVAT Tracker Ready' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheets()[0];
+
+    var headers = [
+      'Server Logged At', 'Attempt UID', 'Client ID', 'Student Name/ID',
+      'Q#', 'Question Timestamp', 'Scenario', 'Equation', 'Difficulty',
+      'Mode', 'Time on Q (s)', 'Total Exercise Time', 'Checks',
+      '1st-Try Correct', 'Solved Eventually', 'Viewed Solution First', 'Diagnostic Notes'
+    ];
+
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(headers);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    }
+
+    var data = JSON.parse(e.postData.contents);
+    var rows = Array.isArray(data.records) ? data.records : [data];
+
+    var lastRow = sheet.getLastRow();
+    var uidColValues = lastRow > 1 ? sheet.getRange(2, 2, lastRow - 1, 1).getValues() : [];
+    var uidToRow = {};
+    for (var i = 0; i < uidColValues.length; i++) {
+      var uid = String(uidColValues[i][0] || '');
+      if (uid) uidToRow[uid] = i + 2;
+    }
+
+    rows.forEach(function(r) {
+      var attemptUid = String(r.attemptUid || '');
+      var rowValues = [
+        new Date(),
+        attemptUid,
+        r.clientId || '',
+        r.studentName || 'Unnamed Student',
+        r.id || '',
+        r.timestamp || '',
+        r.scenario || '',
+        r.eq || '',
+        r.difficulty || '',
+        r.mode || '',
+        r.timeSec || 0,
+        r.totalExerciseTime || '',
+        r.checks || 1,
+        r.firstTryCorrect ? 'Yes' : 'No',
+        r.solvedEventually ? 'Yes' : 'No',
+        r.viewedSolutionBeforeCheck ? 'Yes' : 'No',
+        (r.diagnostics || []).join('; ')
+      ];
+
+      if (attemptUid && uidToRow[attemptUid]) {
+        sheet.getRange(uidToRow[attemptUid], 1, 1, rowValues.length).setValues([rowValues]);
+      } else {
+        sheet.appendRow(rowValues);
+        if (attemptUid) uidToRow[attemptUid] = sheet.getLastRow();
+      }
+    });
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok', saved: rows.length }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}`;
+
+  document.getElementById('gasCodeBlock').textContent = APPS_SCRIPT_SOURCE;
+
   const EQUATIONS = [
     { id: 'eq1', label: 'v = u + at', absent: 's', absentName: 'No displacement (s)' },
     { id: 'eq2', label: 's = ½(u + v)t', absent: 'a', absentName: 'No acceleration (a)' },
@@ -709,25 +1124,69 @@
     t: 'Time'
   };
 
-  // ---------- State ----------
+  // ---------- Persistent Performance State ----------
+  function makeClientId() {
+    return 'stu_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+  }
+
+  function createDefaultRecord() {
+    return {
+      clientId: makeClientId(),
+      studentName: '',
+      gsheetUrl: DEFAULT_GOOGLE_SCRIPT_URL,
+      autoSync: true,
+      totalActiveMs: 0,
+      correctFirstTry: 0,
+      attempted: 0,
+      streak: 0,
+      bestStreak: 0,
+      history: []
+    };
+  }
+
+  function loadRecord() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return createDefaultRecord();
+      const parsed = JSON.parse(raw);
+      const merged = Object.assign(createDefaultRecord(), parsed);
+      if (!merged.clientId) merged.clientId = makeClientId();
+      if (!merged.gsheetUrl && DEFAULT_GOOGLE_SCRIPT_URL) {
+        merged.gsheetUrl = DEFAULT_GOOGLE_SCRIPT_URL;
+      }
+      return merged;
+    } catch (e) {
+      return createDefaultRecord();
+    }
+  }
+
+  function saveRecord() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+    } catch (e) {}
+  }
+
+  let record = loadRecord();
+
+  // ---------- Live Question & Timer State ----------
   let currentQ = null;
   let cluesHighlighted = false;
   let selectedStep1 = 'forward';
   let selectedEqA = null;
   let selectedEqB = null;
-  let hasCheckedCurrent = false;
 
-  const stats = {
-    correct: 0,
-    attempted: 0,
-    streak: 0,
-    byEq: {
-      eq1: { c: 0, a: 0 },
-      eq2: { c: 0, a: 0 },
-      eq3: { c: 0, a: 0 },
-      eq4: { c: 0, a: 0 }
-    }
-  };
+  let hasCheckedCurrent = false;
+  let checksOnCurrent = 0;
+  let viewedSolutionBeforeCheck = false;
+  let currentHistoryIndex = -1;
+
+  let isManuallyPaused = false;
+  let isTabHidden = document.hidden;
+  let lastTickMs = Date.now();
+  let questionElapsedMs = 0;
+  let questionCompleted = false;
+  let saveCounter = 0;
+  let isSyncing = false;
 
   // ---------- Utility Functions ----------
   const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -741,10 +1200,231 @@
     return String(roundClean(n, 2));
   };
 
+  function formatDuration(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const pad = (x) => String(x).padStart(2, '0');
+    if (hrs > 0) return `${hrs}:${pad(mins)}:${pad(secs)}`;
+    return `${pad(mins)}:${pad(secs)}`;
+  }
+
+  function formatSec(sec) {
+    if (sec === null || sec === undefined || isNaN(sec)) return '—';
+    const s = Math.round(sec);
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return `${m}m ${rem}s`;
+  }
+
   function nearlyEqual(userVal, trueVal) {
     if (isNaN(userVal)) return false;
-    const tol = Math.max(0.06, Math.abs(trueVal) * 0.02); // 2% or 0.06 tolerance for 3 s.f.
+    const tol = Math.max(0.06, Math.abs(trueVal) * 0.02);
     return Math.abs(userVal - trueVal) <= tol;
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ---------- Timer Loop ----------
+  function isTimerRunning() {
+    return !isManuallyPaused && !isTabHidden;
+  }
+
+  function tickTimers() {
+    const now = Date.now();
+    const delta = Math.min(now - lastTickMs, 2000);
+    lastTickMs = now;
+
+    if (isTimerRunning()) {
+      record.totalActiveMs += delta;
+      if (!questionCompleted) {
+        questionElapsedMs += delta;
+      }
+      saveCounter++;
+      if (saveCounter >= 5) {
+        saveCounter = 0;
+        saveRecord();
+      }
+    }
+    updateTimerDisplays();
+  }
+
+  function updateTimerDisplays() {
+    const totStr = formatDuration(record.totalActiveMs);
+    const qStr = formatDuration(questionElapsedMs);
+    document.getElementById('hdrTotalTime').textContent = totStr;
+    document.getElementById('hdrQTime').textContent = qStr;
+    document.getElementById('statTotalTime').textContent = totStr;
+    document.getElementById('repTotalTime').textContent = totStr;
+    document.getElementById('qTimerBadge').textContent = isManuallyPaused
+      ? `Time on Q: ${qStr} (Paused)`
+      : `Time on Q: ${qStr}`;
+  }
+
+  setInterval(tickTimers, 1000);
+
+  document.addEventListener('visibilitychange', () => {
+    isTabHidden = document.hidden;
+    lastTickMs = Date.now();
+    if (isTabHidden) saveRecord();
+  });
+
+  window.addEventListener('beforeunload', () => {
+    tickTimers();
+    saveRecord();
+  });
+
+  // ---------- Google Sheets Sync ----------
+  function setSyncStatus(type, badgeText, msgText) {
+    const badge = document.getElementById('gsheetBadge');
+    const msg = document.getElementById('gsheetMsg');
+    badge.className = `sync-badge ${type}`;
+    badge.textContent = badgeText;
+    msg.textContent = msgText || '';
+  }
+
+  function refreshSyncStatusIdle() {
+    const url = (record.gsheetUrl || '').trim();
+    const pending = record.history.filter(h => !h.synced).length;
+    if (!url) {
+      setSyncStatus('sync-idle', 'Not configured', 'Paste a Google Apps Script Web App URL to enable cloud saving.');
+    } else if (pending > 0) {
+      setSyncStatus('sync-warn', `${pending} pending`, 'Click "Sync Pending to Sheet" to upload unsent attempts.');
+    } else if (record.history.length > 0) {
+      setSyncStatus('sync-ok', 'All synced', `${record.history.length} attempt(s) stored in Google Sheet.`);
+    } else {
+      setSyncStatus('sync-ok', 'Connected', 'Ready to record attempts to Google Sheet.');
+    }
+  }
+
+  async function postToGoogleSheet(url, entries) {
+    const payload = {
+      records: entries.map(item => ({
+        attemptUid: item.attemptUid || `${record.clientId}_q${item.id}`,
+        clientId: record.clientId,
+        studentName: record.studentName || 'Unnamed Student',
+        id: item.id,
+        timestamp: item.timestamp,
+        scenario: item.scenario,
+        eq: (item.eq || '').toUpperCase(),
+        difficulty: item.difficulty,
+        mode: item.mode,
+        timeSec: item.timeSec,
+        totalExerciseTime: formatDuration(record.totalActiveMs),
+        checks: item.checks,
+        firstTryCorrect: item.firstTryCorrect,
+        solvedEventually: item.solvedEventually,
+        viewedSolutionBeforeCheck: item.viewedSolutionBeforeCheck,
+        diagnostics: item.diagnostics || []
+      }))
+    };
+
+    const bodyStr = JSON.stringify(payload);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: bodyStr
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json.status !== 'ok') throw new Error(json.message || 'Apps Script error');
+      return { confirmed: true };
+    } catch (err) {
+      if (!(err instanceof TypeError)) throw err;
+      // Fallback for strict file:// origins where CORS redirect may block reading response
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: bodyStr
+      });
+      return { confirmed: false };
+    }
+  }
+
+  async function syncPendingEntries(specificIndexes = null) {
+    const url = (record.gsheetUrl || '').trim();
+    if (!url) {
+      refreshSyncStatusIdle();
+      return;
+    }
+    if (isSyncing) return;
+
+    const toSync = [];
+    record.history.forEach((item, idx) => {
+      if (specificIndexes ? specificIndexes.includes(idx) : !item.synced) {
+        toSync.push({ idx, item });
+      }
+    });
+
+    if (toSync.length === 0) {
+      refreshSyncStatusIdle();
+      return;
+    }
+
+    isSyncing = true;
+    setSyncStatus('sync-idle', 'Syncing...', `Uploading ${toSync.length} record(s) to Google Sheet...`);
+
+    try {
+      const result = await postToGoogleSheet(url, toSync.map(x => x.item));
+      toSync.forEach(x => { record.history[x.idx].synced = true; });
+      saveRecord();
+      updateAllStatsUI();
+      setSyncStatus(
+        'sync-ok',
+        'Synced',
+        result.confirmed
+          ? `Saved ${toSync.length} record(s) to Google Sheet at ${new Date().toLocaleTimeString()}.`
+          : `Sent ${toSync.length} record(s) to Google Sheet at ${new Date().toLocaleTimeString()}.`
+      );
+    } catch (err) {
+      setSyncStatus('sync-err', 'Sync failed', `Could not reach Google Sheet (${err.message}). Data is safely saved locally.`);
+    } finally {
+      isSyncing = false;
+    }
+  }
+
+  async function testGoogleSheetConnection() {
+    const input = document.getElementById('gsheetUrlInput');
+    const url = input.value.trim();
+    record.gsheetUrl = url;
+    saveRecord();
+
+    if (!url) {
+      refreshSyncStatusIdle();
+      return;
+    }
+    if (!url.startsWith('https://script.google.com/')) {
+      setSyncStatus('sync-err', 'Invalid URL', 'URL should start with https://script.google.com/');
+      return;
+    }
+
+    setSyncStatus('sync-idle', 'Testing...', 'Checking connection to Google Apps Script...');
+    try {
+      const res = await fetch(url, { method: 'GET', mode: 'cors' });
+      const json = await res.json();
+      if (json.status === 'ok') {
+        setSyncStatus('sync-ok', 'Connected', json.message || 'Ready to record to Google Sheet.');
+        if (record.history.some(h => !h.synced)) {
+          syncPendingEntries();
+        }
+      } else {
+        setSyncStatus('sync-err', 'Script error', json.message || 'Unexpected response.');
+      }
+    } catch (err) {
+      setSyncStatus('sync-warn', 'URL saved', 'Could not verify via GET (normal if opened from file://). Will test on next sync.');
+    }
   }
 
   // ---------- Question Generators ----------
@@ -795,11 +1475,8 @@
   };
 
   function generateSingleQuestion(eqFocus, diff) {
-    // Pick target equation if 'all'
     const eqId = eqFocus === 'all' ? pick(['eq1', 'eq2', 'eq3', 'eq4']) : eqFocus;
 
-    // Decide scenario style based on difficulty
-    // Challenge can include km/h conversion or vertical free-fall (for eq1, eq3, eq4)
     if (diff === 'Challenge' && Math.random() < 0.45 && eqId !== 'eq2') {
       return generateFreeFallQuestion(eqId);
     }
@@ -811,7 +1488,6 @@
     let u, v, a, s, t;
 
     if (useBraking) {
-      // Braking: u > 0, a < 0, v >= 0
       const stopCompletely = Math.random() < 0.55;
       if (stopCompletely) {
         v = 0;
@@ -827,11 +1503,10 @@
         u = roundClean(v + decelMag * t, 2);
       }
       if (useKmh) {
-        // Ensure u (and v if needed) are nice in km/h (multiples of 5 m/s = 18 km/h)
         const decelMag = pick([2, 2.5, 4, 5]);
         a = -decelMag;
         t = pick([4, 5, 6, 8, 10]);
-        u = pick([20, 25, 30, 35, 40]); // multiples of 5 -> 72, 90, 108, 126, 144 km/h
+        u = pick([20, 25, 30, 35, 40]);
         v = roundClean(u + a * t, 2);
         if (v < 0) {
           v = 0;
@@ -840,18 +1515,16 @@
       }
       s = roundClean(0.5 * (u + v) * t, 2);
     } else {
-      // Forward acceleration
       if (useFromRest) {
         u = 0;
       } else if (useKmh) {
-        u = pick([10, 15, 20, 25, 30]); // 36, 54, 72, 90, 108 km/h
+        u = pick([10, 15, 20, 25, 30]);
       } else {
         u = randInt(4, 45);
       }
       a = pick([1.5, 2, 2.5, 3, 4, 5, 6, 8]);
       t = randInt(3, 12);
       if (useKmh) {
-        // If asking for v in eq1/eq4 or using v, keep numbers clean
         t = pick([4, 5, 6, 8, 10]);
         a = pick([1.5, 2, 2.5, 3, 4, 5]);
       }
@@ -859,37 +1532,31 @@
       s = roundClean(u * t + 0.5 * a * t * t, 2);
     }
 
-    // Choose which variable is target & which 3 are given based on eqId
     let target, given;
     if (eqId === 'eq1') {
-      // v, u, a, t (no s)
       const choices = ['v', 'a', 't'];
       if (!useFromRest) choices.push('u');
       target = pick(choices);
       given = ['v', 'u', 'a', 't'].filter(x => x !== target);
     } else if (eqId === 'eq2') {
-      // s, u, v, t (no a)
       const choices = ['s', 't'];
       if (!useFromRest) choices.push('u');
       if (!(useBraking && v === 0)) choices.push('v');
       target = pick(choices);
       given = ['s', 'u', 'v', 't'].filter(x => x !== target);
     } else if (eqId === 'eq3') {
-      // s, u, a, t (no v)
       const choices = ['s', 'a'];
       if (!useFromRest) choices.push('u');
-      if (u === 0) choices.push('t'); // avoid quadratic t when u != 0
+      if (u === 0) choices.push('t');
       target = pick(choices);
       given = ['s', 'u', 'a', 't'].filter(x => x !== target);
     } else {
-      // eq4: v, u, a, s (no t)
       const choices = ['v', 'a', 's'];
       if (!useFromRest) choices.push('u');
       target = pick(choices);
       given = ['v', 'u', 'a', 's'].filter(x => x !== target);
     }
 
-    // Build natural physics narrative
     const sc = useBraking ? pick(SCENARIOS.braking) : pick(SCENARIOS.forwardAccel);
     const vals = { u, v, a, s, t };
 
@@ -931,7 +1598,6 @@
       return `<span class="clue">${fmt(val)} m s<sup>&minus;1</sup></span>`;
     };
 
-    // Opening clause with u and/or a
     let intro = `${sc.subject}`;
     if (has('u') && vals.u === 0) {
       intro += ` <span class="clue">starts from rest</span> and`;
@@ -968,7 +1634,6 @@
     intro += '.';
     parts.push(intro);
 
-    // Question prompt
     const qMap = {
       v: 'Calculate its final speed at the end of this motion.',
       u: 'Find its initial speed before this acceleration.',
@@ -990,7 +1655,6 @@
     let u, v, a, s, t, target, given, dirPrompt, dirOpts, rawHtml;
 
     if (isDrop) {
-      // Dropped from rest downward (+ downward)
       u = 0;
       a = g;
       t = pick([1.5, 2, 2.5, 3, 4]);
@@ -1027,7 +1691,6 @@
       };
       rawHtml = text + qMap[target];
     } else {
-      // Thrown vertically upwards to highest point (+ upward, a = -9.81, v = 0)
       v = 0;
       a = -g;
       t = pick([1.5, 2, 2.5, 3]);
@@ -1169,9 +1832,6 @@
       wrap.innerHTML = `
         <svg viewBox="0 0 640 120" width="100%" style="max-width:640px;display:block;margin:auto;">
           <defs>
-            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L6,3 L0,6 Z" fill="#1e40af"/>
-            </marker>
             <marker id="arrO" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
               <path d="M0,0 L6,3 L0,6 Z" fill="#ea580c"/>
             </marker>
@@ -1200,28 +1860,22 @@
             <path d="M0,0 L6,3 L0,6 Z" fill="#ea580c"/>
           </marker>
         </defs>
-        <!-- Road -->
         <line x1="20" y1="92" x2="640" y2="92" stroke="#64748b" stroke-width="3"/>
-        <!-- Positive Direction indicator -->
         <line x1="240" y1="18" x2="360" y2="18" stroke="#ea580c" stroke-width="2.2" marker-end="url(#arrO2)"/>
         <text x="300" y="13" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ea580c">Positive (+) direction</text>
-        <!-- Start Object -->
         <rect x="45" y="64" width="64" height="24" rx="6" fill="#2563eb"/>
         <circle cx="60" cy="90" r="6" fill="#0f172a"/>
         <circle cx="94" cy="90" r="6" fill="#0f172a"/>
         <text x="77" y="54" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f172a">${dispVal('u')}</text>
 
-        <!-- End Object (ghosted) -->
         <rect x="520" y="64" width="64" height="24" rx="6" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
         <circle cx="535" cy="90" r="6" fill="#334155"/>
         <circle cx="569" cy="90" r="6" fill="#334155"/>
         <text x="552" y="54" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f172a">${dispVal('v')}</text>
 
-        <!-- Acceleration arrow -->
         <line x1="${isDecel ? 370 : 250}" y1="45" x2="${isDecel ? 250 : 370}" y2="45" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrB)"/>
         <text x="310" y="38" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">${aLabel}</text>
 
-        <!-- Displacement & Time span -->
         <line x1="115" y1="108" x2="515" y2="108" stroke="#475569" stroke-width="1.5"/>
         <line x1="115" y1="102" x2="115" y2="114" stroke="#475569" stroke-width="1.5"/>
         <line x1="515" y1="102" x2="515" y2="114" stroke="#475569" stroke-width="1.5"/>
@@ -1234,6 +1888,13 @@
     const q = currentQ;
     cluesHighlighted = false;
     hasCheckedCurrent = false;
+    checksOnCurrent = 0;
+    viewedSolutionBeforeCheck = false;
+    currentHistoryIndex = -1;
+    questionElapsedMs = 0;
+    questionCompleted = false;
+    lastTickMs = Date.now();
+
     selectedStep1 = q.directionPrompt;
     selectedEqA = null;
     selectedEqB = null;
@@ -1259,6 +1920,7 @@
     renderDiagram(q);
     renderWorkspace();
     hideFeedbackAndSolution();
+    updateTimerDisplays();
   }
 
   function renderWorkspace() {
@@ -1269,7 +1931,6 @@
     document.getElementById('step2Box').classList.toggle('hidden', isQuick);
     document.getElementById('step3Box').classList.toggle('hidden', isQuick);
 
-    // Step 1
     const s1 = document.getElementById('step1Options');
     s1.innerHTML = q.directionOptions.map((opt, idx) => `
       <label style="display:flex;align-items:center;gap:0.45rem;cursor:pointer;background:#f8fafc;border:1px solid var(--border);padding:0.5rem 0.75rem;border-radius:8px;font-size:0.9rem;">
@@ -1281,7 +1942,6 @@
       r.addEventListener('change', (e) => { selectedStep1 = e.target.value; });
     });
 
-    // Step 2: SUVAT Inputs
     const grid = document.getElementById('suvatGrid');
     grid.innerHTML = ['u', 'v', 'a', 's', 't'].map(k => `
       <div class="suvat-item">
@@ -1310,7 +1970,6 @@
       });
     });
 
-    // Step 3: Equation choice(s)
     const showHint = document.getElementById('showMissingHint').checked;
     const s3 = document.getElementById('step3Container');
     const buildEqButtons = (partKey) => `
@@ -1345,7 +2004,6 @@
       });
     });
 
-    // Step 4: Final Answers
     const s4 = document.getElementById('step4Container');
     const unitOptions = `
       <option value="m s⁻¹">m s⁻¹</option>
@@ -1383,20 +2041,21 @@
     }
   }
 
-  // ---------- Checking & Feedback ----------
+  // ---------- Checking & Performance Recording ----------
   function checkWork() {
+    tickTimers();
     const q = currentQ;
-    const isQuick = document.getElementById('modeSelect').value === 'quick';
+    const mode = document.getElementById('modeSelect').value;
+    const isQuick = mode === 'quick';
     const messages = [];
+    const diagTags = new Set();
     let allCorrect = true;
 
     if (!isQuick) {
-      // Check Step 1
       if (selectedStep1 !== q.directionPrompt) {
         messages.push(`<strong>Step 1 Tip:</strong> Taking the direction of initial motion (${q.directionPrompt}) as positive (+) keeps the initial setup straightforward.`);
       }
 
-      // Check Step 2 (SUVAT identification)
       const step2Errors = [];
       const targets = q.parts.map(p => p.target);
       ['u', 'v', 'a', 's', 't'].forEach(k => {
@@ -1431,16 +2090,18 @@
 
       if (step2Errors.length > 0) {
         allCorrect = false;
+        diagTags.add('Step 2 SUVAT');
         messages.push(`<strong>Step 2 (Knowns &amp; Unknowns):</strong><br>&bull; ${step2Errors.join('<br>&bull; ')}`);
       }
 
-      // Check Step 3
       const pA = q.parts[0];
       if (!selectedEqA) {
         allCorrect = false;
+        diagTags.add('Step 3 Eq');
         messages.push(`<strong>Step 3:</strong> Please select a suitable equation${q.isTwoPart ? ' for Part (a)' : ''}.`);
       } else if (!pA.validEqs.includes(selectedEqA)) {
         allCorrect = false;
+        diagTags.add('Step 3 Eq');
         const chosen = EQUATIONS.find(e => e.id === selectedEqA);
         messages.push(`<strong>Step 3${q.isTwoPart ? ' (Part a)' : ''}:</strong> <span class="math-inline">${chosen.label}</span> contains the unused variable or doesn't help find <strong>${pA.target}</strong> from the given quantities.`);
       }
@@ -1449,15 +2110,16 @@
         const pB = q.parts[1];
         if (!selectedEqB) {
           allCorrect = false;
+          diagTags.add('Step 3 Eq');
           messages.push(`<strong>Step 3 (Part b):</strong> Please select a suitable equation for Part (b).`);
         } else if (!pB.validEqs.includes(selectedEqB)) {
           allCorrect = false;
+          diagTags.add('Step 3 Eq');
           messages.push(`<strong>Step 3 (Part b):</strong> Choose an equation that solves for <strong>${pB.target}</strong>.`);
         }
       }
     }
 
-    // Check Step 4 (Numerical Answers + Units)
     const checkPartAns = (part, inputId, unitId, label) => {
       const raw = document.getElementById(inputId).value;
       const num = parseFloat(raw);
@@ -1467,20 +2129,24 @@
 
       if (raw.trim() === '' || isNaN(num)) {
         allCorrect = false;
+        diagTags.add('Step 4 Value');
         messages.push(`<strong>Step 4${label}:</strong> Please enter your numerical answer.`);
         return false;
       }
       if (!nearlyEqual(num, trueVal)) {
         allCorrect = false;
         if (nearlyEqual(-num, trueVal)) {
+          diagTags.add('Step 4 Sign');
           messages.push(`<strong>Step 4${label}:</strong> Your magnitude is right, but check the <strong>+/&minus; sign</strong>! Expected <strong>${fmt(trueVal)} ${trueUnit}</strong>.`);
         } else {
+          diagTags.add('Step 4 Value');
           messages.push(`<strong>Step 4${label}:</strong> Numerical value is incorrect (check your substitution/algebra).`);
         }
         return false;
       }
       if (unit !== trueUnit) {
         allCorrect = false;
+        diagTags.add('Step 4 Unit');
         messages.push(`<strong>Step 4${label}:</strong> Numerical value is correct, but check the <strong>unit</strong>! (${VAR_NAMES[part.target]} uses <strong>${trueUnit}</strong>).`);
         return false;
       }
@@ -1494,27 +2160,74 @@
       checkPartAns(q.parts[0], 'ansInputA', 'unitSelectA', '');
     }
 
-    // Update stats once per question
+    checksOnCurrent++;
+    const timeSec = Math.max(1, Math.round(questionElapsedMs / 1000));
+    const mainEq = q.parts[0].primaryEq;
+
     if (!hasCheckedCurrent) {
       hasCheckedCurrent = true;
-      stats.attempted++;
-      const mainEq = q.parts[0].primaryEq;
-      stats.byEq[mainEq].a++;
-      if (allCorrect) {
-        stats.correct++;
-        stats.streak++;
-        stats.byEq[mainEq].c++;
+      record.attempted++;
+      const independentFirstTry = allCorrect && !viewedSolutionBeforeCheck;
+
+      if (independentFirstTry) {
+        record.correctFirstTry++;
+        record.streak++;
+        if (record.streak > record.bestStreak) {
+          record.bestStreak = record.streak;
+        }
       } else {
-        stats.streak = 0;
+        record.streak = 0;
       }
-      updateStatsUI();
+
+      const nextId = record.history.length + 1;
+      const entry = {
+        id: nextId,
+        attemptUid: `${record.clientId}_q${nextId}_${Date.now().toString(36)}`,
+        timestamp: new Date().toISOString(),
+        scenario: q.scenario,
+        eq: q.isTwoPart ? `${q.parts[0].primaryEq}+${q.parts[1].primaryEq}` : mainEq,
+        primaryEq: mainEq,
+        difficulty: q.difficulty,
+        mode: isQuick ? 'Quick' : 'Guided',
+        timeSec,
+        checks: checksOnCurrent,
+        firstTryCorrect: independentFirstTry,
+        solvedEventually: allCorrect,
+        viewedSolutionBeforeCheck,
+        diagnostics: viewedSolutionBeforeCheck
+          ? ['Viewed solution first', ...diagTags]
+          : Array.from(diagTags),
+        synced: false
+      };
+
+      record.history.push(entry);
+      currentHistoryIndex = record.history.length - 1;
+    } else if (currentHistoryIndex >= 0) {
+      const entry = record.history[currentHistoryIndex];
+      entry.checks = checksOnCurrent;
+      entry.timeSec = timeSec;
+      entry.synced = false; // re-sync updated retry state to sheet
+      if (allCorrect) {
+        entry.solvedEventually = true;
+      }
+    }
+
+    if (allCorrect) {
+      questionCompleted = true;
+    }
+
+    saveRecord();
+    updateAllStatsUI();
+
+    if (record.autoSync && (record.gsheetUrl || '').trim()) {
+      syncPendingEntries([currentHistoryIndex]);
     }
 
     const fb = document.getElementById('feedbackBox');
     fb.classList.remove('ok', 'bad', 'warn', 'show');
     if (allCorrect) {
       fb.classList.add('ok', 'show');
-      fb.innerHTML = `<strong>Spot on!</strong> All steps and final answers are correct. Great work!`;
+      fb.innerHTML = `<strong>Spot on!</strong> Completed in <strong>${formatSec(timeSec)}</strong>. All steps and final answers are correct.`;
       renderSolution(true);
     } else {
       fb.classList.add('bad', 'show');
@@ -1585,14 +2298,233 @@
     document.getElementById('solutionBox').classList.remove('show');
   }
 
-  function updateStatsUI() {
-    document.getElementById('statScore').textContent = `${stats.correct} / ${stats.attempted}`;
-    document.getElementById('statStreak').textContent = stats.streak;
+  // ---------- Performance & Analytics UI ----------
+  function computeAggregates() {
+    const eqMap = {
+      eq1: { label: 'v = u + at', a: 0, c: 0, time: 0 },
+      eq2: { label: 's = ½(u + v)t', a: 0, c: 0, time: 0 },
+      eq3: { label: 's = ut + ½at²', a: 0, c: 0, time: 0 },
+      eq4: { label: 'v² = u² + 2as', a: 0, c: 0, time: 0 }
+    };
+    const diffMap = {
+      Standard: { a: 0, c: 0, time: 0 },
+      Intermediate: { a: 0, c: 0, time: 0 },
+      Challenge: { a: 0, c: 0, time: 0 }
+    };
+
+    let sumTime = 0;
+    let eventualCount = 0;
+
+    record.history.forEach(item => {
+      sumTime += item.timeSec || 0;
+      if (item.solvedEventually) eventualCount++;
+
+      const eqKey = item.primaryEq || 'eq1';
+      if (eqMap[eqKey]) {
+        eqMap[eqKey].a++;
+        if (item.firstTryCorrect) eqMap[eqKey].c++;
+        eqMap[eqKey].time += item.timeSec || 0;
+      }
+
+      if (diffMap[item.difficulty]) {
+        diffMap[item.difficulty].a++;
+        if (item.firstTryCorrect) diffMap[item.difficulty].c++;
+        diffMap[item.difficulty].time += item.timeSec || 0;
+      }
+    });
+
+    const avgTimeSec = record.history.length > 0 ? sumTime / record.history.length : null;
+    return { eqMap, diffMap, avgTimeSec, eventualCount };
+  }
+
+  function updateAllStatsUI() {
+    const { eqMap, diffMap, avgTimeSec, eventualCount } = computeAggregates();
+
+    document.getElementById('statScore').textContent = `${record.correctFirstTry} / ${record.attempted}`;
+    document.getElementById('statStreak').textContent = `${record.streak} / ${record.bestStreak}`;
+    document.getElementById('statAvgTime').textContent = avgTimeSec === null ? '—' : formatSec(avgTimeSec);
+
     const eqTxt = ['eq1', 'eq2', 'eq3', 'eq4'].map(id => {
-      const d = stats.byEq[id];
+      const d = eqMap[id];
       return d.a === 0 ? '—' : `${Math.round((d.c / d.a) * 100)}%`;
     }).join(' / ');
     document.getElementById('statEqAcc').textContent = eqTxt;
+
+    const n = record.attempted;
+    document.getElementById('repFirstAcc').textContent = n === 0
+      ? '—'
+      : `${Math.round((record.correctFirstTry / n) * 100)}% (${record.correctFirstTry}/${n})`;
+    document.getElementById('repEventualAcc').textContent = n === 0
+      ? '—'
+      : `${Math.round((eventualCount / n) * 100)}% (${eventualCount}/${n})`;
+
+    document.getElementById('eqBreakdownBody').innerHTML = ['eq1', 'eq2', 'eq3', 'eq4'].map(id => {
+      const d = eqMap[id];
+      const pct = d.a === 0 ? '—' : `${Math.round((d.c / d.a) * 100)}%`;
+      const avg = d.a === 0 ? '—' : formatSec(d.time / d.a);
+      return `<tr>
+        <td class="math-inline">${d.label}</td>
+        <td>${d.a}</td>
+        <td>${pct}</td>
+        <td>${avg}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('diffBreakdownBody').innerHTML = ['Standard', 'Intermediate', 'Challenge'].map(lvl => {
+      const d = diffMap[lvl];
+      const pct = d.a === 0 ? '—' : `${Math.round((d.c / d.a) * 100)}%`;
+      const avg = d.a === 0 ? '—' : formatSec(d.time / d.a);
+      return `<tr>
+        <td>${lvl}</td>
+        <td>${d.a}</td>
+        <td>${pct}</td>
+        <td>${avg}</td>
+      </tr>`;
+    }).join('');
+
+    const logBody = document.getElementById('historyLogBody');
+    if (record.history.length === 0) {
+      logBody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:1rem;">No attempts recorded yet. Solve a question and click "Check My Answer".</td></tr>`;
+    } else {
+      logBody.innerHTML = [...record.history].reverse().map(item => {
+        const dt = new Date(item.timestamp);
+        const timeStr = dt.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        let statusHtml;
+        if (item.firstTryCorrect) {
+          statusHtml = `<span class="pill-status pill-ok">1st-Try Correct</span>`;
+        } else if (item.viewedSolutionBeforeCheck) {
+          statusHtml = `<span class="pill-status pill-sol">Solution Viewed</span>`;
+        } else if (item.solvedEventually) {
+          statusHtml = `<span class="pill-status pill-retry">Solved on Retry</span>`;
+        } else {
+          statusHtml = `<span class="pill-status pill-miss">Incorrect</span>`;
+        }
+        const diagText = item.diagnostics && item.diagnostics.length > 0
+          ? escapeHtml(item.diagnostics.join(', '))
+          : '—';
+        const syncText = item.synced
+          ? `<span class="pill-status pill-ok">Synced</span>`
+          : `<span class="pill-status pill-retry">Pending</span>`;
+
+        return `<tr>
+          <td>${item.id}</td>
+          <td>${escapeHtml(timeStr)}</td>
+          <td>${escapeHtml(item.scenario)}</td>
+          <td>${escapeHtml(item.eq.toUpperCase())}</td>
+          <td>${escapeHtml(item.difficulty)}</td>
+          <td>${escapeHtml(item.mode)}</td>
+          <td>${formatSec(item.timeSec)}</td>
+          <td>${item.checks}</td>
+          <td>${statusHtml}</td>
+          <td>${diagText}</td>
+          <td>${syncText}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    if (!isSyncing) refreshSyncStatusIdle();
+    updateTimerDisplays();
+  }
+
+  // ---------- Export Functions ----------
+  function exportCSV() {
+    const csvEscape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const headers = [
+      'Student Name/ID', 'Client ID', 'Q#', 'Timestamp', 'Scenario', 'Equation',
+      'Difficulty', 'Mode', 'Time Spent (s)', 'Checks',
+      'First-Try Correct', 'Solved Eventually', 'Viewed Solution Before Check', 'Diagnostic Notes'
+    ];
+    const rows = [headers.map(csvEscape).join(',')];
+
+    record.history.forEach(item => {
+      rows.push([
+        record.studentName || 'Unnamed Student',
+        record.clientId,
+        item.id,
+        item.timestamp,
+        item.scenario,
+        item.eq.toUpperCase(),
+        item.difficulty,
+        item.mode,
+        item.timeSec,
+        item.checks,
+        item.firstTryCorrect ? 'Yes' : 'No',
+        item.solvedEventually ? 'Yes' : 'No',
+        item.viewedSolutionBeforeCheck ? 'Yes' : 'No',
+        (item.diagnostics || []).join('; ')
+      ].map(csvEscape).join(','));
+    });
+
+    rows.push('');
+    rows.push([
+      'SUMMARY',
+      `Total Active Time: ${formatDuration(record.totalActiveMs)}`,
+      `Attempted: ${record.attempted}`,
+      `1st-Try Correct: ${record.correctFirstTry}`,
+      `Best Streak: ${record.bestStreak}`
+    ].map(csvEscape).join(','));
+
+    const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = (record.studentName || 'student').replace(/[^a-z0-9_-]+/gi, '_');
+    a.href = url;
+    a.download = `SUVAT_Performance_${safeName}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function copyTextToClipboard(text, onSuccess) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
+    } else {
+      fallbackCopy(text, onSuccess);
+    }
+  }
+
+  function fallbackCopy(text, onSuccess) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); if (onSuccess) onSuccess(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function showCopyToast(msg = 'Copied!') {
+    const toast = document.getElementById('copyToast');
+    toast.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 2000);
+  }
+
+  function copySummaryReport() {
+    const { eqMap, avgTimeSec, eventualCount } = computeAggregates();
+    const n = record.attempted;
+    const pctFirst = n ? `${Math.round((record.correctFirstTry / n) * 100)}%` : 'N/A';
+    const pctEventual = n ? `${Math.round((eventualCount / n) * 100)}%` : 'N/A';
+
+    const lines = [
+      `SUVAT Interactive Revision — Performance Report`,
+      `Student: ${record.studentName || 'Not specified'}`,
+      `Date: ${new Date().toLocaleString()}`,
+      `Total Active Exercise Time: ${formatDuration(record.totalActiveMs)}`,
+      `Questions Attempted: ${n}`,
+      `1st-Try Independent Accuracy: ${record.correctFirstTry}/${n} (${pctFirst})`,
+      `Eventual Solve Rate: ${eventualCount}/${n} (${pctEventual})`,
+      `Best Streak: ${record.bestStreak}`,
+      `Average Time per Question: ${avgTimeSec === null ? 'N/A' : formatSec(avgTimeSec)}`,
+      `By Equation:`,
+      ...['eq1', 'eq2', 'eq3', 'eq4'].map(id => {
+        const d = eqMap[id];
+        const p = d.a ? `${Math.round((d.c / d.a) * 100)}%` : 'N/A';
+        return `  - ${d.label}: ${d.c}/${d.a} (${p}), Avg ${d.a ? formatSec(d.time / d.a) : 'N/A'}`;
+      })
+    ];
+
+    copyTextToClipboard(lines.join('\n'), () => showCopyToast('Summary copied!'));
   }
 
   function loadNewQuestion() {
@@ -1607,10 +2539,23 @@
   }
 
   // ---------- Event Listeners ----------
+  document.getElementById('pauseTimerBtn').addEventListener('click', function() {
+    tickTimers();
+    isManuallyPaused = !isManuallyPaused;
+    lastTickMs = Date.now();
+    this.textContent = isManuallyPaused ? 'Resume' : 'Pause';
+    document.getElementById('headerTimerPill').classList.toggle('timer-paused', isManuallyPaused);
+    updateTimerDisplays();
+  });
+
+  document.getElementById('jumpReportBtn').addEventListener('click', () => {
+    document.getElementById('reportCard').scrollIntoView({ behavior: 'smooth' });
+  });
+
   document.getElementById('toggleRefBtn').addEventListener('click', function() {
     const card = document.getElementById('referenceCard');
     const hidden = card.classList.toggle('hidden');
-    this.textContent = hidden ? 'Show Formula & Tactics Reference' : 'Hide Formula & Tactics Reference';
+    this.textContent = hidden ? 'Show Formula & Tactics' : 'Hide Formula & Tactics';
   });
 
   document.getElementById('showMissingHint').addEventListener('change', (e) => {
@@ -1641,20 +2586,73 @@
   });
 
   document.getElementById('checkBtn').addEventListener('click', checkWork);
-  document.getElementById('showSolBtn').addEventListener('click', () => renderSolution(true));
 
-  document.getElementById('resetStatsBtn').addEventListener('click', () => {
-    stats.correct = 0;
-    stats.attempted = 0;
-    stats.streak = 0;
-    ['eq1', 'eq2', 'eq3', 'eq4'].forEach(k => { stats.byEq[k] = { c: 0, a: 0 }; });
-    updateStatsUI();
+  document.getElementById('showSolBtn').addEventListener('click', () => {
+    if (!hasCheckedCurrent) {
+      viewedSolutionBeforeCheck = true;
+    }
+    renderSolution(true);
   });
 
-  // Load Textbook F1 example on startup so student immediately sees the familiar problem
+  const nameInput = document.getElementById('studentNameInput');
+  nameInput.value = record.studentName || '';
+  nameInput.addEventListener('input', (e) => {
+    record.studentName = e.target.value;
+    saveRecord();
+  });
+
+  const gsheetInput = document.getElementById('gsheetUrlInput');
+  gsheetInput.value = record.gsheetUrl || '';
+  gsheetInput.addEventListener('change', (e) => {
+    record.gsheetUrl = e.target.value.trim();
+    saveRecord();
+    refreshSyncStatusIdle();
+  });
+
+  const autoSyncCheck = document.getElementById('autoSyncCheck');
+  autoSyncCheck.checked = record.autoSync !== false;
+  autoSyncCheck.addEventListener('change', (e) => {
+    record.autoSync = e.target.checked;
+    saveRecord();
+  });
+
+  document.getElementById('testGsheetBtn').addEventListener('click', testGoogleSheetConnection);
+  document.getElementById('syncNowBtn').addEventListener('click', () => syncPendingEntries());
+
+  document.getElementById('copyGasBtn').addEventListener('click', function() {
+    copyTextToClipboard(APPS_SCRIPT_SOURCE, () => {
+      const orig = this.textContent;
+      this.textContent = 'Copied Apps Script!';
+      setTimeout(() => { this.textContent = orig; }, 1800);
+    });
+  });
+
+  document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+  document.getElementById('copySummaryBtn').addEventListener('click', copySummaryReport);
+
+  document.getElementById('resetStatsBtn').addEventListener('click', () => {
+    if (!confirm('Clear all locally saved exercise time, scores, and attempt history? (Rows already synced to Google Sheets will remain in the sheet.)')) return;
+    const savedName = record.studentName;
+    const savedUrl = record.gsheetUrl;
+    const savedAuto = record.autoSync;
+    const savedClient = record.clientId;
+    record = createDefaultRecord();
+    record.studentName = savedName;
+    record.gsheetUrl = savedUrl;
+    record.autoSync = savedAuto;
+    record.clientId = savedClient;
+    questionElapsedMs = 0;
+    hasCheckedCurrent = false;
+    checksOnCurrent = 0;
+    currentHistoryIndex = -1;
+    saveRecord();
+    updateAllStatsUI();
+  });
+
+  // Load Textbook F1 example on startup
   currentQ = getTextbookF1Question();
   renderQuestion();
-  updateStatsUI();
+  updateAllStatsUI();
 })();
 </script>
 </body>
