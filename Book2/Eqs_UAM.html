@@ -534,7 +534,7 @@
       font-weight: 600;
     }
 
-    /* Performance & Google Sheet Sync */
+    /* Performance & Sync */
     .perf-top-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -580,29 +580,6 @@
     .sync-warn { background: #fef3c7; color: #92400e; }
     .sync-err { background: #fee2e2; color: #991b1b; }
     .sync-idle { background: #e2e8f0; color: #475569; }
-
-    details.gas-guide {
-      margin-top: 0.7rem;
-      font-size: 0.84rem;
-      color: #334155;
-    }
-
-    details.gas-guide summary {
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    pre.gas-code {
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 0.8rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.76rem;
-      line-height: 1.45;
-      margin: 0.5rem 0;
-    }
 
     .breakdown-grid {
       display: grid;
@@ -694,7 +671,7 @@
         </button>
       </div>
       <button class="btn-outline btn-sm" id="jumpReportBtn" style="background:rgba(255,255,255,0.14);color:#fff;border-color:rgba(255,255,255,0.35);">
-        Performance &amp; Google Sheet
+        Performance Record
       </button>
       <button class="btn-outline btn-sm" id="toggleRefBtn" style="background:rgba(255,255,255,0.14);color:#fff;border-color:rgba(255,255,255,0.35);">
         Hide Formula &amp; Tactics
@@ -911,16 +888,16 @@
       </div>
     </div>
 
-    <!-- Google Sheets Sync Box -->
+    <!-- Cloud Sync Status Box (No script displayed) -->
     <div class="gsheet-box">
       <div class="gsheet-grid">
         <div>
-          <label class="ctrl-label" for="gsheetUrlInput">Google Sheet Apps Script Web App URL</label>
+          <label class="ctrl-label" for="gsheetUrlInput">Google Sheet Endpoint URL</label>
           <input type="url" id="gsheetUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
         </div>
         <div class="btn-row">
           <button class="btn-outline btn-sm" id="testGsheetBtn">Save &amp; Test</button>
-          <button class="btn-success btn-sm" id="syncNowBtn">Sync Pending to Sheet</button>
+          <button class="btn-success btn-sm" id="syncNowBtn">Sync Pending</button>
         </div>
       </div>
       <div class="gsheet-status">
@@ -932,17 +909,6 @@
           <input type="checkbox" id="autoSyncCheck" checked /> Auto-sync after each check
         </label>
       </div>
-
-      <details class="gas-guide">
-        <summary>Teacher Setup Guide: How to connect a Google Sheet (click to expand)</summary>
-        <ol style="margin:0.5rem 0;padding-left:1.25rem;">
-          <li>Create a Google Sheet, then go to <strong>Extensions &rarr; Apps Script</strong>.</li>
-          <li>Paste the script below, click <strong>Save</strong>, then <strong>Deploy &rarr; New deployment &rarr; Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>).</li>
-          <li>Copy the Web App URL and either paste it above or set <code>DEFAULT_GOOGLE_SCRIPT_URL</code> in the HTML code before sharing with students.</li>
-        </ol>
-        <button type="button" class="btn-outline btn-sm" id="copyGasBtn">Copy Apps Script Code</button>
-        <pre class="gas-code" id="gasCodeBlock"></pre>
-      </details>
     </div>
 
     <div class="breakdown-grid">
@@ -982,7 +948,7 @@
 
     <div style="margin-top:1.15rem;">
       <strong style="font-size:0.9rem;color:var(--primary);">Attempt History Log</strong>
-      <span style="font-size:0.8rem;color:var(--muted);margin-left:0.4rem;">(Saved locally &amp; synced to Google Sheet when connected)</span>
+      <span style="font-size:0.8rem;color:var(--muted);margin-left:0.4rem;">(Saved locally &amp; synced automatically when connected)</span>
       <div class="table-wrap" style="max-height:300px;overflow-y:auto;">
         <table>
           <thead>
@@ -997,7 +963,7 @@
               <th>Checks</th>
               <th>Result</th>
               <th>Diagnostic Note</th>
-              <th>Sheet Sync</th>
+              <th>Sync</th>
             </tr>
           </thead>
           <tbody id="historyLogBody">
@@ -1012,94 +978,8 @@
 
 <script>
 (function() {
-  // =========================================================================
-  // TEACHER CONFIGURATION: Paste your deployed Google Apps Script Web App URL
-  // here if you want this HTML file pre-connected for all students.
-  // Example: const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
-  // =========================================================================
   const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFVxMjQdvO5t9jJ3RJIh_ygprnM07kIN9KXXtux0vKEC3bHStHmE4PF42OAQrYyLUE8Q/exec';
-
   const STORAGE_KEY = 'uam_suvat_student_record_v2';
-
-  const APPS_SCRIPT_SOURCE = `function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok', message: 'SUVAT Tracker Ready' }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  lock.waitLock(10000);
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheets()[0];
-
-    var headers = [
-      'Server Logged At', 'Attempt UID', 'Client ID', 'Student Name/ID',
-      'Q#', 'Question Timestamp', 'Scenario', 'Equation', 'Difficulty',
-      'Mode', 'Time on Q (s)', 'Total Exercise Time', 'Checks',
-      '1st-Try Correct', 'Solved Eventually', 'Viewed Solution First', 'Diagnostic Notes'
-    ];
-
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(headers);
-      sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
-    }
-
-    var data = JSON.parse(e.postData.contents);
-    var rows = Array.isArray(data.records) ? data.records : [data];
-
-    var lastRow = sheet.getLastRow();
-    var uidColValues = lastRow > 1 ? sheet.getRange(2, 2, lastRow - 1, 1).getValues() : [];
-    var uidToRow = {};
-    for (var i = 0; i < uidColValues.length; i++) {
-      var uid = String(uidColValues[i][0] || '');
-      if (uid) uidToRow[uid] = i + 2;
-    }
-
-    rows.forEach(function(r) {
-      var attemptUid = String(r.attemptUid || '');
-      var rowValues = [
-        new Date(),
-        attemptUid,
-        r.clientId || '',
-        r.studentName || 'Unnamed Student',
-        r.id || '',
-        r.timestamp || '',
-        r.scenario || '',
-        r.eq || '',
-        r.difficulty || '',
-        r.mode || '',
-        r.timeSec || 0,
-        r.totalExerciseTime || '',
-        r.checks || 1,
-        r.firstTryCorrect ? 'Yes' : 'No',
-        r.solvedEventually ? 'Yes' : 'No',
-        r.viewedSolutionBeforeCheck ? 'Yes' : 'No',
-        (r.diagnostics || []).join('; ')
-      ];
-
-      if (attemptUid && uidToRow[attemptUid]) {
-        sheet.getRange(uidToRow[attemptUid], 1, 1, rowValues.length).setValues([rowValues]);
-      } else {
-        sheet.appendRow(rowValues);
-        if (attemptUid) uidToRow[attemptUid] = sheet.getLastRow();
-      }
-    });
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', saved: rows.length }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}`;
-
-  document.getElementById('gasCodeBlock').textContent = APPS_SCRIPT_SOURCE;
 
   const EQUATIONS = [
     { id: 'eq1', label: 'v = u + at', absent: 's', absentName: 'No displacement (s)' },
@@ -1134,6 +1014,7 @@ function doPost(e) {
       clientId: makeClientId(),
       studentName: '',
       gsheetUrl: DEFAULT_GOOGLE_SCRIPT_URL,
+      lastDefaultUrl: DEFAULT_GOOGLE_SCRIPT_URL,
       autoSync: true,
       totalActiveMs: 0,
       correctFirstTry: 0,
@@ -1151,7 +1032,12 @@ function doPost(e) {
       const parsed = JSON.parse(raw);
       const merged = Object.assign(createDefaultRecord(), parsed);
       if (!merged.clientId) merged.clientId = makeClientId();
-      if (!merged.gsheetUrl && DEFAULT_GOOGLE_SCRIPT_URL) {
+
+      // If teacher updated DEFAULT_GOOGLE_SCRIPT_URL in the file, update stored URL
+      if (DEFAULT_GOOGLE_SCRIPT_URL && merged.lastDefaultUrl !== DEFAULT_GOOGLE_SCRIPT_URL) {
+        merged.gsheetUrl = DEFAULT_GOOGLE_SCRIPT_URL;
+        merged.lastDefaultUrl = DEFAULT_GOOGLE_SCRIPT_URL;
+      } else if (!merged.gsheetUrl && DEFAULT_GOOGLE_SCRIPT_URL) {
         merged.gsheetUrl = DEFAULT_GOOGLE_SCRIPT_URL;
       }
       return merged;
@@ -1294,14 +1180,17 @@ function doPost(e) {
   function refreshSyncStatusIdle() {
     const url = (record.gsheetUrl || '').trim();
     const pending = record.history.filter(h => !h.synced).length;
+    const unverified = record.history.filter(h => h.syncUnverified).length;
     if (!url) {
-      setSyncStatus('sync-idle', 'Not configured', 'Paste a Google Apps Script Web App URL to enable cloud saving.');
+      setSyncStatus('sync-idle', 'Not configured', 'Paste an endpoint URL to enable cloud saving.');
     } else if (pending > 0) {
-      setSyncStatus('sync-warn', `${pending} pending`, 'Click "Sync Pending to Sheet" to upload unsent attempts.');
+      setSyncStatus('sync-warn', `${pending} pending`, 'Click "Sync Pending" to upload unsent attempts.');
+    } else if (unverified > 0) {
+      setSyncStatus('sync-warn', 'Sent (unverified)', 'Sent via fallback mode. Check your Google Sheet to verify delivery.');
     } else if (record.history.length > 0) {
-      setSyncStatus('sync-ok', 'All synced', `${record.history.length} attempt(s) stored in Google Sheet.`);
+      setSyncStatus('sync-ok', 'All synced', `${record.history.length} attempt(s) confirmed in Google Sheet.`);
     } else {
-      setSyncStatus('sync-ok', 'Connected', 'Ready to record attempts to Google Sheet.');
+      setSyncStatus('sync-ok', 'Ready', 'Ready to record attempts to Google Sheet.');
     }
   }
 
@@ -1333,19 +1222,27 @@ function doPost(e) {
       const res = await fetch(url, {
         method: 'POST',
         mode: 'cors',
+        redirect: 'follow',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: bodyStr
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (json.status !== 'ok') throw new Error(json.message || 'Apps Script error');
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error('Unexpected response (check that Web App access is set to "Anyone")');
+      }
+      if (json.status !== 'ok') throw new Error(json.message || 'Endpoint returned error');
       return { confirmed: true };
     } catch (err) {
       if (!(err instanceof TypeError)) throw err;
-      // Fallback for strict file:// origins where CORS redirect may block reading response
+      // Fallback for restricted origins (e.g. file:// or mobile browser redirect CORS quirks)
       await fetch(url, {
         method: 'POST',
         mode: 'no-cors',
+        redirect: 'follow',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: bodyStr
       });
@@ -1374,22 +1271,23 @@ function doPost(e) {
     }
 
     isSyncing = true;
-    setSyncStatus('sync-idle', 'Syncing...', `Uploading ${toSync.length} record(s) to Google Sheet...`);
+    setSyncStatus('sync-idle', 'Syncing...', `Uploading ${toSync.length} record(s)...`);
 
     try {
       const result = await postToGoogleSheet(url, toSync.map(x => x.item));
-      toSync.forEach(x => { record.history[x.idx].synced = true; });
+      toSync.forEach(x => {
+        record.history[x.idx].synced = true;
+        record.history[x.idx].syncUnverified = !result.confirmed;
+      });
       saveRecord();
       updateAllStatsUI();
-      setSyncStatus(
-        'sync-ok',
-        'Synced',
-        result.confirmed
-          ? `Saved ${toSync.length} record(s) to Google Sheet at ${new Date().toLocaleTimeString()}.`
-          : `Sent ${toSync.length} record(s) to Google Sheet at ${new Date().toLocaleTimeString()}.`
-      );
+      if (result.confirmed) {
+        setSyncStatus('sync-ok', 'Synced', `Saved ${toSync.length} record(s) to Google Sheet at ${new Date().toLocaleTimeString()}.`);
+      } else {
+        setSyncStatus('sync-warn', 'Sent (unverified)', 'CORS prevented reading confirmation. Verify the row appears in your Sheet.');
+      }
     } catch (err) {
-      setSyncStatus('sync-err', 'Sync failed', `Could not reach Google Sheet (${err.message}). Data is safely saved locally.`);
+      setSyncStatus('sync-err', 'Sync failed', `Error: ${err.message}. Data is safely saved locally.`);
     } finally {
       isSyncing = false;
     }
@@ -1410,20 +1308,26 @@ function doPost(e) {
       return;
     }
 
-    setSyncStatus('sync-idle', 'Testing...', 'Checking connection to Google Apps Script...');
+    setSyncStatus('sync-idle', 'Testing...', 'Checking connection...');
     try {
-      const res = await fetch(url, { method: 'GET', mode: 'cors' });
-      const json = await res.json();
+      const res = await fetch(url, { method: 'GET', mode: 'cors', redirect: 'follow' });
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        throw new Error('Returned HTML instead of JSON — check deployment access ("Anyone") and New Version.');
+      }
       if (json.status === 'ok') {
         setSyncStatus('sync-ok', 'Connected', json.message || 'Ready to record to Google Sheet.');
         if (record.history.some(h => !h.synced)) {
           syncPendingEntries();
         }
       } else {
-        setSyncStatus('sync-err', 'Script error', json.message || 'Unexpected response.');
+        setSyncStatus('sync-err', 'Endpoint error', json.message || 'Unexpected response.');
       }
     } catch (err) {
-      setSyncStatus('sync-warn', 'URL saved', 'Could not verify via GET (normal if opened from file://). Will test on next sync.');
+      setSyncStatus('sync-err', 'Connection check failed', err.message || 'Could not reach endpoint.');
     }
   }
 
@@ -2197,7 +2101,8 @@ function doPost(e) {
         diagnostics: viewedSolutionBeforeCheck
           ? ['Viewed solution first', ...diagTags]
           : Array.from(diagTags),
-        synced: false
+        synced: false,
+        syncUnverified: false
       };
 
       record.history.push(entry);
@@ -2206,7 +2111,8 @@ function doPost(e) {
       const entry = record.history[currentHistoryIndex];
       entry.checks = checksOnCurrent;
       entry.timeSec = timeSec;
-      entry.synced = false; // re-sync updated retry state to sheet
+      entry.synced = false;
+      entry.syncUnverified = false;
       if (allCorrect) {
         entry.solvedEventually = true;
       }
@@ -2402,9 +2308,14 @@ function doPost(e) {
         const diagText = item.diagnostics && item.diagnostics.length > 0
           ? escapeHtml(item.diagnostics.join(', '))
           : '—';
-        const syncText = item.synced
-          ? `<span class="pill-status pill-ok">Synced</span>`
-          : `<span class="pill-status pill-retry">Pending</span>`;
+        let syncText;
+        if (item.synced && !item.syncUnverified) {
+          syncText = `<span class="pill-status pill-ok">Synced</span>`;
+        } else if (item.synced && item.syncUnverified) {
+          syncText = `<span class="pill-status pill-retry">Sent (?)</span>`;
+        } else {
+          syncText = `<span class="pill-status pill-retry">Pending</span>`;
+        }
 
         return `<tr>
           <td>${item.id}</td>
@@ -2619,14 +2530,6 @@ function doPost(e) {
   document.getElementById('testGsheetBtn').addEventListener('click', testGoogleSheetConnection);
   document.getElementById('syncNowBtn').addEventListener('click', () => syncPendingEntries());
 
-  document.getElementById('copyGasBtn').addEventListener('click', function() {
-    copyTextToClipboard(APPS_SCRIPT_SOURCE, () => {
-      const orig = this.textContent;
-      this.textContent = 'Copied Apps Script!';
-      setTimeout(() => { this.textContent = orig; }, 1800);
-    });
-  });
-
   document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
   document.getElementById('copySummaryBtn').addEventListener('click', copySummaryReport);
 
@@ -2636,9 +2539,11 @@ function doPost(e) {
     const savedUrl = record.gsheetUrl;
     const savedAuto = record.autoSync;
     const savedClient = record.clientId;
+    const savedLastDef = record.lastDefaultUrl;
     record = createDefaultRecord();
     record.studentName = savedName;
     record.gsheetUrl = savedUrl;
+    record.lastDefaultUrl = savedLastDef;
     record.autoSync = savedAuto;
     record.clientId = savedClient;
     questionElapsedMs = 0;
