@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physics Motion Graph Practice</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --success: #16a34a;
+      --success-soft: #f0fdf4;
+      --warn: #d97706;
+      --warn-soft: #fffbeb;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --radius: 14px;
+      --shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .brand p {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .student-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .student-bar input {
+      padding: 7px 11px;
+      font-size: 0.88rem;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      width: 155px;
+    }
+    .student-bar input.small { width: 115px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .dot.ok { background: var(--success); }
+    .dot.warn { background: var(--warn); }
+    .dot.err { background: var(--danger); }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 9px 15px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    button:hover { background: #f8fafc; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    button.primary:hover { background: var(--primary-hover); }
+    button.secondary {
+      background: var(--primary-soft);
+      border-color: #bfdbfe;
+      color: var(--primary);
+    }
+
+    .container {
+      max-width: 1220px;
+      margin: 22px auto;
+      padding: 0 18px 40px;
+    }
+
+    .toolbar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .filter-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    select, input[type="text"], textarea {
+      font-family: inherit;
+      font-size: 0.92rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      background: #fff;
+      color: var(--text);
+    }
+    select:focus, input:focus, textarea:focus {
+      outline: 2px solid #93c5fd;
+      border-color: var(--primary);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .stats-row span b { color: var(--primary); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.08fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge.st { background: #dbeafe; color: #1e40af; }
+    .badge.vt { background: #dcfce7; color: #166534; }
+    .badge.at { background: #fef3c7; color: #92400e; }
+    .badge.qtype { background: #f3e8ff; color: #6b21a8; }
+
+    .canvas-wrap {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .question-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    .question-box h2 {
+      margin: 0 0 6px;
+      font-size: 1.04rem;
+    }
+    .question-box p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: #334155;
+    }
+
+    .req-checklist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+    .req-chip {
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 135px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .calc-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .calc-input-row input { flex: 1; }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .hint-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: var(--warn-soft);
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      color: #78350f;
+      display: none;
+    }
+
+    .feedback-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .feedback-box.pass { background: var(--success-soft); border-color: #bbf7d0; }
+    .feedback-box.partial { background: var(--warn-soft); border-color: #fde68a; }
+    .feedback-box.fail { background: var(--danger-soft); border-color: #fecaca; }
+
+    .fb-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .fb-score { font-size: 1.15rem; font-weight: 800; }
+
+    .seg-list {
+      margin: 10px 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+    .seg-item {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.86rem;
+    }
+    .model-ans {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 8px;
+      font-size: 0.86rem;
+      border: 1px dashed #94a3b8;
+    }
+
+    .history-card { margin-top: 20px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">v-t</div>
+    <div>
+      <h1>Motion Graph Practice Lab</h1>
+      <p>s-t, v-t &amp; a-t Graphs • AI Grading • Auto-Recorded to Google Sheets</p>
+    </div>
+  </div>
+
+  <div class="student-bar">
+    <input type="text" id="studentName" placeholder="Your Name *" oninput="saveStudentInfo()" />
+    <input type="text" id="studentId" class="small" placeholder="Class / ID" oninput="saveStudentInfo()" />
+    <div class="pill" title="Google Apps Script AI & Sheet status">
+      <span class="dot" id="connDot"></span>
+      <span id="connStatus">Checking server...</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="filter-group">
+      <label for="graphFilter">Graph:</label>
+      <select id="graphFilter">
+        <option value="all">Mixed (s-t, v-t, a-t)</option>
+        <option value="st">s-t Graph (Displacement-Time)</option>
+        <option value="vt">v-t Graph (Velocity-Time)</option>
+        <option value="at">a-t Graph (Acceleration-Time)</option>
+      </select>
+
+      <label for="qTypeFilter">Question:</label>
+      <select id="qTypeFilter">
+        <option value="all">Mixed (Describe + Calculate)</option>
+        <option value="describe">Describe the Motion</option>
+        <option value="calculate">Calculation</option>
+      </select>
+
+      <button class="primary" onclick="generateNewQuestion()">✨ New Question</button>
+    </div>
+
+    <div class="stats-row">
+      <span>Completed: <b id="statCount">0</b></span>
+      <span>Avg Score: <b id="statAvg">-</b></span>
+      <span>Streak: <b id="statStreak">0</b></span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Left: Graph Canvas -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <span class="badge st" id="graphBadge">s-t Graph</span>
+          <span class="badge qtype" id="qTypeBadge">Describe</span>
+        </div>
+        <span style="font-size:0.82rem; color:var(--muted);" id="axisHintText">Gradient = velocity</span>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="graphCanvas"></canvas>
+      </div>
+      <div style="margin-top:10px; font-size:0.8rem; color:var(--muted);">
+        Tip: Vertical dashed lines mark exact time segment boundaries.
+      </div>
+    </div>
+
+    <!-- Right: Question & AI Checking -->
+    <div class="card">
+      <div class="question-box">
+        <h2 id="questionTitle">Loading question...</h2>
+        <p id="questionPrompt"></p>
+      </div>
+
+      <div id="describeChecklist" class="req-checklist" style="display:none;">
+        <span class="req-chip">1. Time Period (e.g. 0–4 s)</span>
+        <span class="req-chip">2. Type of Motion</span>
+        <span class="req-chip">3. Related Figure (with unit)</span>
+      </div>
+
+      <div id="answerArea"></div>
+
+      <div class="action-row">
+        <button class="primary" id="checkBtn" onclick="checkAnswer()">🤖 AI Check &amp; Submit</button>
+        <button class="secondary" onclick="toggleHint()">💡 Hint</button>
+        <button onclick="generateNewQuestion()">Next Question →</button>
+      </div>
+
+      <div id="hintBox" class="hint-box"></div>
+
+      <div id="feedbackBox" class="feedback-box">
+        <div class="fb-top">
+          <strong id="fbTitle">Evaluation</strong>
+          <span class="fb-score" id="fbScore">0%</span>
+        </div>
+        <div id="fbSummary" style="font-size:0.92rem; margin-bottom:8px;"></div>
+        <ul id="fbSegments" class="seg-list"></ul>
+        <div id="fbModel" class="model-ans"></div>
+        <div id="fbMeta" style="margin-top:8px; font-size:0.76rem; color:var(--muted);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session History -->
+  <div class="card history-card">
+    <div class="card-header">
+      <h3 style="margin:0; font-size:1rem;">My Session Performance</h3>
+      <button onclick="exportCSV()" style="padding:6px 12px; font-size:0.82rem;">⬇️ Export CSV</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Graph</th>
+            <th>Type</th>
+            <th>Score</th>
+            <th>Answer Summary</th>
+            <th>Google Sheet</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="6" style="color:var(--muted); text-align:center;">No attempts yet. Complete a question above!</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== PRESET TEACHER GOOGLE APPS SCRIPT URL ====================
+// Replace the URL below with your deployed Google Apps Script Web App URL.
+// The Gemini API key stays securely inside your Google Apps Script.
+const PRESET_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQWZqpuuK7Bky5lCPsFnPKw01wUbAxrwONRd7Dh8MNWHn0k2-OiEJ34nAFaHpKc8VQ/exec';
+// ===============================================================================
+
+const STUDENT_STORAGE_KEY = 'motionGraphStudentInfo_v1';
+let currentProblem = null;
+let questionStartTime = Date.now();
+let sessionLogs = [];
+let streak = 0;
+
+function isScriptConfigured() {
+  return PRESET_APPS_SCRIPT_URL.startsWith('https://script.google.com/') &&
+         !PRESET_APPS_SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID');
+}
+
+function loadStudentInfo() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STUDENT_STORAGE_KEY));
+    if (saved) {
+      document.getElementById('studentName').value = saved.name || '';
+      document.getElementById('studentId').value = saved.id || '';
+    }
+  } catch (_) {}
+}
+
+function saveStudentInfo() {
+  localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify({
+    name: document.getElementById('studentName').value.trim(),
+    id: document.getElementById('studentId').value.trim()
+  }));
+}
+
+async function checkServerStatus() {
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connStatus');
+  if (!isScriptConfigured()) {
+    dot.className = 'dot warn';
+    txt.textContent = 'Offline Mode (URL not preset)';
+    return;
+  }
+  try {
+    const res = await fetch(PRESET_APPS_SCRIPT_URL);
+    const json = await res.json();
+    if (json.status === 'ready') {
+      dot.className = 'dot ok';
+      txt.textContent = 'AI & Sheet Connected';
+    } else {
+      dot.className = 'dot warn';
+      txt.textContent = 'Server Warning';
+    }
+  } catch (_) {
+    dot.className = 'dot err';
+    txt.textContent = 'Connection Error';
+  }
+}
+
+// ==================== QUESTION GENERATOR ====================
+const randPick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function generateProblemData(graphType, qType) {
+  const durations = [
+    randPick([2, 3, 4]),
+    randPick([2, 3, 4, 5]),
+    randPick([2, 3, 4])
+  ];
+  const tMarks = [0, durations[0], durations[0] + durations[1], durations[0] + durations[1] + durations[2]];
+
+  let segments = [];
+  let points = [];
+
+  if (graphType === 'st') {
+    let s = randPick([0, 0, 2, 4]);
+    points.push({ t: 0, y: s });
+    let prevV = null;
+    for (let i = 0; i < 3; i++) {
+      let candidates = [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5].filter(v => v !== prevV);
+      if (i === 0) candidates = candidates.filter(v => v !== 0);
+      const v = randPick(candidates);
+      prevV = v;
+      const dt = durations[i];
+      const sStart = s;
+      const sEnd = s + v * dt;
+      s = sEnd;
+      points.push({ t: tMarks[i + 1], y: sEnd });
+
+      let motionType = 'constant velocity';
+      let motionCode = 'const_vel';
+      if (v === 0) { motionType = 'at rest (stationary)'; motionCode = 'rest'; }
+      else if (v < 0) { motionType = 'constant velocity in the opposite (negative) direction'; motionCode = 'const_vel_neg'; }
+
+      segments.push({
+        index: i + 1,
+        tStart: tMarks[i],
+        tEnd: tMarks[i + 1],
+        dt,
+        yStart: sStart,
+        yEnd: sEnd,
+        value: v,
+        figureLabel: v === 0 ? `velocity = 0 m/s (at s = ${sStart} m)` : `velocity = ${v} m/s`,
+        expectedFigures: v === 0 ? [0, sStart] : [v, Math.abs(v)],
+        motionType,
+        motionCode,
+        unit: 'm/s'
+      });
+    }
+  } else if (graphType === 'vt') {
+    let v = randPick([0, 0, 2, 4, 6]);
+    points.push({ t: 0, y: v });
+    let prevA = null;
+    for (let i = 0; i < 3; i++) {
+      const dt = durations[i];
+      let candidates = [];
+      for (const a of [-3, -2, -1, 0, 1, 2, 3, 4]) {
+        if (a === prevA) continue;
+        const vNext = v + a * dt;
+        if (vNext > 16 || vNext < -10) continue;
+        if ((v > 0 && vNext < 0) || (v < 0 && vNext > 0)) continue;
+        candidates.push(a);
+      }
+      if (candidates.length === 0) candidates = [0];
+      const a = randPick(candidates);
+      prevA = a;
+      const vStart = v;
+      const vEnd = v + a * dt;
+      v = vEnd;
+      points.push({ t: tMarks[i + 1], y: vEnd });
+
+      let motionType = '';
+      let motionCode = '';
+      if (a === 0 && vStart === 0) {
+        motionType = 'at rest (stationary)';
+        motionCode = 'rest';
+      } else if (a === 0) {
+        motionType = vStart > 0 ? 'constant (uniform) velocity' : 'constant velocity in the opposite direction';
+        motionCode = vStart > 0 ? 'const_vel' : 'const_vel_neg';
+      } else if (Math.abs(vEnd) > Math.abs(vStart)) {
+        motionType = vEnd >= 0 ? 'uniform (constant) acceleration' : 'uniform acceleration in the opposite direction';
+        motionCode = 'accel';
+      } else {
+        motionType = 'uniform deceleration (slowing down)';
+        motionCode = 'decel';
+      }
+
+      const figureLabel = a === 0
+        ? `velocity = ${vStart} m/s`
+        : (motionCode === 'decel'
+            ? `deceleration = ${Math.abs(a)} m/s² (a = ${a} m/s²)`
+            : `acceleration = ${a} m/s²`);
+
+      segments.push({
+        index: i + 1,
+        tStart: tMarks[i],
+        tEnd: tMarks[i + 1],
+        dt,
+        yStart: vStart,
+        yEnd: vEnd,
+        value: a,
+        area: 0.5 * (vStart + vEnd) * dt,
+        figureLabel,
+        expectedFigures: a === 0 ? [vStart, Math.abs(vStart)] : [a, Math.abs(a)],
+        motionType,
+        motionCode,
+        unit: a === 0 ? 'm/s' : 'm/s²'
+      });
+    }
+  } else if (graphType === 'at') {
+    let prevA = null;
+    for (let i = 0; i < 3; i++) {
+      let candidates = [-4, -3, -2, -1, 0, 1, 2, 3, 4].filter(a => a !== prevA);
+      if (i === 0) candidates = candidates.filter(a => a !== 0);
+      const a = randPick(candidates);
+      prevA = a;
+      const dt = durations[i];
+      points.push({ tStart: tMarks[i], tEnd: tMarks[i + 1], y: a });
+
+      let motionType = '';
+      let motionCode = '';
+      if (a === 0) {
+        motionType = 'zero acceleration (constant velocity or at rest)';
+        motionCode = 'const_vel';
+      } else if (a > 0) {
+        motionType = 'uniform (constant) positive acceleration';
+        motionCode = 'accel';
+      } else {
+        motionType = 'uniform negative acceleration (or deceleration)';
+        motionCode = 'decel';
+      }
+
+      segments.push({
+        index: i + 1,
+        tStart: tMarks[i],
+        tEnd: tMarks[i + 1],
+        dt,
+        yStart: a,
+        yEnd: a,
+        value: a,
+        area: a * dt,
+        figureLabel: `acceleration = ${a} m/s²`,
+        expectedFigures: [a, Math.abs(a)],
+        motionType,
+        motionCode,
+        unit: 'm/s²'
+      });
+    }
+  }
+
+  let questionTitle = '';
+  let questionPrompt = '';
+  let calcMeta = null;
+  let hint = '';
+  let modelAnswer = '';
+
+  if (qType === 'describe') {
+    const graphNames = { st: 'displacement-time (s-t)', vt: 'velocity-time (v-t)', at: 'acceleration-time (a-t)' };
+    questionTitle = `Describe the Motion (${graphNames[graphType]} graph)`;
+    questionPrompt = `Describe the motion of the object from t = 0 s to t = ${tMarks[3]} s. For EACH time interval, state: (1) the time period, (2) the type of motion, and (3) the related figure with units.`;
+    hint = graphType === 'st'
+      ? 'On an s-t graph, gradient = velocity. Horizontal = at rest; straight sloped line = constant velocity.'
+      : graphType === 'vt'
+      ? 'On a v-t graph, gradient = acceleration. Horizontal = constant velocity (or at rest if v = 0). Sloping toward 0 = deceleration.'
+      : 'On an a-t graph, read acceleration directly from the vertical axis. a = 0 means zero acceleration (constant velocity).';
+
+    modelAnswer = segments.map(seg =>
+      `• From t = ${seg.tStart} s to ${seg.tEnd} s: ${seg.motionType}, with ${seg.figureLabel}.`
+    ).join('\n');
+  } else {
+    const built = buildCalculationQuestion(graphType, segments, tMarks);
+    questionTitle = built.title;
+    questionPrompt = built.prompt;
+    calcMeta = built.calcMeta;
+    hint = built.hint;
+    modelAnswer = built.modelAnswer;
+  }
+
+  return {
+    graphType,
+    qType,
+    tMax: tMarks[3],
+    tMarks,
+    segments,
+    points,
+    questionTitle,
+    questionPrompt,
+    calcMeta,
+    hint,
+    modelAnswer
+  };
+}
+
+function buildCalculationQuestion(graphType, segments, tMarks) {
+  const nonZeroSegs = segments.filter(s => s.value !== 0);
+  const seg = nonZeroSegs.length ? randPick(nonZeroSegs) : segments[0];
+
+  if (graphType === 'st') {
+    const kind = randPick(['velocity', 'total_distance', 'total_displacement']);
+    if (kind === 'velocity') {
+      return {
+        title: 'Calculate Velocity from s-t Graph',
+        prompt: `Calculate the velocity of the object between t = ${seg.tStart} s and t = ${seg.tEnd} s.`,
+        hint: 'Velocity = gradient of s-t graph = (s₂ − s₁) / (t₂ − t₁).',
+        modelAnswer: `v = (${seg.yEnd} − ${seg.yStart}) / (${seg.tEnd} − ${seg.tStart}) = ${seg.value} m/s`,
+        calcMeta: { expected: seg.value, unit: 'm/s', signMatters: true }
+      };
+    } else if (kind === 'total_distance') {
+      const dist = segments.reduce((acc, s) => acc + Math.abs(s.yEnd - s.yStart), 0);
+      const steps = segments.map(s => `|${s.yEnd} − ${s.yStart}|`).join(' + ');
+      return {
+        title: 'Calculate Total Distance from s-t Graph',
+        prompt: `Calculate the total distance travelled by the object from t = 0 s to t = ${tMarks[3]} s.`,
+        hint: 'Total distance = sum of |displacement| for all segments (always positive).',
+        modelAnswer: `Total distance = ${steps} = ${dist} m`,
+        calcMeta: { expected: dist, unit: 'm', signMatters: false }
+      };
+    } else {
+      const disp = segments[2].yEnd - segments[0].yStart;
+      return {
+        title: 'Calculate Total Displacement from s-t Graph',
+        prompt: `Find the total displacement of the object from t = 0 s to t = ${tMarks[3]} s.`,
+        hint: 'Total displacement = s(final) − s(0).',
+        modelAnswer: `Displacement = ${segments[2].yEnd} − ${segments[0].yStart} = ${disp} m`,
+        calcMeta: { expected: disp, unit: 'm', signMatters: true }
+      };
+    }
+  }
+
+  if (graphType === 'vt') {
+    const kind = randPick(['accel', 'seg_disp', 'total_disp']);
+    if (kind === 'accel') {
+      return {
+        title: 'Calculate Acceleration from v-t Graph',
+        prompt: `Calculate the acceleration of the object from t = ${seg.tStart} s to t = ${seg.tEnd} s.`,
+        hint: 'Acceleration = gradient of v-t graph = (v − u) / Δt.',
+        modelAnswer: `a = (${seg.yEnd} − ${seg.yStart}) / (${seg.tEnd} − ${seg.tStart}) = ${seg.value} m/s²`,
+        calcMeta: { expected: seg.value, unit: 'm/s²', signMatters: true }
+      };
+    } else if (kind === 'seg_disp') {
+      const targetSeg = randPick(segments.filter(s => s.area !== 0)) || segments[0];
+      return {
+        title: 'Calculate Displacement from v-t Graph',
+        prompt: `Calculate the displacement of the object between t = ${targetSeg.tStart} s and t = ${targetSeg.tEnd} s.`,
+        hint: 'Displacement = area under v-t graph = ½ × (v₁ + v₂) × Δt.',
+        modelAnswer: `Displacement = ½ × (${targetSeg.yStart} + ${targetSeg.yEnd}) × ${targetSeg.dt} = ${targetSeg.area} m`,
+        calcMeta: { expected: targetSeg.area, unit: 'm', signMatters: true }
+      };
+    } else {
+      const totalArea = segments.reduce((acc, s) => acc + s.area, 0);
+      return {
+        title: 'Calculate Total Displacement from v-t Graph',
+        prompt: `Calculate the total displacement of the object from t = 0 s to t = ${tMarks[3]} s.`,
+        hint: 'Total displacement = total signed area under the v-t graph.',
+        modelAnswer: `Total displacement = ${segments.map(s => s.area).join(' + ')} = ${totalArea} m`,
+        calcMeta: { expected: totalArea, unit: 'm', signMatters: true }
+      };
+    }
+  }
+
+  const kind = randPick(['delta_v_seg', 'final_v']);
+  if (kind === 'delta_v_seg') {
+    const totalDv = segments.reduce((acc, s) => acc + s.area, 0);
+    return {
+      title: 'Calculate Change in Velocity from a-t Graph',
+      prompt: `Calculate the total change in velocity (Δv) of the object from t = 0 s to t = ${tMarks[3]} s.`,
+      hint: 'Δv = area under the a-t graph = Σ (a × Δt).',
+      modelAnswer: `Δv = ${segments.map(s => `(${s.value} × ${s.dt})`).join(' + ')} = ${totalDv} m/s`,
+      calcMeta: { expected: totalDv, unit: 'm/s', signMatters: true }
+    };
+  } else {
+    const u = randPick([0, 2, 4, 5]);
+    const totalDv = segments.reduce((acc, s) => acc + s.area, 0);
+    const vFinal = u + totalDv;
+    return {
+      title: 'Calculate Final Velocity from a-t Graph',
+      prompt: `If the object starts with initial velocity u = ${u} m/s at t = 0 s, find its velocity at t = ${tMarks[3]} s.`,
+      hint: 'Final velocity v = u + Δv, where Δv is the signed area under the a-t graph.',
+      modelAnswer: `Δv = ${totalDv} m/s, so v = ${u} + (${totalDv}) = ${vFinal} m/s`,
+      calcMeta: { expected: vFinal, unit: 'm/s', signMatters: true }
+    };
+  }
+}
+
+function generateNewQuestion() {
+  const gSel = document.getElementById('graphFilter').value;
+  const qSel = document.getElementById('qTypeFilter').value;
+  const graphType = gSel === 'all' ? randPick(['st', 'vt', 'at']) : gSel;
+  const qType = qSel === 'all' ? randPick(['describe', 'calculate']) : qSel;
+
+  currentProblem = generateProblemData(graphType, qType);
+  questionStartTime = Date.now();
+
+  const gBadge = document.getElementById('graphBadge');
+  gBadge.className = 'badge ' + graphType;
+  gBadge.textContent = graphType === 'st' ? 's-t Graph' : graphType === 'vt' ? 'v-t Graph' : 'a-t Graph';
+
+  document.getElementById('qTypeBadge').textContent = qType === 'describe' ? 'Describe Motion' : 'Calculation';
+  document.getElementById('axisHintText').textContent =
+    graphType === 'st' ? 'Gradient = velocity' :
+    graphType === 'vt' ? 'Gradient = accel • Area = displacement' :
+    'Area = change in velocity (Δv)';
+
+  document.getElementById('questionTitle').textContent = currentProblem.questionTitle;
+  document.getElementById('questionPrompt').textContent = currentProblem.questionPrompt;
+  document.getElementById('describeChecklist').style.display = qType === 'describe' ? 'flex' : 'none';
+
+const ansArea = document.getElementById('answerArea');
+  if (qType === 'describe') {
+    ansArea.innerHTML = `<textarea id="studentAnswer" placeholder="Format for each segment:\nFrom t = __ to __ s, the object [type of motion] at [value + unit]."></textarea>`;
+  } else {
+    const dummyExample = currentProblem.calcMeta.expected === 5 ? 8 : 5;
+    ansArea.innerHTML = `
+      <div class="calc-input-row">
+        <input type="text" id="studentAnswer" placeholder="Enter your answer with unit (e.g. ${dummyExample} ${currentProblem.calcMeta.unit})" onkeydown="if(event.key==='Enter') checkAnswer()" />
+      </div>
+      <small style="color:var(--muted); display:block; margin-top:6px;">You can also include your formula/working before the final answer.</small>
+    `;
+  }
+
+  document.getElementById('hintBox').style.display = 'none';
+  document.getElementById('feedbackBox').style.display = 'none';
+  drawGraph(currentProblem);
+}
+
+function toggleHint() {
+  const hb = document.getElementById('hintBox');
+  if (hb.style.display === 'block') {
+    hb.style.display = 'none';
+  } else {
+    hb.textContent = '💡 ' + currentProblem.hint;
+    hb.style.display = 'block';
+  }
+}
+
+// ==================== GRAPH RENDERER ====================
+function drawGraph(prob) {
+  const canvas = document.getElementById('graphCanvas');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width;
+  const H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  let yVals = [0];
+  prob.points.forEach(p => yVals.push(p.y));
+  let yMin = Math.min(...yVals);
+  let yMax = Math.max(...yVals);
+  if (yMin === yMax) { yMin -= 2; yMax += 2; }
+
+  const rawSpan = yMax - yMin;
+  let yStep = 1;
+  if (rawSpan > 24) yStep = 4;
+  else if (rawSpan > 12) yStep = 2;
+
+  yMin = Math.floor(yMin / yStep) * yStep;
+  yMax = Math.ceil(yMax / yStep) * yStep;
+  if (yMin === yMax) yMax += yStep;
+
+  const tMax = prob.tMax;
+  const pad = { left: 56, right: 24, top: 26, bottom: 44 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  const toX = t => pad.left + (t / tMax) * plotW;
+  const toY = y => pad.top + ((yMax - y) / (yMax - yMin)) * plotH;
+
+  ctx.lineWidth = 1;
+  ctx.font = '12px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+
+  for (let t = 0; t <= tMax; t++) {
+    const x = toX(t);
+    ctx.strokeStyle = prob.tMarks.includes(t) ? '#cbd5e1' : '#f1f5f9';
+    ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, H - pad.bottom); ctx.stroke();
+    ctx.fillStyle = '#475569';
+    ctx.fillText(t, x, H - pad.bottom + 7);
+  }
+
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let y = yMin; y <= yMax + 0.001; y += yStep) {
+    const py = toY(y);
+    ctx.strokeStyle = Math.abs(y) < 1e-6 ? '#64748b' : '#e2e8f0';
+    ctx.lineWidth = Math.abs(y) < 1e-6 ? 1.6 : 1;
+    ctx.beginPath(); ctx.moveTo(pad.left, py); ctx.lineTo(W - pad.right, py); ctx.stroke();
+    ctx.fillStyle = '#475569';
+    ctx.fillText(Math.round(y * 10) / 10, pad.left - 8, py);
+  }
+
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top);
+  ctx.lineTo(pad.left, H - pad.bottom);
+  ctx.stroke();
+
+  const yZero = (yMin <= 0 && yMax >= 0) ? toY(0) : (H - pad.bottom);
+  ctx.beginPath();
+  ctx.moveTo(pad.left, yZero);
+  ctx.lineTo(W - pad.right, yZero);
+  ctx.stroke();
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 13px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('Time t (s)', pad.left + plotW / 2, H - 4);
+
+  const yLabel = prob.graphType === 'st' ? 'Displacement s (m)'
+    : prob.graphType === 'vt' ? 'Velocity v (m/s)'
+    : 'Acceleration a (m/s²)';
+  ctx.save();
+  ctx.translate(16, pad.top + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textBaseline = 'middle';
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1;
+  prob.tMarks.slice(1).forEach(tm => {
+    const gx = toX(tm);
+    ctx.beginPath(); ctx.moveTo(gx, pad.top); ctx.lineTo(gx, H - pad.bottom); ctx.stroke();
+  });
+  ctx.restore();
+
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 3;
+  ctx.lineJoin = 'round';
+
+  if (prob.graphType === 'at') {
+    prob.points.forEach((seg, idx) => {
+      const x1 = toX(seg.tStart), x2 = toX(seg.tEnd), y = toY(seg.y);
+      ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+      if (idx < prob.points.length - 1) {
+        const yNext = toY(prob.points[idx + 1].y);
+        ctx.save();
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = '#60a5fa';
+        ctx.beginPath(); ctx.moveTo(x2, y); ctx.lineTo(x2, yNext); ctx.stroke();
+        ctx.restore();
+      }
+      drawDot(ctx, x1, y);
+      drawDot(ctx, x2, y);
+    });
+  } else {
+    ctx.beginPath();
+    prob.points.forEach((pt, idx) => {
+      const px = toX(pt.t), py = toY(pt.y);
+      if (idx === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+    prob.points.forEach(pt => drawDot(ctx, toX(pt.t), toY(pt.y)));
+  }
+}
+
+function drawDot(ctx, x, y) {
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+}
+
+window.addEventListener('resize', () => { if (currentProblem) drawGraph(currentProblem); });
+
+// ==================== AI & RUBRIC CHECKING ====================
+function buildAIPrompt(prob, studentAns) {
+  const segSummary = prob.segments.map(s =>
+    `Segment ${s.index}: t=${s.tStart}s to ${s.tEnd}s | Motion: ${s.motionType} | Figure: ${s.figureLabel}`
+  ).join('\n');
+
+  return `You are an expert physics teacher grading a student's motion graph answer.
+Graph type: ${prob.graphType}-t graph
+Question type: ${prob.qType}
+Question: ${prob.questionPrompt}
+Ground truth data:
+${segSummary}
+${prob.calcMeta ? `Expected numerical answer: ${prob.calcMeta.expected} ${prob.calcMeta.unit}` : ''}
+Model Answer:
+${prob.modelAnswer}
+
+Student Answer:
+"""
+${studentAns}
+"""
+
+Grading rules:
+- If Question type is "describe": For EACH of the ${prob.segments.length} time segments, check whether the student stated:
+  1) the time period
+  2) the type of motion (allow standard physics synonyms e.g. uniform/constant velocity, stationary/at rest, slowing down/deceleration)
+  3) the related figure (velocity, acceleration, or position with reasonable accuracy).
+- If Question type is "calculate": Check the final numerical value (allow minor rounding), sign/direction if relevant, and unit.
+
+Return ONLY valid JSON matching this exact schema:
+{
+  "score": <integer 0 to 100>,
+  "isCorrect": <boolean, true if score >= 70>,
+  "summary": "<concise 1-2 sentence encouraging feedback>",
+  "segments": [
+    "<Segment evaluation e.g. 0–4 s: Time ✓ | Motion ✓ | Figure ✗ (missing acceleration 2 m/s²)>"
+  ],
+  "modelAnswer": "<clean model answer>"
+}`;
+}
+
+function evaluateWithLocalRubric(prob, studentAns) {
+  if (prob.qType === 'calculate') return gradeCalcLocal(prob, studentAns);
+  return gradeDescribeLocal(prob, studentAns);
+}
+
+function gradeCalcLocal(prob, ans) {
+  const expected = prob.calcMeta.expected;
+  const nums = ans.match(/-?\d+(\.\d+)?/g);
+  if (!nums) {
+    return {
+      score: 0,
+      isCorrect: false,
+      summary: 'No numerical value detected. Please include the calculated number and unit.',
+      segments: [],
+      modelAnswer: prob.modelAnswer
+    };
+  }
+  const val = parseFloat(nums[nums.length - 1]);
+  const tol = Math.max(0.05, Math.abs(expected) * 0.03);
+  if (Math.abs(val - expected) <= tol) {
+    return {
+      score: 100,
+      isCorrect: true,
+      summary: `Correct! Your answer (${val}) matches the expected value (${expected} ${prob.calcMeta.unit}).`,
+      segments: [],
+      modelAnswer: prob.modelAnswer
+    };
+  }
+  if (prob.calcMeta.signMatters && Math.abs(Math.abs(val) - Math.abs(expected)) <= tol && val !== expected) {
+    return {
+      score: 60,
+      isCorrect: false,
+      summary: `Magnitude is right (${Math.abs(val)}), but check the sign/direction (${expected} ${prob.calcMeta.unit}).`,
+      segments: [],
+      modelAnswer: prob.modelAnswer
+    };
+  }
+  return {
+    score: 0,
+    isCorrect: false,
+    summary: `Not quite. You entered ${val}, while the expected value is ${expected} ${prob.calcMeta.unit}.`,
+    segments: [],
+    modelAnswer: prob.modelAnswer
+  };
+}
+
+function gradeDescribeLocal(prob, ans) {
+  const lower = ans.toLowerCase();
+  const timeRegex = /(?:from\s*)?(?:t\s*=\s*)?(\d+)\s*(?:s|sec|seconds)?\s*(?:to|-|–|—|until|and)\s*(?:t\s*=\s*)?(\d+)\s*(?:s|sec|seconds)?/gi;
+  const matches = [...lower.matchAll(timeRegex)].map(m => ({
+    t1: parseInt(m[1], 10),
+    t2: parseInt(m[2], 10),
+    index: m.index,
+    raw: m[0]
+  }));
+
+  const firstMatch = lower.match(/first\s+(\d+)\s*(?:s|sec|seconds)/i);
+  if (firstMatch && !matches.some(m => m.t1 === 0 && m.t2 === parseInt(firstMatch[1], 10))) {
+    matches.push({ t1: 0, t2: parseInt(firstMatch[1], 10), index: firstMatch.index, raw: firstMatch[0] });
+  }
+  matches.sort((a, b) => a.index - b.index);
+
+  let earned = 0;
+  const maxPts = prob.segments.length * 3;
+  const segResults = [];
+
+  prob.segments.forEach((seg, idx) => {
+    const matchIdx = matches.findIndex(m => m.t1 === seg.tStart && m.t2 === seg.tEnd);
+    const hasTime = matchIdx !== -1;
+
+    let chunk = '';
+    if (hasTime) {
+      const start = matches[matchIdx].index;
+      const end = (matchIdx + 1 < matches.length) ? matches[matchIdx + 1].index : lower.length;
+      chunk = lower.slice(start, end);
+    } else {
+      const parts = lower.split(/[\n.;]+/).filter(p => p.trim().length > 2);
+      chunk = parts[idx] || lower;
+    }
+
+    const strippedChunk = hasTime ? chunk.replace(matches[matchIdx].raw, ' ') : chunk;
+    const hasMotion = checkMotionKeywords(seg.motionCode, strippedChunk);
+    const nums = (strippedChunk.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+    const hasFigure = seg.expectedFigures.some(ef => nums.some(n => Math.abs(n - ef) <= 0.15));
+
+    if (hasTime) earned++;
+    if (hasMotion) earned++;
+    if (hasFigure) earned++;
+
+    segResults.push(
+      `Segment ${seg.index} (${seg.tStart}–${seg.tEnd} s): `
+      + `Time ${hasTime ? '✓' : '✗'} | Motion ${hasMotion ? '✓' : '✗'} | Figure ${hasFigure ? '✓' : '✗'}`
+      + (!hasFigure || !hasMotion || !hasTime ? ` → Expected: ${seg.motionType}, ${seg.figureLabel}` : '')
+    );
+  });
+
+  const score = Math.round((earned / maxPts) * 100);
+  return {
+    score,
+    isCorrect: score >= 70,
+    summary: score === 100
+      ? 'Excellent! Every time period, motion type, and related figure is clearly stated.'
+      : score >= 70
+      ? 'Good job! Most key details are present—check any missing items below.'
+      : 'Needs improvement. Include (1) time period, (2) motion type, and (3) related figure for each segment.',
+    segments: segResults,
+    modelAnswer: prob.modelAnswer
+  };
+}
+
+function checkMotionKeywords(code, text) {
+  if (code === 'rest') return /(rest|stationary|not moving|stops|stopped|zero velocity|zero speed|no motion)/.test(text);
+  if (code === 'const_vel') return /(constant velocity|uniform velocity|constant speed|uniform speed|steady speed|zero acceleration|moves? forward|positive velocity)/.test(text);
+  if (code === 'const_vel_neg') return /(constant|uniform|steady|opposite|backward|backwards|negative|return)/.test(text) && /(velocity|speed|direction|move|motion)/.test(text);
+  if (code === 'accel') return /(accelerat|speeding up|speeds up|velocity increases|increasing velocity|positive acceleration)/.test(text) && !/decelerat/.test(text);
+  if (code === 'decel') return /(decelerat|slowing down|slows down|negative acceleration|retardation|velocity decreases|decreasing velocity)/.test(text);
+  return false;
+}
+
+async function checkAnswer() {
+  const nameInput = document.getElementById('studentName');
+  const studentName = nameInput.value.trim();
+  if (!studentName) {
+    alert('Please enter your Name in the top bar before submitting.');
+    nameInput.focus();
+    return;
+  }
+
+  const studentId = document.getElementById('studentId').value.trim() || '-';
+  const studentAns = document.getElementById('studentAnswer').value.trim();
+  if (!studentAns) {
+    alert('Please enter your answer before checking.');
+    return;
+  }
+
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Checking with AI...';
+
+  const timeSpentSec = Math.round((Date.now() - questionStartTime) / 1000);
+  const prompt = buildAIPrompt(currentProblem, studentAns);
+  const logPayload = {
+    studentName,
+    studentId,
+    graphType: currentProblem.graphType.toUpperCase(),
+    questionType: currentProblem.qType,
+    questionText: currentProblem.questionPrompt,
+    studentAnswer: studentAns,
+    timeSpentSec
+  };
+
+  let result = null;
+  let usedEngine = 'Built-in Smart Rubric';
+  let syncStatus = 'Offline Only';
+
+  try {
+    if (isScriptConfigured()) {
+      try {
+        const res = await fetch(PRESET_APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'gradeAndLog',
+            prompt,
+            logData: logPayload
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'ok' && json.aiResult) {
+          result = json.aiResult;
+          usedEngine = 'Google Apps Script AI';
+          syncStatus = 'Synced ✓';
+        }
+      } catch (_) {}
+    }
+
+    // Fallback if Apps Script AI didn't respond (e.g. URL not preset or API key missing in Script)
+    if (!result) {
+      result = evaluateWithLocalRubric(currentProblem, studentAns);
+      if (isScriptConfigured()) {
+        try {
+          const res = await fetch(PRESET_APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'log',
+              ...logPayload,
+              score: result.score,
+              isCorrect: result.isCorrect,
+              feedback: result.summary,
+              engine: usedEngine
+            })
+          });
+          const json = await res.json();
+          syncStatus = json.status === 'ok' ? 'Synced ✓' : 'Sync Error';
+        } catch (_) {
+          syncStatus = 'Sync Failed';
+        }
+      }
+    }
+
+    renderFeedback(result, usedEngine, syncStatus);
+    recordSessionHistory(currentProblem, studentAns, result, syncStatus);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 AI Check & Submit';
+  }
+}
+
+function renderFeedback(res, engine, syncStatus) {
+  const box = document.getElementById('feedbackBox');
+  box.className = 'feedback-box ' + (res.score >= 70 ? 'pass' : res.score >= 40 ? 'partial' : 'fail');
+  box.style.display = 'block';
+
+  document.getElementById('fbTitle').textContent = res.isCorrect ? '✅ Well Done!' : '📝 Review Feedback';
+  document.getElementById('fbScore').textContent = `${res.score}%`;
+  document.getElementById('fbSummary').textContent = res.summary;
+
+  const segUl = document.getElementById('fbSegments');
+  segUl.innerHTML = '';
+  if (Array.isArray(res.segments) && res.segments.length) {
+    res.segments.forEach(s => {
+      const li = document.createElement('li');
+      li.className = 'seg-item';
+      li.textContent = s;
+      segUl.appendChild(li);
+    });
+  }
+
+  document.getElementById('fbModel').innerHTML = `<b>Model Answer:</b><br>${(res.modelAnswer || currentProblem.modelAnswer).replace(/\n/g, '<br>')}`;
+  document.getElementById('fbMeta').textContent = `Checked by: ${engine} • Google Sheet: ${syncStatus}`;
+}
+
+function recordSessionHistory(prob, ans, res, syncStatus) {
+  if (res.isCorrect) streak++;
+  else streak = 0;
+
+  sessionLogs.unshift({
+    time: new Date().toLocaleTimeString(),
+    graph: prob.graphType.toUpperCase(),
+    qType: prob.qType,
+    score: res.score,
+    ans: ans.length > 55 ? ans.slice(0, 55) + '…' : ans,
+    fullAns: ans,
+    syncStatus
+  });
+
+  document.getElementById('statCount').textContent = sessionLogs.length;
+  const avg = Math.round(sessionLogs.reduce((a, b) => a + b.score, 0) / sessionLogs.length);
+  document.getElementById('statAvg').textContent = avg + '%';
+  document.getElementById('statStreak').textContent = streak;
+
+  document.getElementById('historyBody').innerHTML = sessionLogs.map(row => `
+    <tr>
+      <td>${row.time}</td>
+      <td><b>${row.graph}</b></td>
+      <td>${row.qType}</td>
+      <td><b style="color:${row.score >= 70 ? 'var(--success)' : 'var(--danger)'}">${row.score}%</b></td>
+      <td>${escapeHtml(row.ans)}</td>
+      <td>${row.syncStatus}</td>
+    </tr>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+}
+
+function exportCSV() {
+  if (!sessionLogs.length) return alert('No logs to export yet.');
+  const name = document.getElementById('studentName').value.trim() || 'Student';
+  const id = document.getElementById('studentId').value.trim() || '-';
+  const rows = [['Time', 'Student', 'ID', 'Graph', 'Type', 'Score', 'Answer', 'SheetSync']];
+  sessionLogs.forEach(r => {
+    rows.push([r.time, name, id, r.graph, r.qType, r.score, `"${r.fullAns.replace(/"/g, '""')}"`, r.syncStatus]);
+  });
+  const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'motion-graph-results.csv';
+  a.click();
+}
+
+// Init
+loadStudentInfo();
+checkServerStatus();
+generateNewQuestion();
+</script>
+</body>
+</html>
