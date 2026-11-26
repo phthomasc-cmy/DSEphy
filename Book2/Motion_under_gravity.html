@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motion Under Gravity Simulation</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --disp-color: #f59e0b;   /* Amber for Displacement */
+      --vel-color: #38bdf8;    /* Cyan for Velocity */
+      --acc-color: #f43f5e;    /* Rose/Red for Acceleration */
+      --btn-bg: #334155;
+      --btn-hover: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px minmax(340px, 1.15fr) minmax(340px, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+
+    @media (max-width: 1180px) {
+      .main-grid {
+        grid-template-columns: 300px 1fr;
+      }
+      .graphs-column {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #0f172a;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+      gap: 4px;
+    }
+
+    .segmented button {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .segmented button.active {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.86rem;
+    }
+
+    .control-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="range"]:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button.ctrl-btn {
+      flex: 1;
+      min-width: 60px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    button.ctrl-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    button.ctrl-btn.primary {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    button.ctrl-btn.primary:hover {
+      background: #7dd3fc;
+    }
+
+    .speed-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.84rem;
+    }
+
+    .speed-pills {
+      display: flex;
+      gap: 4px;
+    }
+
+    .speed-pills button {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--panel-border);
+      background: #0f172a;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .speed-pills button.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-row input {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* Viewport Canvas */
+    .canvas-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 480px;
+      background: #0b1120;
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      background: #0f172a;
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* Readouts & Graphs */
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .readout-box {
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .readout-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .readout-val {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .equations-box {
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    .graph-container {
+      flex: 1;
+      min-height: 330px;
+      background: #0b1120;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--panel-border);
+      margin: 2px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Motion Under Gravity Simulation</h1>
+      <p>1D vertical kinematics with customizable coordinate direction, vector arrows, and time scrubbing</p>
+    </div>
+    <div class="badge" id="statusBadge">Ready</div>
+  </header>
+
+  <div class="main-grid">
+    <!-- LEFT COLUMN: CONTROLS -->
+    <section class="card">
+      <div>
+        <div class="section-title">1. Motion Case</div>
+        <div class="segmented" id="caseToggle">
+          <button type="button" data-case="freefall" class="active">Free Fall (v₀ = 0)</button>
+          <button type="button" data-case="initialVel">Initial Velocity (v₀ ≠ 0)</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">2. Positive Direction (+ Axis)</div>
+        <div class="segmented" id="dirToggle">
+          <button type="button" data-dir="up" class="active">↑ Up is Positive (+)</button>
+          <button type="button" data-dir="down">↓ Down is Positive (+)</button>
+        </div>
+        <p class="hint" id="gravitySignHint" style="margin-top: 6px;">
+          Gravity pulls downward → <strong>a = -9.81 m/s²</strong>
+        </p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-group">
+        <div class="control-header">
+          <span>Initial Velocity (v₀)</span>
+          <span class="control-value" id="v0Display">0.0 m/s</span>
+        </div>
+        <input type="range" id="v0Slider" min="-30" max="30" step="0.5" value="0" disabled />
+        <p class="hint" id="v0PhysicalHint">Free fall starts from rest (v₀ = 0).</p>
+      </div>
+
+      <div class="control-group">
+        <div class="control-header">
+          <span>Initial Height Above Ground (h₀)</span>
+          <span class="control-value" id="h0Display">45.0 m</span>
+        </div>
+        <input type="range" id="h0Slider" min="0" max="60" step="1" value="45" />
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="trailCheckbox" checked />
+        <span>Show equal-time strobe trail (every 0.4 s)</span>
+      </label>
+
+      <div class="divider"></div>
+
+      <div class="control-group">
+        <div class="section-title">3. Time Control</div>
+        <div class="control-header">
+          <span>Time (t)</span>
+          <span class="control-value" id="tDisplay">0.00 s / 3.03 s</span>
+        </div>
+        <input type="range" id="timeSlider" min="0" max="3.03" step="0.005" value="0" />
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="ctrl-btn primary" id="playPauseBtn">▶ Play</button>
+        <button type="button" class="ctrl-btn" id="resetBtn">↺ Reset</button>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="ctrl-btn" id="stepBackBtn">−0.05 s</button>
+        <button type="button" class="ctrl-btn" id="stepFwdBtn">+0.05 s</button>
+      </div>
+
+      <div class="speed-group">
+        <span style="color: var(--muted);">Playback Speed:</span>
+        <div class="speed-pills" id="speedPills">
+          <button type="button" data-speed="0.25">0.25×</button>
+          <button type="button" data-speed="0.5">0.5×</button>
+          <button type="button" data-speed="1" class="active">1×</button>
+          <button type="button" data-speed="2">2×</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER COLUMN: SIMULATION CANVAS -->
+    <section class="card">
+      <div class="legend">
+        <div class="legend-item">
+          <span class="swatch" style="background: var(--disp-color);"></span>
+          <span>Displacement Arrow (Δy from y₀)</span>
+        </div>
+        <div class="legend-item">
+          <span class="swatch" style="background: var(--vel-color);"></span>
+          <span>Velocity Arrow (v)</span>
+        </div>
+        <div class="legend-item">
+          <span class="swatch" style="background: var(--acc-color);"></span>
+          <span>Acceleration Arrow (a)</span>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="simCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: READOUTS & GRAPHS -->
+    <section class="card graphs-column">
+      <div class="section-title">Instantaneous Quantities</div>
+      <div class="readout-grid">
+        <div class="readout-box">
+          <span class="readout-label">Displacement (Δy)</span>
+          <span class="readout-val" id="dispReadout" style="color: var(--disp-color);">0.00 m</span>
+        </div>
+        <div class="readout-box">
+          <span class="readout-label">Velocity (v)</span>
+          <span class="readout-val" id="velReadout" style="color: var(--vel-color);">0.00 m/s</span>
+        </div>
+        <div class="readout-box">
+          <span class="readout-label">Acceleration (a)</span>
+          <span class="readout-val" id="accReadout" style="color: var(--acc-color);">-9.81 m/s²</span>
+        </div>
+      </div>
+
+      <div class="equations-box" id="equationsBox">
+        <!-- Populated dynamically -->
+      </div>
+
+      <div class="section-title" style="margin-top: 2px;">Graphs vs. Time (Click or drag to scrub t)</div>
+      <div class="graph-container" id="graphContainer">
+        <canvas id="graphCanvas"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      const G = 9.81; // m/s^2
+
+      // Physical state stored in absolute upward coordinates so coordinate flips preserve physical motion
+      const state = {
+        mode: "freefall",       // "freefall" | "initialVel"
+        posDir: 1,              // +1 = Up is positive, -1 = Down is positive
+        h0: 45,                 // Initial height above ground (m)
+        v0_up: 0,               // Physical initial upward velocity (m/s)
+        t: 0,                   // Current simulation time (s)
+        tHit: 0,                // Impact time when h(t) = 0
+        hPeak: 45,              // Maximum physical height reached
+        playing: false,
+        speed: 1,
+        showTrail: true,
+        lastTimestamp: null
+      };
+
+      // DOM Elements
+      const caseButtons = document.querySelectorAll("#caseToggle button");
+      const dirButtons = document.querySelectorAll("#dirToggle button");
+      const v0Slider = document.getElementById("v0Slider");
+      const v0Display = document.getElementById("v0Display");
+      const v0PhysicalHint = document.getElementById("v0PhysicalHint");
+      const h0Slider = document.getElementById("h0Slider");
+      const h0Display = document.getElementById("h0Display");
+      const gravitySignHint = document.getElementById("gravitySignHint");
+      const trailCheckbox = document.getElementById("trailCheckbox");
+
+      const timeSlider = document.getElementById("timeSlider");
+      const tDisplay = document.getElementById("tDisplay");
+      const playPauseBtn = document.getElementById("playPauseBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const stepBackBtn = document.getElementById("stepBackBtn");
+      const stepFwdBtn = document.getElementById("stepFwdBtn");
+      const speedButtons = document.querySelectorAll("#speedPills button");
+
+      const statusBadge = document.getElementById("statusBadge");
+      const dispReadout = document.getElementById("dispReadout");
+      const velReadout = document.getElementById("velReadout");
+      const accReadout = document.getElementById("accReadout");
+      const equationsBox = document.getElementById("equationsBox");
+
+      const simCanvas = document.getElementById("simCanvas");
+      const simCtx = simCanvas.getContext("2d");
+      const graphCanvas = document.getElementById("graphCanvas");
+      const graphCtx = graphCanvas.getContext("2d");
+      const graphContainer = document.getElementById("graphContainer");
+
+      // Format signed numbers cleanly
+      function fmt(num, decimals = 2, showPlus = true) {
+        const rounded = Math.abs(num) < 1e-9 ? 0 : num;
+        const sign = rounded > 0 && showPlus ? "+" : "";
+        return sign + rounded.toFixed(decimals);
+      }
+
+      // Compute analytical kinematics at time t
+      function getKinematics(t) {
+        const h = Math.max(0, state.h0 + state.v0_up * t - 0.5 * G * t * t);
+        const v_up = state.v0_up - G * t;
+        const a_up = -G;
+
+        // Convert to user's chosen coordinate convention
+        const disp = state.posDir * (h - state.h0);
+        const vel = state.posDir * v_up;
+        const acc = state.posDir * a_up;
+        const v0_user = state.posDir * state.v0_up;
+
+        return { h, v_up, disp, vel, acc, v0_user };
+      }
+
+      // Recompute impact time and max height
+      function recalcTrajectory() {
+        const v0 = state.mode === "freefall" ? 0 : state.v0_up;
+        state.v0_up = v0;
+
+        // Solve 0.5*G*t^2 - v0*t - h0 = 0
+        const discriminant = v0 * v0 + 2 * G * state.h0;
+        if (state.h0 <= 0 && v0 <= 0) {
+          state.tHit = 0;
+        } else {
+          state.tHit = (v0 + Math.sqrt(Math.max(0, discriminant))) / G;
+        }
+
+        if (v0 > 0) {
+          state.hPeak = state.h0 + (v0 * v0) / (2 * G);
+        } else {
+          state.hPeak = state.h0;
+        }
+
+        if (state.t > state.tHit) state.t = state.tHit;
+        if (state.t < 0) state.t = 0;
+
+        timeSlider.max = state.tHit.toFixed(4);
+        timeSlider.disabled = state.tHit === 0;
+      }
+
+      // Sync UI controls with state
+      function syncControls() {
+        const v0_user = state.posDir * state.v0_up;
+        v0Slider.value = v0_user;
+        v0Display.textContent = `${fmt(v0_user, 1)} m/s`;
+        h0Display.textContent = `${state.h0.toFixed(1)} m`;
+
+        if (state.mode === "freefall") {
+          v0Slider.disabled = true;
+          v0PhysicalHint.textContent = "Free fall always starts from rest (v₀ = 0 m/s).";
+        } else {
+          v0Slider.disabled = false;
+          if (Math.abs(state.v0_up) < 0.05) {
+            v0PhysicalHint.textContent = "Physical launch: at rest (v₀ = 0 m/s).";
+          } else if (state.v0_up > 0) {
+            v0PhysicalHint.textContent = `Physical launch: ↑ Upward at ${state.v0_up.toFixed(1)} m/s.`;
+          } else {
+            v0PhysicalHint.textContent = `Physical launch: ↓ Downward at ${Math.abs(state.v0_up).toFixed(1)} m/s.`;
+          }
+        }
+
+        if (state.posDir === 1) {
+          gravitySignHint.innerHTML = `Gravity pulls downward → <strong>a = -${G.toFixed(2)} m/s²</strong>`;
+        } else {
+          gravitySignHint.innerHTML = `Gravity pulls downward → <strong>a = +${G.toFixed(2)} m/s²</strong>`;
+        }
+
+        timeSlider.value = state.t;
+        tDisplay.textContent = `${state.t.toFixed(2)} s / ${state.tHit.toFixed(2)} s`;
+        playPauseBtn.textContent = state.playing ? "⏸ Pause" : "▶ Play";
+
+        if (state.tHit === 0) {
+          statusBadge.textContent = "Already on ground (increase h₀ or launch upward)";
+        } else if (state.t >= state.tHit - 1e-4) {
+          statusBadge.textContent = `Landed at t = ${state.tHit.toFixed(2)} s`;
+        } else if (state.playing) {
+          statusBadge.textContent = "Simulating...";
+        } else if (state.t === 0) {
+          statusBadge.textContent = "Ready at t = 0.00 s";
+        } else {
+          statusBadge.textContent = `Paused at t = ${state.t.toFixed(2)} s`;
+        }
+      }
+
+      // Draw crisp arrow helper
+      function drawArrow(ctx, x1, y1, x2, y2, color, lineWidth = 3, headSize = 10) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.hypot(dx, dy);
+        if (len < 2) return;
+
+        const angle = Math.atan2(dy, dx);
+        const actualHead = Math.min(headSize, len * 0.45);
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = "round";
+
+        // Shaft stops slightly before tip so tip stays sharp
+        const endX = x2 - Math.cos(angle) * (actualHead * 0.65);
+        const endY = y2 - Math.sin(angle) * (actualHead * 0.65);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        // Arrowhead
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - actualHead * Math.cos(angle - Math.PI / 6), y2 - actualHead * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - actualHead * Math.cos(angle + Math.PI / 6), y2 - actualHead * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Draw Main Physics Canvas
+      function renderSimCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = simCanvas.parentElement.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+
+        if (simCanvas.width !== Math.round(width * dpr) || simCanvas.height !== Math.round(height * dpr)) {
+          simCanvas.width = Math.round(width * dpr);
+          simCanvas.height = Math.round(height * dpr);
+        }
+
+        simCtx.save();
+        simCtx.scale(dpr, dpr);
+        simCtx.clearRect(0, 0, width, height);
+
+        const padTop = 44;
+        const padBottom = 46;
+        const usableH = Math.max(100, height - padTop - padBottom);
+        const maxDisplayHeight = Math.max(20, state.hPeak * 1.15, 65);
+        const pxPerMeter = usableH / maxDisplayHeight;
+
+        const groundY = height - padBottom;
+        const hToY = (h) => groundY - h * pxPerMeter;
+
+        const kin = getKinematics(state.t);
+        const y0Px = hToY(state.h0);
+        const yCurPx = hToY(kin.h);
+        const ballX = Math.round(width * 0.52);
+
+        // Subtle background grid lines every 10 m
+        simCtx.save();
+        simCtx.strokeStyle = "rgba(148, 163, 184, 0.1)";
+        simCtx.lineWidth = 1;
+        const stepM = maxDisplayHeight > 80 ? 20 : 10;
+        for (let m = 0; m <= maxDisplayHeight; m += stepM) {
+          const gy = hToY(m);
+          simCtx.beginPath();
+          simCtx.moveTo(74, gy);
+          simCtx.lineTo(width - 16, gy);
+          simCtx.stroke();
+        }
+        simCtx.restore();
+
+        // Ground surface
+        simCtx.save();
+        simCtx.fillStyle = "#1e293b";
+        simCtx.fillRect(0, groundY, width, padBottom);
+        simCtx.strokeStyle = "#64748b";
+        simCtx.lineWidth = 2;
+        simCtx.beginPath();
+        simCtx.moveTo(0, groundY);
+        simCtx.lineTo(width, groundY);
+        simCtx.stroke();
+        simCtx.fillStyle = "#94a3b8";
+        simCtx.font = "600 12px system-ui, sans-serif";
+        simCtx.fillText("Ground (h = 0 m)", 14, groundY + 24);
+        simCtx.restore();
+
+        // Coordinate Axis Ruler on Left (showing Δy relative to y0)
+        const axisX = 64;
+        simCtx.save();
+        simCtx.strokeStyle = "#cbd5e1";
+        simCtx.lineWidth = 2;
+        simCtx.beginPath();
+        simCtx.moveTo(axisX, padTop - 10);
+        simCtx.lineTo(axisX, groundY);
+        simCtx.stroke();
+
+        // Positive direction indicator arrow on axis
+        if (state.posDir === 1) {
+          drawArrow(simCtx, axisX, padTop + 16, axisX, padTop - 16, "#38bdf8", 2.5, 9);
+          simCtx.fillStyle = "#38bdf8";
+          simCtx.font = "700 12px system-ui, sans-serif";
+          simCtx.fillText("+y (Up)", axisX - 38, padTop - 22);
+        } else {
+          drawArrow(simCtx, axisX, groundY - 32, axisX, groundY - 4, "#38bdf8", 2.5, 9);
+          simCtx.fillStyle = "#38bdf8";
+          simCtx.font = "700 12px system-ui, sans-serif";
+          simCtx.fillText("+y (Down)", axisX - 48, padTop - 22);
+        }
+
+        // Ruler ticks for height & Δy
+        simCtx.font = "11px ui-monospace, monospace";
+        simCtx.textAlign = "right";
+        for (let m = 0; m <= maxDisplayHeight; m += stepM) {
+          const ty = hToY(m);
+          simCtx.strokeStyle = "#64748b";
+          simCtx.lineWidth = 1;
+          simCtx.beginPath();
+          simCtx.moveTo(axisX - 5, ty);
+          simCtx.lineTo(axisX + 5, ty);
+          simCtx.stroke();
+          simCtx.fillStyle = "#94a3b8";
+          simCtx.fillText(`${m}m`, axisX - 9, ty + 4);
+        }
+        simCtx.restore();
+
+        // Dashed Reference Line at y0 (Origin of Displacement)
+        simCtx.save();
+        simCtx.setLineDash([6, 5]);
+        simCtx.strokeStyle = "rgba(245, 158, 11, 0.55)";
+        simCtx.lineWidth = 1.5;
+        simCtx.beginPath();
+        simCtx.moveTo(axisX + 6, y0Px);
+        simCtx.lineTo(width - 20, y0Px);
+        simCtx.stroke();
+        simCtx.setLineDash([]);
+        simCtx.fillStyle = "#fbbf24";
+        simCtx.font = "600 11px system-ui, sans-serif";
+        simCtx.fillText(`y₀ (Δy = 0, h₀ = ${state.h0.toFixed(0)} m)`, axisX + 12, y0Px - 6);
+        simCtx.restore();
+
+        // Strobe / Ghost Trail (every 0.4 s)
+        if (state.showTrail && state.t > 0) {
+          simCtx.save();
+          const interval = 0.4;
+          for (let gt = 0; gt < state.t; gt += interval) {
+            const gKin = getKinematics(gt);
+            const gy = hToY(gKin.h);
+            simCtx.fillStyle = "rgba(148, 163, 184, 0.25)";
+            simCtx.strokeStyle = "rgba(148, 163, 184, 0.45)";
+            simCtx.lineWidth = 1;
+            simCtx.beginPath();
+            simCtx.arc(ballX, gy, 10, 0, Math.PI * 2);
+            simCtx.fill();
+            simCtx.stroke();
+          }
+          simCtx.restore();
+        }
+
+        // 1. DISPLACEMENT ARROW (from y0 to y(t)) on the left side of the ball
+        const dispX = ballX - 66;
+        const dispPxLen = Math.abs(yCurPx - y0Px);
+        simCtx.save();
+        if (dispPxLen >= 4) {
+          drawArrow(simCtx, dispX, y0Px, dispX, yCurPx, "#f59e0b", 4, 12);
+          // Guide ticks from y0 and yCur to displacement arrow
+          simCtx.strokeStyle = "rgba(245, 158, 11, 0.45)";
+          simCtx.lineWidth = 1;
+          simCtx.beginPath();
+          simCtx.moveTo(dispX - 8, y0Px);
+          simCtx.lineTo(dispX + 8, y0Px);
+          simCtx.moveTo(dispX - 8, yCurPx);
+          simCtx.lineTo(ballX - 16, yCurPx);
+          simCtx.stroke();
+        } else {
+          simCtx.fillStyle = "#f59e0b";
+          simCtx.beginPath();
+          simCtx.arc(dispX, y0Px, 4, 0, Math.PI * 2);
+          simCtx.fill();
+        }
+        // Label for Displacement
+        const midDispY = (y0Px + yCurPx) / 2;
+        simCtx.fillStyle = "#fbbf24";
+        simCtx.font = "700 12px ui-monospace, monospace";
+        simCtx.textAlign = "right";
+        simCtx.fillText(`Δy = ${fmt(kin.disp)} m`, dispX - 10, midDispY + 4);
+        simCtx.restore();
+
+        // 2. VELOCITY ARROW attached slightly right of ball
+        const velScalePxPerMs = 2.6;
+        const velX = ballX + 34;
+        const velVecPx = -kin.v_up * velScalePxPerMs; // screen y is downward
+        simCtx.save();
+        if (Math.abs(kin.v_up) >= 0.15) {
+          const clampedVelPx = Math.sign(velVecPx) * Math.min(Math.abs(velVecPx), 115);
+          drawArrow(simCtx, velX, yCurPx, velX, yCurPx + clampedVelPx, "#38bdf8", 3.5, 10);
+          simCtx.fillStyle = "#38bdf8";
+          simCtx.font = "700 12px ui-monospace, monospace";
+          simCtx.textAlign = "left";
+          simCtx.fillText(`v = ${fmt(kin.vel)} m/s`, velX + 8, yCurPx + clampedVelPx * 0.5 + 4);
+        } else {
+          simCtx.fillStyle = "#38bdf8";
+          simCtx.font = "700 12px ui-monospace, monospace";
+          simCtx.textAlign = "left";
+          simCtx.fillText(`v = 0.00 m/s`, velX + 8, yCurPx + 4);
+        }
+        simCtx.restore();
+
+        // 3. ACCELERATION ARROW (constant downward) further right
+        const accX = ballX + 130;
+        const accLenPx = 42; // constant representation of 9.81 m/s^2
+        simCtx.save();
+        drawArrow(simCtx, accX, yCurPx, accX, yCurPx + accLenPx, "#f43f5e", 3.5, 10);
+        simCtx.fillStyle = "#fb7185";
+        simCtx.font = "700 12px ui-monospace, monospace";
+        simCtx.textAlign = "left";
+        simCtx.fillText(`a = ${fmt(kin.acc)} m/s²`, accX + 8, yCurPx + accLenPx * 0.5 + 4);
+        simCtx.restore();
+
+        // The Moving Object (Ball)
+        simCtx.save();
+        const grad = simCtx.createRadialGradient(ballX - 4, yCurPx - 4, 2, ballX, yCurPx, 15);
+        grad.addColorStop(0, "#f8fafc");
+        grad.addColorStop(0.5, "#38bdf8");
+        grad.addColorStop(1, "#0284c7");
+        simCtx.fillStyle = grad;
+        simCtx.beginPath();
+        simCtx.arc(ballX, yCurPx, 14, 0, Math.PI * 2);
+        simCtx.fill();
+        simCtx.strokeStyle = "#e0f2fe";
+        simCtx.lineWidth = 1.5;
+        simCtx.stroke();
+
+        // Height tag above/beside ball
+        simCtx.fillStyle = "#e2e8f0";
+        simCtx.font = "600 11px ui-monospace, monospace";
+        simCtx.textAlign = "center";
+        simCtx.fillText(`h = ${kin.h.toFixed(1)} m`, ballX, yCurPx - 20);
+        simCtx.restore();
+
+        simCtx.restore();
+      }
+
+      // Draw Live Readouts & Substituted Equations
+      function renderReadouts() {
+        const kin = getKinematics(state.t);
+        dispReadout.textContent = `${fmt(kin.disp)} m`;
+        velReadout.textContent = `${fmt(kin.vel)} m/s`;
+        accReadout.textContent = `${fmt(kin.acc)} m/s²`;
+
+        const tStr = state.t.toFixed(2);
+        const v0Str = fmt(kin.v0_user, 1);
+        const aStr = fmt(kin.acc, 2);
+
+        equationsBox.innerHTML =
+          `<div><strong>Δy</strong> = v₀t + ½at² = (${v0Str})(${tStr}) + ½(${aStr})(${tStr})² = <span style="color:var(--disp-color)">${fmt(kin.disp)} m</span></div>` +
+          `<div><strong>v</strong>  = v₀ + at    = (${v0Str}) + (${aStr})(${tStr}) = <span style="color:var(--vel-color)">${fmt(kin.vel)} m/s</span></div>` +
+          `<div><strong>a</strong>  = <span style="color:var(--acc-color)">${aStr} m/s²</span> (constant gravitational acceleration)</div>`;
+      }
+
+      // Draw 3 Stacked Graphs: Displacement, Velocity, Acceleration vs Time
+      function renderGraphs() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = graphContainer.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+
+        if (graphCanvas.width !== Math.round(width * dpr) || graphCanvas.height !== Math.round(height * dpr)) {
+          graphCanvas.width = Math.round(width * dpr);
+          graphCanvas.height = Math.round(height * dpr);
+        }
+
+        graphCtx.save();
+        graphCtx.scale(dpr, dpr);
+        graphCtx.clearRect(0, 0, width, height);
+
+        const tMax = Math.max(state.tHit, 1);
+        const samples = 100;
+
+        // Precompute full trajectory arrays
+        const ptsDisp = [];
+        const ptsVel = [];
+        const ptsAcc = [];
+
+        let minD = 0, maxD = 0;
+        let minV = 0, maxV = 0;
+        const accVal = state.posDir * -G;
+
+        for (let i = 0; i <= samples; i++) {
+          const tt = (i / samples) * state.tHit;
+          const k = getKinematics(tt);
+          ptsDisp.push({ t: tt, y: k.disp });
+          ptsVel.push({ t: tt, y: k.vel });
+          ptsAcc.push({ t: tt, y: k.acc });
+          minD = Math.min(minD, k.disp);
+          maxD = Math.max(maxD, k.disp);
+          minV = Math.min(minV, k.vel);
+          maxV = Math.max(maxV, k.vel);
+        }
+
+        // Pad y-ranges nicely
+        const padRange = (mn, mx, minSpan = 10) => {
+          if (mx - mn < minSpan) {
+            const mid = (mx + mn) / 2;
+            return [mid - minSpan / 2, mid + minSpan / 2];
+          }
+          const pad = (mx - mn) * 0.15;
+          return [mn - pad, mx + pad];
+        };
+
+        const [dMin, dMax] = padRange(minD, maxD, 10);
+        const [vMin, vMax] = padRange(minV, maxV, 10);
+        const aRange = 14; // [-14, +14] keeps ±9.81 clearly visible relative to 0
+
+        const panels = [
+          { title: "Δy (m)", data: ptsDisp, yMin: dMin, yMax: dMax, color: "#f59e0b", curVal: getKinematics(state.t).disp },
+          { title: "v (m/s)", data: ptsVel, yMin: vMin, yMax: vMax, color: "#38bdf8", curVal: getKinematics(state.t).vel },
+          { title: "a (m/s²)", data: ptsAcc, yMin: -aRange, yMax: aRange, color: "#f43f5e", curVal: accVal }
+        ];
+
+        const padL = 48;
+        const padR = 16;
+        const padTop = 10;
+        const padBot = 22;
+        const plotW = Math.max(40, width - padL - padR);
+        const panelH = (height - padTop - padBot) / 3;
+
+        panels.forEach((p, idx) => {
+          const top = padTop + idx * panelH + 6;
+          const bot = padTop + (idx + 1) * panelH - 10;
+          const h = Math.max(20, bot - top);
+
+          const tToX = (tt) => padL + (tt / tMax) * plotW;
+          const valToY = (v) => bot - ((v - p.yMin) / (p.yMax - p.yMin)) * h;
+
+          // Panel background
+          graphCtx.fillStyle = "rgba(30, 41, 59, 0.35)";
+          graphCtx.fillRect(padL, top, plotW, h);
+
+          // Zero horizontal axis if in view
+          if (p.yMin <= 0 && p.yMax >= 0) {
+            const zy = valToY(0);
+            graphCtx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+            graphCtx.lineWidth = 1;
+            graphCtx.beginPath();
+            graphCtx.moveTo(padL, zy);
+            graphCtx.lineTo(padL + plotW, zy);
+            graphCtx.stroke();
+          }
+
+          // Panel label & y-bounds
+          graphCtx.fillStyle = p.color;
+          graphCtx.font = "700 11px system-ui, sans-serif";
+          graphCtx.textAlign = "left";
+          graphCtx.fillText(p.title, padL + 6, top + 12);
+
+          graphCtx.fillStyle = "#64748b";
+          graphCtx.font = "10px ui-monospace, monospace";
+          graphCtx.textAlign = "right";
+          graphCtx.fillText(p.yMax.toFixed(0), padL - 5, top + 9);
+          graphCtx.fillText(p.yMin.toFixed(0), padL - 5, bot);
+
+          // Ghost full curve
+          if (state.tHit > 0) {
+            graphCtx.strokeStyle = p.color + "33";
+            graphCtx.lineWidth = 1.5;
+            graphCtx.beginPath();
+            p.data.forEach((pt, i) => {
+              const gx = tToX(pt.t);
+              const gy = valToY(pt.y);
+              if (i === 0) graphCtx.moveTo(gx, gy);
+              else graphCtx.lineTo(gx, gy);
+            });
+            graphCtx.stroke();
+
+            // Active curve up to current t
+            graphCtx.strokeStyle = p.color;
+            graphCtx.lineWidth = 2.5;
+            graphCtx.beginPath();
+            const activeSteps = Math.max(1, Math.round((state.t / state.tHit) * samples));
+            for (let i = 0; i <= activeSteps; i++) {
+              const tt = (i / activeSteps) * state.t;
+              const k = getKinematics(tt);
+              const val = idx === 0 ? k.disp : idx === 1 ? k.vel : k.acc;
+              const gx = tToX(tt);
+              const gy = valToY(val);
+              if (i === 0) graphCtx.moveTo(gx, gy);
+              else graphCtx.lineTo(gx, gy);
+            }
+            graphCtx.stroke();
+          }
+
+          // Current time vertical marker + dot
+          const curX = tToX(state.t);
+          const curY = valToY(p.curVal);
+          graphCtx.save();
+          graphCtx.setLineDash([3, 3]);
+          graphCtx.strokeStyle = "rgba(226, 232, 240, 0.45)";
+          graphCtx.lineWidth = 1;
+          graphCtx.beginPath();
+          graphCtx.moveTo(curX, top);
+          graphCtx.lineTo(curX, bot);
+          graphCtx.stroke();
+          graphCtx.restore();
+
+          graphCtx.fillStyle = p.color;
+          graphCtx.beginPath();
+          graphCtx.arc(curX, curY, 4, 0, Math.PI * 2);
+          graphCtx.fill();
+          graphCtx.strokeStyle = "#0f172a";
+          graphCtx.lineWidth = 1.5;
+          graphCtx.stroke();
+        });
+
+        // Bottom time axis label
+        graphCtx.fillStyle = "#94a3b8";
+        graphCtx.font = "10px ui-monospace, monospace";
+        graphCtx.textAlign = "left";
+        graphCtx.fillText("t = 0 s", padL, height - 6);
+        graphCtx.textAlign = "right";
+        graphCtx.fillText(`t = ${tMax.toFixed(2)} s`, padL + plotW, height - 6);
+
+        graphCtx.restore();
+      }
+
+      function renderAll() {
+        syncControls();
+        renderSimCanvas();
+        renderReadouts();
+        renderGraphs();
+      }
+
+      // Animation Loop
+      function loop(timestamp) {
+        if (!state.playing) {
+          state.lastTimestamp = null;
+          return;
+        }
+        if (state.lastTimestamp === null) {
+          state.lastTimestamp = timestamp;
+        }
+        const dt = ((timestamp - state.lastTimestamp) / 1000) * state.speed;
+        state.lastTimestamp = timestamp;
+
+        state.t += dt;
+        if (state.t >= state.tHit) {
+          state.t = state.tHit;
+          state.playing = false;
+        }
+
+        renderAll();
+        if (state.playing) {
+          requestAnimationFrame(loop);
+        }
+      }
+
+      // Event Listeners
+      caseButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          caseButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.mode = btn.dataset.case;
+          state.playing = false;
+          state.t = 0;
+
+          if (state.mode === "freefall") {
+            state.v0_up = 0;
+            if (state.h0 === 0) state.h0 = 45;
+            h0Slider.value = state.h0;
+          } else {
+            if (state.v0_up === 0) state.v0_up = 20; // Helpful default upward throw
+            if (state.h0 > 30) {
+              state.h0 = 15;
+              h0Slider.value = 15;
+            }
+          }
+          recalcTrajectory();
+          renderAll();
+        });
+      });
+
+      dirButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          dirButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.posDir = btn.dataset.dir === "up" ? 1 : -1;
+          renderAll();
+        });
+      });
+
+      v0Slider.addEventListener("input", () => {
+        state.playing = false;
+        state.t = 0;
+        const v0_user = parseFloat(v0Slider.value);
+        state.v0_up = state.posDir * v0_user;
+        recalcTrajectory();
+        renderAll();
+      });
+
+      h0Slider.addEventListener("input", () => {
+        state.playing = false;
+        state.t = 0;
+        state.h0 = parseFloat(h0Slider.value);
+        recalcTrajectory();
+        renderAll();
+      });
+
+      trailCheckbox.addEventListener("change", () => {
+        state.showTrail = trailCheckbox.checked;
+        renderAll();
+      });
+
+      timeSlider.addEventListener("input", () => {
+        state.playing = false;
+        state.t = parseFloat(timeSlider.value);
+        renderAll();
+      });
+
+      playPauseBtn.addEventListener("click", () => {
+        if (state.tHit === 0) return;
+        if (state.playing) {
+          state.playing = false;
+          renderAll();
+        } else {
+          if (state.t >= state.tHit - 1e-4) {
+            state.t = 0;
+          }
+          state.playing = true;
+          state.lastTimestamp = null;
+          renderAll();
+          requestAnimationFrame(loop);
+        }
+      });
+
+      resetBtn.addEventListener("click", () => {
+        state.playing = false;
+        state.t = 0;
+        renderAll();
+      });
+
+      stepBackBtn.addEventListener("click", () => {
+        state.playing = false;
+        state.t = Math.max(0, state.t - 0.05);
+        renderAll();
+      });
+
+      stepFwdBtn.addEventListener("click", () => {
+        state.playing = false;
+        state.t = Math.min(state.tHit, state.t + 0.05);
+        renderAll();
+      });
+
+      speedButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          speedButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.speed = parseFloat(btn.dataset.speed);
+        });
+      });
+
+      // Scrubbing directly on the graphs
+      let scrubbingGraph = false;
+      function scrubFromPointer(clientX) {
+        if (state.tHit === 0) return;
+        const rect = graphContainer.getBoundingClientRect();
+        const padL = 48;
+        const padR = 16;
+        const plotW = Math.max(40, rect.width - padL - padR);
+        const relX = Math.min(Math.max(clientX - rect.left - padL, 0), plotW);
+        state.playing = false;
+        state.t = (relX / plotW) * Math.max(state.tHit, 1);
+        state.t = Math.min(state.t, state.tHit);
+        renderAll();
+      }
+
+      graphContainer.addEventListener("pointerdown", (e) => {
+        scrubbingGraph = true;
+        graphContainer.setPointerCapture(e.pointerId);
+        scrubFromPointer(e.clientX);
+      });
+      graphContainer.addEventListener("pointermove", (e) => {
+        if (scrubbingGraph) scrubFromPointer(e.clientX);
+      });
+      graphContainer.addEventListener("pointerup", () => {
+        scrubbingGraph = false;
+      });
+
+      window.addEventListener("resize", renderAll);
+
+      // Initialize
+      recalcTrajectory();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
